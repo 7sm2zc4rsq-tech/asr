@@ -1,112 +1,191 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Torneo</title>
+<title>Torneo Del Porcodidio</title>
 
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  font-family: 'Orbitron', sans-serif;
-  color:white;
-  text-align:center;
-  background: url("sfondo.jpg") no-repeat center center fixed;
-  background-size: cover;
+body{
+    margin:0;
+    font-family:'Orbitron',sans-serif;
+    color:white;
+    text-align:center;
+    background:url("sfondo.jpg") no-repeat center center fixed;
+    background-size:cover;
 }
 
-.screen { display:none; }
-.active { display:block; }
-
-.menu-btn {
-  width:100%;
-  height:33.3vh;
-  font-size:42px;
-  font-weight:bold;
-  letter-spacing:2px;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(4px);
-  border:none;
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:0.2s;
+/* SCHERMATE */
+.screen{
+    display:none;
+    min-height:100vh;
 }
 
-.menu-btn:active {
-  transform:scale(0.95);
+.active{
+    display:block;
 }
 
-button {
-  padding:10px;
-  margin:5px;
-  border:none;
-  border-radius:10px;
+/* HOME */
+.menu-btn{
+    width:100%;
+    height:33.33vh;
+
+    border:none;
+
+    background:rgba(0,0,0,0.25);
+    backdrop-filter:blur(4px);
+
+    font-size:48px;
+    font-weight:800;
+    letter-spacing:3px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    transition:0.2s;
 }
 
-input {
-  padding:10px;
-  margin:5px;
+.menu-btn:active{
+    transform:scale(0.97);
 }
 
-.box {
-  background: rgba(0,0,0,0.6);
-  margin:10px;
-  padding:10px;
-  border-radius:10px;
+/* GENERALE */
+button{
+    border:none;
+    border-radius:12px;
+    padding:12px;
+    margin:6px;
+    font-family:'Orbitron',sans-serif;
+}
+
+input{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    margin:5px;
+    width:120px;
+}
+
+.box{
+    background:rgba(0,0,0,0.6);
+    margin:10px;
+    padding:12px;
+    border-radius:12px;
+}
+
+.title{
+    font-size:32px;
+    margin-top:20px;
 }
 </style>
+
 </head>
 
 <body>
 
 <!-- SUONI -->
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+
+<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio> <audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
 
 <!-- HOME -->
+
 <div id="home" class="screen active">
-  <button class="menu-btn" style="color:#00ffd5;" onclick="show('tournament')">🎮 NUOVO TORNEO</button>
-  <button class="menu-btn" style="color:#ffcc00;" onclick="show('players')">👤 GIOCATORI</button>
-  <button class="menu-btn" style="color:#ff3c3c;" onclick="show('palmares')">🏆 PALMARES</button>
+
+<button class="menu-btn" style="color:#00ffe5;" onclick="show('tournament')">
+🎮 NUOVO TORNEO
+</button>
+
+<button class="menu-btn" style="color:#ffd000;" onclick="show('players')">
+👤 GIOCATORI
+</button>
+
+<button class="menu-btn" style="color:#ff4040;" onclick="show('palmares')">
+🏆 PALMARES
+</button>
+
 </div>
 
 <!-- GIOCATORI -->
+
 <div id="players" class="screen">
-  <h2>Giocatori</h2>
-  <input id="playerName" placeholder="Nome">
-  <button onclick="addPlayer()">Aggiungi</button>
-  <div id="playersList"></div>
-  <button onclick="goHome()">⬅️</button>
+
+<div class="title">Giocatori</div>
+
+<input id="playerName" placeholder="Nome">
+
+<button onclick="addPlayer()">
+Aggiungi
+</button>
+
+<div id="playersList"></div>
+
+<button onclick="goHome()">
+⬅️ Home
+</button>
+
 </div>
 
 <!-- PALMARES -->
+
 <div id="palmares" class="screen">
-  <h2>Palmares</h2>
-  <div id="palmaresList"></div>
-  <button onclick="goHome()">⬅️</button>
+
+<div class="title">Palmares</div>
+
+<div id="palmaresList"></div>
+
+<button onclick="goHome()">
+⬅️ Home
+</button>
+
 </div>
 
 <!-- TORNEO -->
-<div id="tournament" class="screen">
-  <h2>Seleziona Giocatori</h2>
-  <div id="selectPlayers"></div>
 
-  <button onclick="startTournament()">Inizia</button>
-  <button onclick="goHome()">⬅️</button>
+<div id="tournament" class="screen">
+
+<div class="title">Seleziona Giocatori</div>
+
+<div id="selectPlayers"></div>
+
+<button onclick="prepareGames()">
+Continua
+</button>
+
+<div id="gamesArea"></div>
+
+<button onclick="goHome()">
+⬅️ Home
+</button>
+
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<!-- FIREBASE -->
 
+<script type="module">
+
+import { 
+initializeApp 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { 
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
   authDomain: "torneo-74c5b.firebaseapp.com",
@@ -119,127 +198,329 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// SUONI
+/* GIOCHI */
+let games = [
+"UNO",
+"31",
+"Saltacavallo",
+"Fr0cio",
+"Dubito",
+"Las Vegas"
+];
+
+let selected = [];
+
+/* SUONI */
 function clickSound(){
-  let s=document.getElementById("clickSound");
-  s.currentTime=0;
-  s.play();
+    let s=document.getElementById("clickSound");
+    s.currentTime=0;
+    s.play();
 }
 
 function winSound(){
-  let s=document.getElementById("winSound");
-  s.currentTime=0;
-  s.play();
+    let s=document.getElementById("winSound");
+    s.currentTime=0;
+    s.play();
 }
 
-// NAVIGAZIONE
+/* NAV */
 function show(id){
-  clickSound();
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
 
-  if(id==="players") loadPlayers();
-  if(id==="palmares") loadPalmares();
-  if(id==="tournament") loadSelectPlayers();
+    clickSound();
+
+    document.querySelectorAll(".screen")
+    .forEach(s=>s.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+
+    if(id==="players") loadPlayers();
+
+    if(id==="palmares") loadPalmares();
+
+    if(id==="tournament") loadSelectPlayers();
 }
 
-function goHome(){ show("home"); }
+function goHome(){
+    show("home");
+}
 
-// ================= PLAYERS =================
+/* =========================
+   GIOCATORI
+========================= */
 
 async function addPlayer(){
-  clickSound();
-  let name=document.getElementById("playerName").value;
-  if(!name) return;
-  await addDoc(collection(db,"players"),{name});
-  document.getElementById("playerName").value="";
-  loadPlayers();
+
+    clickSound();
+
+    let name=document.getElementById("playerName").value;
+
+    if(!name) return;
+
+    await addDoc(collection(db,"players"),{
+        name:name
+    });
+
+    document.getElementById("playerName").value="";
+
+    loadPlayers();
 }
 
 async function loadPlayers(){
-  const snap=await getDocs(collection(db,"players"));
-  let html="";
-  snap.forEach(d=>{
-    html+=`
-      <div class="box">
-        ${d.data().name}
-        <button onclick="deletePlayer('${d.id}')">❌</button>
-      </div>
-    `;
-  });
-  document.getElementById("playersList").innerHTML=html;
+
+    const snap = await getDocs(collection(db,"players"));
+
+    let html="";
+
+    snap.forEach(d=>{
+
+        html += `
+        <div class="box">
+
+            ${d.data().name}
+
+            <button onclick="editPlayer('${d.id}','${d.data().name}')">
+            ✏️
+            </button>
+
+            <button onclick="deletePlayer('${d.id}')">
+            ❌
+            </button>
+
+        </div>
+        `;
+    });
+
+    document.getElementById("playersList").innerHTML=html;
 }
 
 async function deletePlayer(id){
-  clickSound();
-  await deleteDoc(doc(db,"players",id));
-  loadPlayers();
+
+    clickSound();
+
+    await deleteDoc(doc(db,"players",id));
+
+    loadPlayers();
 }
 
-// ================= SELECT PLAYERS =================
+async function editPlayer(id,current){
 
-let selected=[];
+    clickSound();
+
+    let nuovo = prompt("Nuovo nome",current);
+
+    if(!nuovo) return;
+
+    await updateDoc(doc(db,"players",id),{
+        name:nuovo
+    });
+
+    loadPlayers();
+}
+
+/* =========================
+   SELEZIONE GIOCATORI
+========================= */
 
 async function loadSelectPlayers(){
-  const snap=await getDocs(collection(db,"players"));
-  let html="";
-  snap.forEach(d=>{
-    let name=d.data().name;
-    html+=`
-      <div class="box">
-        <input type="checkbox" value="${name}" onchange="togglePlayer(this)">
-        ${name}
-      </div>
-    `;
-  });
-  document.getElementById("selectPlayers").innerHTML=html;
+
+    selected=[];
+
+    const snap = await getDocs(collection(db,"players"));
+
+    let html="";
+
+    snap.forEach(d=>{
+
+        let name=d.data().name;
+
+        html += `
+        <div class="box">
+
+            <input 
+            type="checkbox" 
+            value="${name}"
+            onchange="togglePlayer(this)">
+
+            ${name}
+
+        </div>
+        `;
+    });
+
+    document.getElementById("selectPlayers").innerHTML=html;
+
+    document.getElementById("gamesArea").innerHTML="";
 }
 
 function togglePlayer(el){
-  if(el.checked) selected.push(el.value);
-  else selected=selected.filter(p=>p!==el.value);
+
+    if(el.checked){
+        selected.push(el.value);
+    }else{
+        selected = selected.filter(p=>p!==el.value);
+    }
 }
 
-// ================= PALMARES =================
+/* =========================
+   PREPARA GIOCHI
+========================= */
+
+function prepareGames(){
+
+    clickSound();
+
+    if(selected.length===0){
+
+        alert("Seleziona almeno un giocatore");
+
+        return;
+    }
+
+    let area=document.getElementById("gamesArea");
+
+    area.innerHTML="";
+
+    games.forEach(g=>{
+
+        area.innerHTML += `
+        <div class="box">
+        <h2>${g}</h2>
+        </div>
+        `;
+
+        selected.forEach(p=>{
+
+            area.innerHTML += `
+            <div class="box">
+
+                ${p}
+
+                <input 
+                type="number" 
+                id="${g}_${p}" 
+                value="0">
+
+            </div>
+            `;
+        });
+
+    });
+
+    area.innerHTML += `
+    <button onclick="finishTournament()">
+    🏆 Fine Torneo
+    </button>
+    `;
+}
+
+/* =========================
+   FINE TORNEO
+========================= */
+
+async function finishTournament(){
+
+    clickSound();
+
+    let totals={};
+
+    selected.forEach(p=>{
+        totals[p]=0;
+    });
+
+    games.forEach(g=>{
+
+        selected.forEach(p=>{
+
+            let val=parseInt(
+                document.getElementById(`${g}_${p}`).value
+            ) || 0;
+
+            totals[p]+=val;
+        });
+
+    });
+
+    let winner = Object.keys(totals)
+    .sort((a,b)=>totals[b]-totals[a])[0];
+
+    await addDoc(collection(db,"palmares"),{
+        winner:winner,
+        points:totals[winner],
+        date:new Date().toLocaleDateString()
+    });
+
+    winSound();
+
+    setTimeout(()=>{
+
+        alert(
+        "🏆 Vincitore: " + winner +
+        "\nPunti: " + totals[winner]
+        );
+
+        goHome();
+
+    },300);
+}
+
+/* =========================
+   PALMARES
+========================= */
 
 async function loadPalmares(){
-  const snap=await getDocs(collection(db,"palmares"));
-  let html="";
-  snap.forEach(d=>{
-    html+=`<div class="box">${d.data().winner}</div>`;
-  });
-  document.getElementById("palmaresList").innerHTML=html;
+
+    const snap = await getDocs(collection(db,"palmares"));
+
+    let html="";
+
+    snap.forEach(d=>{
+
+        html += `
+        <div class="box">
+
+            🏆 ${d.data().winner}
+            <br>
+            ${d.data().points} pt
+            <br>
+            ${d.data().date}
+
+            <br><br>
+
+            <button onclick="deletePalmares('${d.id}')">
+            ❌ Elimina
+            </button>
+
+        </div>
+        `;
+    });
+
+    document.getElementById("palmaresList").innerHTML=html;
 }
 
-// ================= TORNEO =================
+async function deletePalmares(id){
 
-async function startTournament(){
-  clickSound();
+    clickSound();
 
-  if(selected.length===0){
-    alert("Seleziona giocatori");
-    return;
-  }
+    await deleteDoc(doc(db,"palmares",id));
 
-  let winner=selected[Math.floor(Math.random()*selected.length)];
-
-  await addDoc(collection(db,"palmares"),{winner});
-
-  winSound(); // 🔥 SUONO VINCITORE
-
-  setTimeout(()=>{
-    alert("🏆 Vincitore: "+winner);
-    goHome();
-  },300);
+    loadPalmares();
 }
 
-// GLOBAL
+/* GLOBAL */
 window.show=show;
 window.goHome=goHome;
+
 window.addPlayer=addPlayer;
 window.deletePlayer=deletePlayer;
+window.editPlayer=editPlayer;
+
 window.togglePlayer=togglePlayer;
-window.startTournament=startTournament;
+
+window.prepareGames=prepareGames;
+window.finishTournament=finishTournament;
+
+window.deletePalmares=deletePalmares;
 
 </script>
 
