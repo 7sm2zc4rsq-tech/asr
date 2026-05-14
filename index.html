@@ -143,17 +143,20 @@ color:gold;
 <button onclick="goHome()">⬅️</button>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<!-- FIREBASE COMPAT (NO BUG CLICK) -->
 
-const app=initializeApp({
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const app = firebase.initializeApp({
 apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
 authDomain:"torneo-74c5b.firebaseapp.com",
 projectId:"torneo-74c5b"
 });
 
-const db=getFirestore(app);
+const db = firebase.firestore();
 
 let games=["UNO","31","Saltacavallo","Fr0cio","Dubito","Las Vegas"];
 let selected=[];
@@ -176,32 +179,35 @@ function goHome(){show("home");}
 async function addPlayer(){
 let n=playerName.value;
 if(!n)return;
-await addDoc(collection(db,"players"),{name:n});
+await db.collection("players").add({name:n});
 loadPlayers();
 }
 async function loadPlayers(){
-let snap=await getDocs(collection(db,"players"));
+let snap=await db.collection("players").get();
 playersList.innerHTML="";
 snap.forEach(d=>{
 playersList.innerHTML+=`
 <div class="box">${d.data().name}
 <button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button>
-<button onclick="deletePlayer('${d.id}')">❌</button>
+<button onclick="deleteItem('players','${d.id}')">❌</button>
 </div>`;
 });
 }
-async function deletePlayer(id){await deleteDoc(doc(db,"players",id));loadPlayers();}
+async function deleteItem(col,id){
+await db.collection(col).doc(id).delete();
+show(col==="players"?"players":col==="palmares"?"palmares":col==="ranking"?"ranking":col==="gameRanking"?"gamesRanking":"home");
+}
 async function editPlayer(id,n){
 let nuovo=prompt("Nuovo nome",n);
 if(!nuovo)return;
-await updateDoc(doc(db,"players",id),{name:nuovo});
+await db.collection("players").doc(id).update({name:nuovo});
 loadPlayers();
 }
 
 /* SELECT */
 async function loadSelectPlayers(){
 selected=[];
-let snap=await getDocs(collection(db,"players"));
+let snap=await db.collection("players").get();
 selectPlayers.innerHTML="";
 snap.forEach(d=>{
 let n=d.data().name;
@@ -254,7 +260,7 @@ for(let p of selected){
 let val=parseInt(document.getElementById(`${g}_${p}`).value)||0;
 totals[p]+=val;
 
-await addDoc(collection(db,"gameRanking"),{
+await db.collection("gameRanking").add({
 game:g,
 player:p,
 points:val
@@ -263,7 +269,7 @@ points:val
 }
 
 for(let p in totals){
-await addDoc(collection(db,"ranking"),{
+await db.collection("ranking").add({
 name:p,
 points:totals[p]
 });
@@ -271,13 +277,13 @@ points:totals[p]
 
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 
-await addDoc(collection(db,"palmares"),{
+await db.collection("palmares").add({
 winner:winner,
 points:totals[winner],
 date:new Date().toLocaleDateString()
 });
 
-await addDoc(collection(db,"history"),{
+await db.collection("history").add({
 players:selected,
 scores:totals,
 winner:winner
@@ -288,93 +294,76 @@ slot(winner);
 
 /* PALMARES */
 async function loadPalmares(){
-let snap=await getDocs(collection(db,"palmares"));
+let snap=await db.collection("palmares").get();
 palmaresList.innerHTML="";
 snap.forEach(d=>{
 palmaresList.innerHTML+=`
 <div class="box">
 ${d.data().winner} (${d.data().points})
-<button onclick="editValue('palmares','${d.id}',${d.data().points},'points')">✏️</button>
-<button onclick="deleteDoc(doc(db,'palmares','${d.id}'))">❌</button>
+<button onclick="editValue('palmares','${d.id}',${d.data().points})">✏️</button>
+<button onclick="deleteItem('palmares','${d.id}')">❌</button>
 </div>`;
 });
 }
 
 /* CLASSIFICA */
 async function loadRanking(){
-let snap=await getDocs(collection(db,"ranking"));
+let snap=await db.collection("ranking").get();
 rankingList.innerHTML="";
 snap.forEach(d=>{
 rankingList.innerHTML+=`
 <div class="box">
 ${d.data().name} ${d.data().points}
-<button onclick="editValue('ranking','${d.id}',${d.data().points},'points')">✏️</button>
-<button onclick="deleteDoc(doc(db,'ranking','${d.id}'))">❌</button>
+<button onclick="editValue('ranking','${d.id}',${d.data().points})">✏️</button>
+<button onclick="deleteItem('ranking','${d.id}')">❌</button>
 </div>`;
 });
 }
 
-/* CLASSIFICA PER GIOCO (DIVISA) */
+/* CLASSIFICA PER GIOCO */
 async function loadGamesRanking(){
-
-let snap = await getDocs(collection(db,"gameRanking"));
-
-let data = {};
+let snap=await db.collection("gameRanking").get();
+let data={};
 
 snap.forEach(d=>{
 let g=d.data().game;
 let p=d.data().player;
 let pts=d.data().points;
 
-if(!data[g]) data[g]={};
-if(!data[g][p]) data[g][p]=0;
+if(!data[g])data[g]={};
+if(!data[g][p])data[g][p]=0;
 
 data[g][p]+=pts;
 });
 
 let html="";
-
 for(let g in data){
-
 html+=`<div class="box"><h2>${g}</h2>`;
-
-let players=Object.entries(data[g]);
-players.sort((a,b)=>b[1]-a[1]);
-
+let players=Object.entries(data[g]).sort((a,b)=>b[1]-a[1]);
 players.forEach(p=>{
 html+=`${p[0]} - ${p[1]} pt<br>`;
 });
-
 html+=`</div>`;
 }
-
 gamesRankingList.innerHTML=html;
 }
 
 /* STORICO */
 async function loadHistory(){
-let snap=await getDocs(collection(db,"history"));
+let snap=await db.collection("history").get();
 historyList.innerHTML="";
 snap.forEach(d=>{
 historyList.innerHTML+=`<div class="box">🏆 ${d.data().winner}</div>`;
 });
 }
 
-/* EDIT GENERICO */
-async function editValue(col,id,current,field){
+/* EDIT */
+async function editValue(col,id,current){
 let n=prompt("Modifica",current);
 if(!n)return;
-await updateDoc(doc(db,col,id),{[field]:parseInt(n)||n});
+await db.collection(col).doc(id).update({points:parseInt(n)});
+show(col==="ranking"?"ranking":"palmares");
 }
-
-window.show=show;
-window.goHome=goHome;
-window.addPlayer=addPlayer;
-window.deletePlayer=deletePlayer;
-window.editPlayer=editPlayer;
-window.toggle=toggle;
-window.prepareGames=prepareGames;
-window.finish=finish;
 </script>
 
 </body>
