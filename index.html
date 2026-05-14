@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -37,8 +36,8 @@ z-index:999;
 
 .menu-btn{
 width:100%;
-height:20vh;
-font-size:28px;
+height:16vh;
+font-size:26px;
 background:rgba(0,0,0,0.3);
 border:none;
 color:white;
@@ -68,31 +67,36 @@ z-index:9999;
 font-size:60px;
 color:gold;
 }
-</style>
 
+/* RUOTA /
+#wheel{
+width:250px;
+height:250px;
+border-radius:50%;
+border:5px solid white;
+margin:auto;
+transition:transform 3s ease-out;
+}
+</style>
 </head>
 
 <body>
 
 <div id="mainTitle">🎰 Torneo Del Porco Di Dio</div>
 
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio> <audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
-
 <div id="slotOverlay"><div id="slotText"></div></div>
 
 <!-- HOME -->
-
 <div id="home" class="screen active">
 <button class="menu-btn" onclick="show('tournament')">🎮 TORNEO</button>
 <button class="menu-btn" onclick="show('players')">👤 GIOCATORI</button>
 <button class="menu-btn" onclick="show('palmares')">🏆 PALMARES</button>
 <button class="menu-btn" onclick="show('ranking')">📊 CLASSIFICA</button>
 <button class="menu-btn" onclick="show('gamesRanking')">🎯 PER GIOCO</button>
-<button class="menu-btn" onclick="show('history')">📜 STORICO</button>
+<button class="menu-btn" onclick="show('wheelPage')">🎡 RUOTA</button>
 </div>
 
 <!-- GIOCATORI -->
-
 <div id="players" class="screen">
 <h2>Giocatori</h2>
 <input id="playerName">
@@ -102,7 +106,6 @@ color:gold;
 </div>
 
 <!-- PALMARES -->
-
 <div id="palmares" class="screen">
 <h2>Palmares</h2>
 <div id="palmaresList"></div>
@@ -110,31 +113,36 @@ color:gold;
 </div>
 
 <!-- CLASSIFICA -->
-
 <div id="ranking" class="screen">
 <h2>Classifica Totale</h2>
 <div id="rankingList"></div>
 <button onclick="goHome()">⬅️</button>
 </div>
 
-<!-- CLASSIFICA GIOCHI -->
-
+<!-- PER GIOCO -->
 <div id="gamesRanking" class="screen">
 <h2>Classifica per Gioco</h2>
 <div id="gamesRankingList"></div>
 <button onclick="goHome()">⬅️</button>
 </div>
 
-<!-- STORICO -->
+<!-- RUOTA -->
+<div id="wheelPage" class="screen">
+<h2>Ruota</h2>
 
-<div id="history" class="screen">
-<h2>Storico</h2>
-<div id="historyList"></div>
+<input id="wheelInput" placeholder="Opzione">
+<button onclick="addOption()">Aggiungi</button>
+
+<div id="wheelOptions"></div>
+
+<div id="wheel"></div>
+
+<button onclick="spinWheel()">Gira</button>
+
 <button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- TORNEO -->
-
 <div id="tournament" class="screen">
 <h2>Seleziona Giocatori</h2>
 <div id="selectPlayers"></div>
@@ -144,7 +152,6 @@ color:gold;
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
@@ -158,8 +165,9 @@ const db=firebase.firestore();
 
 let games=["UNO","31","Saltacavallo","Fr0cio","Dubito","Las Vegas"];
 let selected=[];
+let wheelOptions=[];
 
-/* NAV */
+/ NAV /
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -168,12 +176,12 @@ if(id==="players")loadPlayers();
 if(id==="palmares")loadPalmares();
 if(id==="ranking")loadRanking();
 if(id==="gamesRanking")loadGamesRanking();
-if(id==="history")loadHistory();
 if(id==="tournament")loadSelectPlayers();
+if(id==="wheelPage")renderWheel();
 }
 function goHome(){show("home");}
 
-/* PLAYERS */
+/ PLAYERS /
 async function addPlayer(){
 let n=playerName.value;
 if(!n)return;
@@ -184,11 +192,7 @@ async function loadPlayers(){
 let snap=await db.collection("players").get();
 playersList.innerHTML="";
 snap.forEach(d=>{
-playersList.innerHTML+=`
-<div class="box">${d.data().name}
-<button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button>
-<button onclick="deleteItem('players','${d.id}')">❌</button>
-</div>`;
+playersList.innerHTML+=<div class="box">${d.data().name} <button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button> <button onclick="deleteItem('players','${d.id}')">❌</button></div>;
 });
 }
 async function editPlayer(id,n){
@@ -197,21 +201,19 @@ if(!nuovo)return;
 await db.collection("players").doc(id).update({name:nuovo});
 loadPlayers();
 }
-
-/* DELETE GENERICO */
 async function deleteItem(col,id){
 await db.collection(col).doc(id).delete();
-show(col==="players"?"players":col==="palmares"?"palmares":col==="ranking"?"ranking":col==="gameRanking"?"gamesRanking":col==="history"?"history":"home");
+show(col==="players"?"players":col==="palmares"?"palmares":col==="ranking"?"ranking":"gamesRanking");
 }
 
-/* SELECT */
+/ SELECT /
 async function loadSelectPlayers(){
 selected=[];
 let snap=await db.collection("players").get();
 selectPlayers.innerHTML="";
 snap.forEach(d=>{
 let n=d.data().name;
-selectPlayers.innerHTML+=`<div class="box"><input type="checkbox" value="${n}" onchange="toggle(this)"> ${n}</div>`;
+selectPlayers.innerHTML+=<div class="box"><input type="checkbox" value="${n}" onchange="toggle(this)"> ${n}</div>;
 });
 }
 function toggle(e){
@@ -219,45 +221,26 @@ if(e.checked)selected.push(e.value);
 else selected=selected.filter(p=>p!==e.value);
 }
 
-/* GAMES */
+/ GAMES /
 function prepareGames(){
 gamesArea.innerHTML="";
 games.forEach(g=>{
-gamesArea.innerHTML+=`<div class="box"><h3>${g}</h3></div>`;
+gamesArea.innerHTML+=<div class="box"><h3>${g}</h3></div>;
 selected.forEach(p=>{
-gamesArea.innerHTML+=`<div class="box">${p} <input id="${g}_${p}" type="number" value="0"></div>`;
+gamesArea.innerHTML+=<div class="box">${p} <input id="${g}_${p}" type="number" value="0"></div>;
 });
 });
-gamesArea.innerHTML+=`<button onclick="finish()">🏆 Fine</button>`;
+gamesArea.innerHTML+=<button onclick="finish()">🏆 Fine</button>;
 }
 
-/* SLOT */
-function slot(w){
-slotOverlay.style.display="flex";
-let i=0;
-let int=setInterval(()=>{
-slotText.innerText=selected[Math.floor(Math.random()*selected.length)];
-i++;
-if(i>40){
-clearInterval(int);
-slotText.innerText=w;
-setTimeout(()=>{
-slotOverlay.style.display="none";
-alert("🏆 Vincitore: "+w);
-goHome();
-},1500);
-}
-},80);
-}
-
-/* FINISH */
+/ FINISH /
 async function finish(){
 let totals={};
 selected.forEach(p=>totals[p]=0);
 
 for(let g of games){
 for(let p of selected){
-let val=parseInt(document.getElementById(`${g}_${p}`).value)||0;
+let val=parseInt(document.getElementById(${g}_${p}).value)||0;
 totals[p]+=val;
 
 await db.collection("gameRanking").add({
@@ -269,97 +252,95 @@ points:val
 }
 
 for(let p in totals){
-await db.collection("ranking").add({
-name:p,
-points:totals[p]
-});
+await db.collection("ranking").add({name:p,points:totals[p]});
 }
 
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+await db.collection("palmares").add({winner:winner,points:totals[winner]});
 
-await db.collection("palmares").add({
-winner:winner,
-points:totals[winner],
-date:new Date().toLocaleDateString()
-});
-
-await db.collection("history").add({
-players:selected,
-scores:totals,
-winner:winner
-});
-
-slot(winner);
+alert("🏆 "+winner);
+goHome();
 }
 
-/* EDIT GENERICO */
-async function editValue(col,id,current,field){
-let n=prompt("Modifica",current);
-if(!n)return;
-await db.collection(col).doc(id).update({[field]:parseInt(n)||n});
-show(col==="ranking"?"ranking":col==="palmares"?"palmares":col==="gameRanking"?"gamesRanking":"history");
-}
-
-/* PALMARES */
+/ PALMARES /
 async function loadPalmares(){
 let snap=await db.collection("palmares").get();
 palmaresList.innerHTML="";
 snap.forEach(d=>{
-palmaresList.innerHTML+=`
-<div class="box">
-${d.data().winner} (${d.data().points})
-<button onclick="editValue('palmares','${d.id}',${d.data().points},'points')">✏️</button>
-<button onclick="deleteItem('palmares','${d.id}')">❌</button>
-</div>`;
+palmaresList.innerHTML+=<div class="box">${d.data().winner} <button onclick="deleteItem('palmares','${d.id}')">❌</button></div>;
 });
 }
 
-/* CLASSIFICA */
+/ CLASSIFICA /
 async function loadRanking(){
 let snap=await db.collection("ranking").get();
 rankingList.innerHTML="";
 snap.forEach(d=>{
-rankingList.innerHTML+=`
-<div class="box">
-${d.data().name} ${d.data().points}
-<button onclick="editValue('ranking','${d.id}',${d.data().points},'points')">✏️</button>
-<button onclick="deleteItem('ranking','${d.id}')">❌</button>
-</div>`;
+rankingList.innerHTML+=<div class="box">${d.data().name} ${d.data().points}</div>;
 });
 }
 
-/* PER GIOCO EDITABILE */
+/ PER GIOCO ORDINATO /
 async function loadGamesRanking(){
 let snap=await db.collection("gameRanking").get();
+let data={};
 
-let html="";
 snap.forEach(d=>{
-html+=`
-<div class="box">
-${d.data().game} - ${d.data().player} ${d.data().points}
-<button onclick="editValue('gameRanking','${d.id}',${d.data().points},'points')">✏️</button>
-<button onclick="deleteItem('gameRanking','${d.id}')">❌</button>
-</div>`;
+let g=d.data().game;
+let p=d.data().player;
+let pts=d.data().points;
+
+if(!data[g])data[g]={};
+if(!data[g][p])data[g][p]=0;
+data[g][p]+=pts;
 });
 
+let html="";
+for(let g in data){
+html+=<div class="box"><h2>${g}</h2>;
+let arr=Object.entries(data[g]).sort((a,b)=>b[1]-a[1]);
+arr.forEach(p=>{
+html+=${p[0]} - ${p[1]} pt<br>;
+});
+html+=</div>;
+}
 gamesRankingList.innerHTML=html;
 }
 
-/* STORICO EDITABILE */
-async function loadHistory(){
-let snap=await db.collection("history").get();
-historyList.innerHTML="";
-snap.forEach(d=>{
-historyList.innerHTML+=`
-<div class="box">
-🏆 ${d.data().winner}
-<button onclick="editValue('history','${d.id}','${d.data().winner}','winner')">✏️</button>
-<button onclick="deleteItem('history','${d.id}')">❌</button>
-</div>`;
+/ RUOTA /
+function addOption(){
+let val=wheelInput.value;
+if(!val)return;
+wheelOptions.push(val);
+renderWheel();
+}
+
+function renderWheel(){
+wheelOptionsDiv.innerHTML="";
+wheelOptions.forEach((o,i)=>{
+wheelOptionsDiv.innerHTML+=<div>${o}</div>;
 });
+
+let gradient="";
+let step=360/wheelOptions.length;
+
+wheelOptions.forEach((o,i)=>{
+gradient+=hsl(${i*step},70%,50%) ${i*step}deg ${(i+1)*step}deg,;
+});
+
+wheel.style.background=conic-gradient(${gradient.slice(0,-1)});
+}
+
+function spinWheel(){
+let deg=3605 + Math.random()*360;
+wheel.style.transform=rotate(${deg}deg);
+
+let index=Math.floor(Math.random()*wheelOptions.length);
+
+setTimeout(()=>{
+alert("🎯 "+wheelOptions[index]);
+},3000);
 }
 </script>
 
 </body>
-</html>
-
