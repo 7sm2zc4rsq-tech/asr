@@ -7,11 +7,14 @@
 <title>Torneo</title>
 
 <link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin:0;
-  font-family: Arial;
+  font-family: 'Orbitron', sans-serif;
   color:white;
   text-align:center;
   background: url("sfondo.jpg") no-repeat center center fixed;
@@ -23,11 +26,22 @@ body {
 
 .menu-btn {
   width:100%;
-  height:33vh;
-  font-size:30px;
-  background: rgba(0,0,0,0.4);
+  height:33.3vh;
+  font-size:42px;
+  font-weight:bold;
+  letter-spacing:2px;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
   border:none;
   color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.2s;
+}
+
+.menu-btn:active {
+  transform:scale(0.95);
 }
 
 button {
@@ -53,13 +67,15 @@ input {
 
 <body>
 
+<!-- SUONI -->
 <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
 
 <!-- HOME -->
 <div id="home" class="screen active">
-  <button class="menu-btn" onclick="show('tournament')">Nuovo Torneo</button>
-  <button class="menu-btn" onclick="show('players')">Giocatori</button>
-  <button class="menu-btn" onclick="show('palmares')">Palmares</button>
+  <button class="menu-btn" style="color:#00ffd5;" onclick="show('tournament')">🎮 NUOVO TORNEO</button>
+  <button class="menu-btn" style="color:#ffcc00;" onclick="show('players')">👤 GIOCATORI</button>
+  <button class="menu-btn" style="color:#ff3c3c;" onclick="show('palmares')">🏆 PALMARES</button>
 </div>
 
 <!-- GIOCATORI -->
@@ -103,9 +119,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// SUONO
+// SUONI
 function clickSound(){
   let s=document.getElementById("clickSound");
+  s.currentTime=0;
+  s.play();
+}
+
+function winSound(){
+  let s=document.getElementById("winSound");
   s.currentTime=0;
   s.play();
 }
@@ -193,14 +215,22 @@ async function loadPalmares(){
 
 async function startTournament(){
   clickSound();
-  if(selected.length===0) return alert("Seleziona giocatori");
+
+  if(selected.length===0){
+    alert("Seleziona giocatori");
+    return;
+  }
 
   let winner=selected[Math.floor(Math.random()*selected.length)];
 
   await addDoc(collection(db,"palmares"),{winner});
 
-  alert("Vincitore: "+winner);
-  goHome();
+  winSound(); // 🔥 SUONO VINCITORE
+
+  setTimeout(()=>{
+    alert("🏆 Vincitore: "+winner);
+    goHome();
+  },300);
 }
 
 // GLOBAL
