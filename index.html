@@ -3,82 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Torneo Del Porco Di Dio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
 <style>
 body{
 margin:0;
 font-family:'Orbitron',sans-serif;
-background:#111;
 color:white;
 text-align:center;
+background:url('sfondo.jpg') no-repeat center center fixed;
+background-size:cover;
 }
 
-.screen{display:none;padding:20px;}
+.overlay{
+background:rgba(0,0,0,0.7);
+min-height:100vh;
+padding:20px;
+}
+
+.screen{display:none;}
 .active{display:block;}
 
-button{
-padding:10px;
-margin:5px;
-font-size:16px;
+h1{
+color:gold;
+font-size:30px;
+}
+
+.menu button{
+display:block;
+width:80%;
+margin:15px auto;
+padding:20px;
+font-size:20px;
+border:none;
+border-radius:15px;
+background:rgba(255,255,255,0.2);
+color:white;
+cursor:pointer;
 }
 
 .box{
-border:1px solid white;
+background:rgba(0,0,0,0.6);
 margin:10px;
 padding:10px;
+border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
+<div class="overlay">
+
 <!-- HOME -->
 <div id="home" class="screen active">
-<h2>Torneo</h2>
+<h1>Torneo Del Porco Di Dio</h1>
+
+<div class="menu">
 <button onclick="show('players')">Giocatori</button>
 <button onclick="show('tournament')">Nuovo Torneo</button>
 <button onclick="show('ranking')">Classifica</button>
-<button onclick="show('gamesRanking')">Per Gioco</button>
-<button onclick="show('wheelPage')">Ruota</button>
+<button onclick="show('games')">Per Gioco</button>
+<button onclick="show('wheel')">Ruota</button>
+</div>
 </div>
 
 <!-- GIOCATORI -->
 <div id="players" class="screen">
 <h2>Giocatori</h2>
+
 <input id="playerName">
 <button onclick="addPlayer()">Aggiungi</button>
+
 <div id="playersList"></div>
-<button onclick="goHome()">⬅️</button>
+
+<button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- TORNEO -->
 <div id="tournament" class="screen">
 <h2>Seleziona Giocatori</h2>
+
 <div id="selectPlayers"></div>
+
 <button onclick="prepareGames()">Continua</button>
+
 <div id="gamesArea"></div>
-<button onclick="goHome()">⬅️</button>
+
+<button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- CLASSIFICA -->
 <div id="ranking" class="screen">
-<h2>Classifica Totale</h2>
+<h2>Classifica</h2>
 <div id="rankingList"></div>
-<button onclick="goHome()">⬅️</button>
+<button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- PER GIOCO -->
-<div id="gamesRanking" class="screen">
-<h2>Classifica per Gioco</h2>
-<div id="gamesRankingList"></div>
-<button onclick="goHome()">⬅️</button>
+<div id="games" class="screen">
+<h2>Per Gioco</h2>
+<div id="gamesList"></div>
+<button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- RUOTA -->
-<div id="wheelPage" class="screen">
+<div id="wheel" class="screen">
 <h2>Ruota</h2>
 
 <input id="wheelInput">
@@ -86,16 +119,20 @@ padding:10px;
 
 <div id="wheelOptions"></div>
 
-<button onclick="spinWheel()">Gira</button>
+<button onclick="spin()">Gira</button>
 
-<button onclick="goHome()">⬅️</button>
+<button onclick="show('home')">⬅️</button>
 </div>
 
+</div>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-/* FIREBASE /
+window.onload = function(){
+
 firebase.initializeApp({
 apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
 authDomain:"torneo-74c5b.firebaseapp.com",
@@ -104,26 +141,23 @@ projectId:"torneo-74c5b"
 
 const db = firebase.firestore();
 
-/ DATI /
 let selected=[];
-let wheelOptions=[];
+let options=[];
 let games=["UNO","31","Saltacavallo","Dubito"];
 
-/ NAV /
-function show(id){
+/* NAV /
+window.show = function(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 
 if(id==="players") loadPlayers();
-if(id==="tournament") loadSelectPlayers();
+if(id==="tournament") loadSelect();
 if(id==="ranking") loadRanking();
-if(id==="gamesRanking") loadGamesRanking();
+if(id==="games") loadGames();
 }
 
-function goHome(){show("home");}
-
 / GIOCATORI /
-async function addPlayer(){
+window.addPlayer = async function(){
 let n=document.getElementById("playerName").value;
 if(!n)return;
 await db.collection("players").add({name:n});
@@ -134,25 +168,25 @@ async function loadPlayers(){
 let snap=await db.collection("players").get();
 let html="";
 snap.forEach(d=>{
-html+=<div class="box">${d.data().name} <button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button> <button onclick="deleteItem('players','${d.id}')">❌</button> </div>;
+html+=<div class="box">${d.data().name} <button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button> <button onclick="deletePlayer('${d.id}')">❌</button> </div>;
 });
-document.getElementById("playersList").innerHTML=html;
+playersList.innerHTML=html;
 }
 
-async function editPlayer(id,n){
-let nuovo=prompt("Nuovo nome",n);
-if(!nuovo)return;
-await db.collection("players").doc(id).update({name:nuovo});
+window.editPlayer = async function(id,name){
+let n=prompt("Nome",name);
+if(!n)return;
+await db.collection("players").doc(id).update({name:n});
 loadPlayers();
 }
 
-async function deleteItem(col,id){
-await db.collection(col).doc(id).delete();
-show(col==="players"?"players":"home");
+window.deletePlayer = async function(id){
+await db.collection("players").doc(id).delete();
+loadPlayers();
 }
 
 / SELECT /
-async function loadSelectPlayers(){
+async function loadSelect(){
 selected=[];
 let snap=await db.collection("players").get();
 let html="";
@@ -160,16 +194,16 @@ snap.forEach(d=>{
 let name=d.data().name;
 html+=<div><input type="checkbox" value="${name}" onchange="toggle(this)"> ${name}</div>;
 });
-document.getElementById("selectPlayers").innerHTML=html;
+selectPlayers.innerHTML=html;
 }
 
-function toggle(e){
+window.toggle = function(e){
 if(e.checked) selected.push(e.value);
 else selected=selected.filter(p=>p!==e.value);
 }
 
-/ GIOCHI /
-function prepareGames(){
+/ GAMES /
+window.prepareGames = function(){
 let html="";
 games.forEach(g=>{
 html+=<h3>${g}</h3>;
@@ -177,12 +211,12 @@ selected.forEach(p=>{
 html+=${p} <input id="${g}_${p}" type="number" value="0"><br>;
 });
 });
-html+=<button onclick="finish()">Fine Torneo</button>;
-document.getElementById("gamesArea").innerHTML=html;
+html+=<button onclick="finish()">Fine</button>;
+gamesArea.innerHTML=html;
 }
 
-/ FINE /
-async function finish(){
+/ FINISH /
+window.finish = async function(){
 let totals={};
 selected.forEach(p=>totals[p]=0);
 
@@ -200,7 +234,7 @@ await db.collection("ranking").add({name:p,points:totals[p]});
 }
 
 alert("Torneo salvato");
-goHome();
+show("home");
 }
 
 / CLASSIFICA /
@@ -208,13 +242,13 @@ async function loadRanking(){
 let snap=await db.collection("ranking").get();
 let html="";
 snap.forEach(d=>{
-html+=<div class="box">${d.data().name} ${d.data().points}</div>;
+html+=<div class="box">${d.data().name} - ${d.data().points}</div>;
 });
-document.getElementById("rankingList").innerHTML=html;
+rankingList.innerHTML=html;
 }
 
-/ PER GIOCO ORDINATO /
-async function loadGamesRanking(){
+/ PER GIOCO /
+async function loadGames(){
 let snap=await db.collection("gameRanking").get();
 
 let data={};
@@ -233,29 +267,30 @@ data[g][p]+=pts;
 let html="";
 for(let g in data){
 html+=<div class="box"><h3>${g}</h3>;
-let arr=Object.entries(data[g]).sort((a,b)=>b[1]-a[1]);
-arr.forEach(p=>{
+Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
 html+=${p[0]} - ${p[1]}<br>;
 });
 html+=</div>;
 }
 
-document.getElementById("gamesRankingList").innerHTML=html;
+gamesList.innerHTML=html;
 }
 
 / RUOTA */
-function addOption(){
-let v=document.getElementById("wheelInput").value;
+window.addOption = function(){
+let v=wheelInput.value;
 if(!v)return;
-wheelOptions.push(v);
-document.getElementById("wheelOptions").innerHTML=wheelOptions.join("<br>");
+options.push(v);
+wheelOptions.innerHTML=options.join("<br>");
 }
 
-function spinWheel(){
-if(wheelOptions.length===0)return;
-let r=wheelOptions[Math.floor(Math.random()*wheelOptions.length)];
+window.spin = function(){
+if(options.length===0)return;
+let r=options[Math.floor(Math.random()*options.length)];
 alert("🎡 "+r);
 }
+
+};
 </script>
 
 </body>
