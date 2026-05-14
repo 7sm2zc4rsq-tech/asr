@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Torneo Del Porcodidio</title>
+<title>Torneo Del Porco Di Dio</title>
 
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
@@ -14,76 +14,60 @@
 
 <style>
 body{
-    margin:0;
-    font-family:'Orbitron',sans-serif;
-    color:white;
-    text-align:center;
-    background:url("sfondo.jpg") no-repeat center center fixed;
-    background-size:cover;
+margin:0;
+font-family:'Orbitron',sans-serif;
+color:white;
+text-align:center;
+background:url("sfondo.jpg") no-repeat center center fixed;
+background-size:cover;
 }
 
-/* SCHERMATE */
-.screen{
-    display:none;
-    min-height:100vh;
+#mainTitle{
+position:fixed;
+top:0;
+width:100%;
+padding:10px;
+font-size:24px;
+background:rgba(0,0,0,0.4);
+color:gold;
+z-index:999;
 }
 
-.active{
-    display:block;
-}
+.screen{display:none;padding-top:70px;}
+.active{display:block;}
 
-/* HOME */
 .menu-btn{
-    width:100%;
-    height:33.33vh;
-
-    border:none;
-
-    background:rgba(0,0,0,0.25);
-    backdrop-filter:blur(4px);
-
-    font-size:48px;
-    font-weight:800;
-    letter-spacing:3px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    transition:0.2s;
-}
-
-.menu-btn:active{
-    transform:scale(0.97);
-}
-
-/* GENERALE */
-button{
-    border:none;
-    border-radius:12px;
-    padding:12px;
-    margin:6px;
-    font-family:'Orbitron',sans-serif;
-}
-
-input{
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    margin:5px;
-    width:120px;
+width:100%;
+height:33vh;
+font-size:40px;
+background:rgba(0,0,0,0.3);
+border:none;
+color:white;
 }
 
 .box{
-    background:rgba(0,0,0,0.6);
-    margin:10px;
-    padding:12px;
-    border-radius:12px;
+background:rgba(0,0,0,0.6);
+margin:10px;
+padding:10px;
+border-radius:10px;
 }
 
-.title{
-    font-size:32px;
-    margin-top:20px;
+#slotOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+#slotText{
+font-size:60px;
+color:gold;
 }
 </style>
 
@@ -91,437 +75,231 @@ input{
 
 <body>
 
-<!-- SUONI -->
+<div id="mainTitle">🎰 Torneo Del Porco Di Dio</div>
 
 <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio> <audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+
+<div id="slotOverlay"><div id="slotText"></div></div>
 
 <!-- HOME -->
 
 <div id="home" class="screen active">
-
-<button class="menu-btn" style="color:#00ffe5;" onclick="show('tournament')">
-🎮 NUOVO TORNEO
-</button>
-
-<button class="menu-btn" style="color:#ffd000;" onclick="show('players')">
-👤 GIOCATORI
-</button>
-
-<button class="menu-btn" style="color:#ff4040;" onclick="show('palmares')">
-🏆 PALMARES
-</button>
-
+<button class="menu-btn" onclick="show('tournament')">🎮 TORNEO</button>
+<button class="menu-btn" onclick="show('players')">👤 GIOCATORI</button>
+<button class="menu-btn" onclick="show('palmares')">🏆 PALMARES</button>
+<button class="menu-btn" onclick="show('ranking')">📊 CLASSIFICA</button>
+<button class="menu-btn" onclick="show('history')">📜 STORICO</button>
 </div>
 
 <!-- GIOCATORI -->
 
 <div id="players" class="screen">
-
-<div class="title">Giocatori</div>
-
-<input id="playerName" placeholder="Nome">
-
-<button onclick="addPlayer()">
-Aggiungi
-</button>
-
+<h2>Giocatori</h2>
+<input id="playerName">
+<button onclick="addPlayer()">Aggiungi</button>
 <div id="playersList"></div>
-
-<button onclick="goHome()">
-⬅️ Home
-</button>
-
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- PALMARES -->
 
 <div id="palmares" class="screen">
-
-<div class="title">Palmares</div>
-
+<h2>Palmares</h2>
 <div id="palmaresList"></div>
+<button onclick="goHome()">⬅️</button>
+</div>
 
-<button onclick="goHome()">
-⬅️ Home
-</button>
+<!-- CLASSIFICA -->
 
+<div id="ranking" class="screen">
+<h2>Classifica Totale</h2>
+<div id="rankingList"></div>
+<button onclick="goHome()">⬅️</button>
+</div>
+
+<!-- STORICO -->
+
+<div id="history" class="screen">
+<h2>Storico Tornei</h2>
+<div id="historyList"></div>
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- TORNEO -->
 
 <div id="tournament" class="screen">
-
-<div class="title">Seleziona Giocatori</div>
-
+<h2>Seleziona Giocatori</h2>
 <div id="selectPlayers"></div>
-
-<button onclick="prepareGames()">
-Continua
-</button>
-
+<button onclick="prepareGames()">Continua</button>
 <div id="gamesArea"></div>
-
-<button onclick="goHome()">
-⬅️ Home
-</button>
-
+<button onclick="goHome()">⬅️</button>
 </div>
 
-<!-- FIREBASE -->
-
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { 
-initializeApp 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+const app=initializeApp({
+apiKey:"AIza...",
+authDomain:"torneo-74c5b.firebaseapp.com",
+projectId:"torneo-74c5b"
+});
 
-import { 
-getFirestore,
-collection,
-addDoc,
-getDocs,
-deleteDoc,
-doc,
-updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db=getFirestore(app);
 
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
-  authDomain: "torneo-74c5b.firebaseapp.com",
-  projectId: "torneo-74c5b",
-  storageBucket: "torneo-74c5b.firebasestorage.app",
-  messagingSenderId: "937631619179",
-  appId: "1:937631619179:web:36be07ea0a2db93368b92e"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* GIOCHI */
-let games = [
-"UNO",
-"31",
-"Saltacavallo",
-"Fr0cio",
-"Dubito",
-"Las Vegas"
-];
-
-let selected = [];
-
-/* SUONI */
-function clickSound(){
-    let s=document.getElementById("clickSound");
-    s.currentTime=0;
-    s.play();
-}
-
-function winSound(){
-    let s=document.getElementById("winSound");
-    s.currentTime=0;
-    s.play();
-}
+let games=["UNO","31","Saltacavallo","Fr0cio","Dubito","Las Vegas"];
+let selected=[];
 
 /* NAV */
 function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 
-    clickSound();
-
-    document.querySelectorAll(".screen")
-    .forEach(s=>s.classList.remove("active"));
-
-    document.getElementById(id)
-    .classList.add("active");
-
-    if(id==="players") loadPlayers();
-
-    if(id==="palmares") loadPalmares();
-
-    if(id==="tournament") loadSelectPlayers();
+if(id==="players")loadPlayers();
+if(id==="palmares")loadPalmares();
+if(id==="ranking")loadRanking();
+if(id==="history")loadHistory();
+if(id==="tournament")loadSelectPlayers();
 }
+function goHome(){show("home");}
 
-function goHome(){
-    show("home");
-}
-
-/* =========================
-   GIOCATORI
-========================= */
-
+/* PLAYERS */
 async function addPlayer(){
-
-    clickSound();
-
-    let name=document.getElementById("playerName").value;
-
-    if(!name) return;
-
-    await addDoc(collection(db,"players"),{
-        name:name
-    });
-
-    document.getElementById("playerName").value="";
-
-    loadPlayers();
+let n=playerName.value;
+if(!n)return;
+await addDoc(collection(db,"players"),{name:n});
+loadPlayers();
 }
-
 async function loadPlayers(){
-
-    const snap = await getDocs(collection(db,"players"));
-
-    let html="";
-
-    snap.forEach(d=>{
-
-        html += `
-        <div class="box">
-
-            ${d.data().name}
-
-            <button onclick="editPlayer('${d.id}','${d.data().name}')">
-            ✏️
-            </button>
-
-            <button onclick="deletePlayer('${d.id}')">
-            ❌
-            </button>
-
-        </div>
-        `;
-    });
-
-    document.getElementById("playersList").innerHTML=html;
+let snap=await getDocs(collection(db,"players"));
+playersList.innerHTML="";
+snap.forEach(d=>{
+playersList.innerHTML+=`
+<div class="box">${d.data().name}
+<button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button>
+<button onclick="deletePlayer('${d.id}')">❌</button>
+</div>`;
+});
+}
+async function deletePlayer(id){await deleteDoc(doc(db,"players",id));loadPlayers();}
+async function editPlayer(id,n){
+let nuovo=prompt("Nuovo nome",n);
+if(!nuovo)return;
+await updateDoc(doc(db,"players",id),{name:nuovo});
+loadPlayers();
 }
 
-async function deletePlayer(id){
-
-    clickSound();
-
-    await deleteDoc(doc(db,"players",id));
-
-    loadPlayers();
-}
-
-async function editPlayer(id,current){
-
-    clickSound();
-
-    let nuovo = prompt("Nuovo nome",current);
-
-    if(!nuovo) return;
-
-    await updateDoc(doc(db,"players",id),{
-        name:nuovo
-    });
-
-    loadPlayers();
-}
-
-/* =========================
-   SELEZIONE GIOCATORI
-========================= */
-
+/* SELECT */
 async function loadSelectPlayers(){
-
-    selected=[];
-
-    const snap = await getDocs(collection(db,"players"));
-
-    let html="";
-
-    snap.forEach(d=>{
-
-        let name=d.data().name;
-
-        html += `
-        <div class="box">
-
-            <input 
-            type="checkbox" 
-            value="${name}"
-            onchange="togglePlayer(this)">
-
-            ${name}
-
-        </div>
-        `;
-    });
-
-    document.getElementById("selectPlayers").innerHTML=html;
-
-    document.getElementById("gamesArea").innerHTML="";
+selected=[];
+let snap=await getDocs(collection(db,"players"));
+selectPlayers.innerHTML="";
+snap.forEach(d=>{
+let n=d.data().name;
+selectPlayers.innerHTML+=`<div class="box"><input type="checkbox" value="${n}" onchange="toggle(this)"> ${n}</div>`;
+});
+}
+function toggle(e){
+if(e.checked)selected.push(e.value);
+else selected=selected.filter(p=>p!==e.value);
 }
 
-function togglePlayer(el){
-
-    if(el.checked){
-        selected.push(el.value);
-    }else{
-        selected = selected.filter(p=>p!==el.value);
-    }
-}
-
-/* =========================
-   PREPARA GIOCHI
-========================= */
-
+/* GAMES */
 function prepareGames(){
-
-    clickSound();
-
-    if(selected.length===0){
-
-        alert("Seleziona almeno un giocatore");
-
-        return;
-    }
-
-    let area=document.getElementById("gamesArea");
-
-    area.innerHTML="";
-
-    games.forEach(g=>{
-
-        area.innerHTML += `
-        <div class="box">
-        <h2>${g}</h2>
-        </div>
-        `;
-
-        selected.forEach(p=>{
-
-            area.innerHTML += `
-            <div class="box">
-
-                ${p}
-
-                <input 
-                type="number" 
-                id="${g}_${p}" 
-                value="0">
-
-            </div>
-            `;
-        });
-
-    });
-
-    area.innerHTML += `
-    <button onclick="finishTournament()">
-    🏆 Fine Torneo
-    </button>
-    `;
+gamesArea.innerHTML="";
+selected.forEach(p=>{
+gamesArea.innerHTML+=`<div class="box">${p}<input id="${p}" type="number" value="0"></div>`;
+});
+gamesArea.innerHTML+=`<button onclick="finish()">Fine</button>`;
 }
 
-/* =========================
-   FINE TORNEO
-========================= */
-
-async function finishTournament(){
-
-    clickSound();
-
-    let totals={};
-
-    selected.forEach(p=>{
-        totals[p]=0;
-    });
-
-    games.forEach(g=>{
-
-        selected.forEach(p=>{
-
-            let val=parseInt(
-                document.getElementById(`${g}_${p}`).value
-            ) || 0;
-
-            totals[p]+=val;
-        });
-
-    });
-
-    let winner = Object.keys(totals)
-    .sort((a,b)=>totals[b]-totals[a])[0];
-
-    await addDoc(collection(db,"palmares"),{
-        winner:winner,
-        points:totals[winner],
-        date:new Date().toLocaleDateString()
-    });
-
-    winSound();
-
-    setTimeout(()=>{
-
-        alert(
-        "🏆 Vincitore: " + winner +
-        "\nPunti: " + totals[winner]
-        );
-
-        goHome();
-
-    },300);
+/* SLOT */
+function slot(w){
+slotOverlay.style.display="flex";
+let i=0;
+let int=setInterval(()=>{
+slotText.innerText=selected[Math.floor(Math.random()*selected.length)];
+i++;
+if(i>30){
+clearInterval(int);
+slotText.innerText=w;
+setTimeout(()=>{
+slotOverlay.style.display="none";
+alert("Vincitore: "+w);
+goHome();
+},1500);
+}
+},80);
 }
 
-/* =========================
-   PALMARES
-========================= */
+/* FINISH */
+async function finish(){
+let totals={};
+selected.forEach(p=>totals[p]=parseInt(document.getElementById(p).value)||0);
 
+let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+
+/* salva palmares */
+await addDoc(collection(db,"palmares"),{
+winner: winner,
+points: totals[winner],
+date: new Date().toLocaleDateString()
+});
+
+/* aggiorna classifica */
+for(let p in totals){
+let ref=doc(db,"ranking",p);
+await updateDoc(ref,{points: totals[p]}).catch(async()=>{
+await addDoc(collection(db,"ranking"),{name:p,points:totals[p]});
+});
+}
+
+/* storico */
+await addDoc(collection(db,"history"),{
+players:selected,
+scores:totals,
+winner:winner
+});
+
+slot(winner);
+}
+
+/* PALMARES */
 async function loadPalmares(){
-
-    const snap = await getDocs(collection(db,"palmares"));
-
-    let html="";
-
-    snap.forEach(d=>{
-
-        html += `
-        <div class="box">
-
-            🏆 ${d.data().winner}
-            <br>
-            ${d.data().points} pt
-            <br>
-            ${d.data().date}
-
-            <br><br>
-
-            <button onclick="deletePalmares('${d.id}')">
-            ❌ Elimina
-            </button>
-
-        </div>
-        `;
-    });
-
-    document.getElementById("palmaresList").innerHTML=html;
+let snap=await getDocs(collection(db,"palmares"));
+palmaresList.innerHTML="";
+snap.forEach(d=>{
+palmaresList.innerHTML+=`<div class="box">${d.data().winner} ${d.data().points}</div>`;
+});
 }
 
-async function deletePalmares(id){
+/* CLASSIFICA */
+async function loadRanking(){
+let snap=await getDocs(collection(db,"ranking"));
+rankingList.innerHTML="";
+snap.forEach(d=>{
+rankingList.innerHTML+=`<div class="box">${d.data().name} ${d.data().points}</div>`;
+});
+}
 
-    clickSound();
-
-    await deleteDoc(doc(db,"palmares",id));
-
-    loadPalmares();
+/* STORICO */
+async function loadHistory(){
+let snap=await getDocs(collection(db,"history"));
+historyList.innerHTML="";
+snap.forEach(d=>{
+historyList.innerHTML+=`<div class="box">🏆 ${d.data().winner}</div>`;
+});
 }
 
 /* GLOBAL */
 window.show=show;
 window.goHome=goHome;
-
 window.addPlayer=addPlayer;
 window.deletePlayer=deletePlayer;
 window.editPlayer=editPlayer;
-
-window.togglePlayer=togglePlayer;
-
+window.toggle=toggle;
 window.prepareGames=prepareGames;
-window.finishTournament=finishTournament;
-
-window.deletePalmares=deletePalmares;
-
+window.finish=finish;
 </script>
 
 </body>
