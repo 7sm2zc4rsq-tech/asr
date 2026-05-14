@@ -4,14 +4,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Torneo Del Porco Di Dio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+<link rel="apple-touch-icon" href="icon.png">
 
 <style>
 body{
 margin:0;
-font-family:'Orbitron',sans-serif;
+font-family:'Cinzel',serif;
 color:white;
 text-align:center;
 background:url('sfondo.jpg') no-repeat center center fixed;
@@ -19,28 +22,31 @@ background-size:cover;
 }
 
 .overlay{
-background:rgba(0,0,0,0.6);
+background:rgba(0,0,0,0.7);
 min-height:100vh;
 padding:20px;
+}
+
+h1{
+font-size:32px;
+color:#ff4500;
+text-shadow:0 0 10px red,0 0 20px orange;
 }
 
 .screen{display:none;}
 .active{display:block;}
 
-h1{color:gold;}
-
 .menu button{
 display:block;
-width:85%;
+width:90%;
 margin:15px auto;
 padding:20px;
-font-size:20px;
+font-size:22px;
 border-radius:20px;
-background:rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.15);
 color:white;
 border:none;
 cursor:pointer;
-z-index:10;
 }
 
 .box{
@@ -53,7 +59,7 @@ border-radius:10px;
 input{padding:8px;margin:5px;}
 
 #wheel{
-width:250px;height:250px;
+width:260px;height:260px;
 border-radius:50%;
 margin:auto;
 transition:transform 3s ease-out;
@@ -74,17 +80,21 @@ margin:auto;
 <body>
 <div class="overlay">
 
+<!-- HOME -->
+
 <div id="home" class="screen active">
 <h1>Torneo Del Porco Di Dio</h1>
 <div class="menu">
-<button onclick="show('players')">Giocatori</button>
 <button onclick="show('tournament')">Nuovo Torneo</button>
-<button onclick="show('ranking')">Classifica</button>
-<button onclick="show('palmares')">Palmares</button>
-<button onclick="show('games')">Per Gioco</button>
+<button onclick="show('players')">Giocatori</button>
 <button onclick="show('wheelPage')">Ruota</button>
+<button onclick="show('palmares')">Palmares</button>
+<button onclick="show('ranking')">Classifica Totale</button>
+<button onclick="show('games')">Classifica Per Gioco</button>
 </div>
 </div>
+
+<!-- GIOCATORI -->
 
 <div id="players" class="screen">
 <input id="playerName"><button onclick="addPlayer()">Aggiungi</button>
@@ -92,36 +102,46 @@ margin:auto;
 <button onclick="show('home')">⬅️</button>
 </div>
 
+<!-- TORNEO -->
+
+<div id="tournament" class="screen">
+<h2>Seleziona Giocatori</h2>
+<div id="selectPlayers"></div>
+<button onclick="startGames()">Inizia</button>
+<div id="gamesArea"></div>
+</div>
+
+<!-- PALMARES -->
+
 <div id="palmares" class="screen">
 <h2>Palmares</h2>
 <div id="palmaresList"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
 
-<div id="tournament" class="screen">
-<div id="selectPlayers"></div>
-<button onclick="prepareGames()">Continua</button>
-<div id="gamesArea"></div>
-<button onclick="show('home')">⬅️</button>
-</div>
+<!-- CLASSIFICA -->
 
 <div id="ranking" class="screen">
+<h2>Classifica Totale</h2>
 <div id="rankingList"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
 
+<!-- PER GIOCO -->
+
 <div id="games" class="screen">
+<h2>Classifiche per Gioco</h2>
 <div id="gamesList"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
 
+<!-- RUOTA -->
+
 <div id="wheelPage" class="screen">
 <div id="pointer"></div>
 <div id="wheel"></div>
-<input id="wheelInput">
-<button onclick="addOption()">Aggiungi</button>
-<div id="wheelOptions"></div>
 <button onclick="spin()">Gira</button>
+<div id="wheelResult"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
 
@@ -132,8 +152,6 @@ margin:auto;
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-window.onload=function(){
-
 firebase.initializeApp({
 apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
 authDomain:"torneo-74c5b.firebaseapp.com",
@@ -142,12 +160,11 @@ projectId:"torneo-74c5b"
 
 const db=firebase.firestore();
 
-let selected=[];
-let options=[];
 let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
+let selected=[];
 
 /* NAV */
-window.show=function(id){
+function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 
@@ -156,11 +173,10 @@ if(id==="ranking")loadRanking();
 if(id==="palmares")loadPalmares();
 if(id==="games")loadGames();
 if(id==="tournament")loadSelect();
-if(id==="wheelPage")renderWheel();
 }
 
-/* PLAYERS */
-window.addPlayer=async()=>{
+/* GIOCATORI */
+async function addPlayer(){
 let n=playerName.value;
 if(!n)return;
 await db.collection("players").add({name:n});
@@ -178,37 +194,36 @@ html+=`<div class="box">${d.data().name}
 playersList.innerHTML=html;
 }
 
-window.editPlayer=async(id,n)=>{
+async function editPlayer(id,n){
 let nuovo=prompt("Nome",n);
 if(!nuovo)return;
 await db.collection("players").doc(id).update({name:nuovo});
 loadPlayers();
 }
 
-window.del=async(col,id)=>{
+async function del(col,id){
 await db.collection(col).doc(id).delete();
-show(col==="players"?"players":col);
+show(col);
 }
 
-/* SELECT */
+/* TORNEO */
 async function loadSelect(){
 selected=[];
 let snap=await db.collection("players").get();
 let html="";
 snap.forEach(d=>{
 let n=d.data().name;
-html+=`<div><input type="checkbox" value="${n}" onchange="toggle(this)"> ${n}</div>`;
+html+=`<input type="checkbox" value="${n}" onchange="toggle(this)"> ${n}<br>`;
 });
 selectPlayers.innerHTML=html;
 }
 
-window.toggle=e=>{
+function toggle(e){
 if(e.checked)selected.push(e.value);
 else selected=selected.filter(p=>p!==e.value);
 }
 
-/* GAMES */
-window.prepareGames=()=>{
+function startGames(){
 let html="";
 games.forEach(g=>{
 html+=`<h3>${g}</h3>`;
@@ -220,8 +235,7 @@ html+=`<button onclick="finish()">Fine Torneo</button>`;
 gamesArea.innerHTML=html;
 }
 
-/* FINISH */
-window.finish=async()=>{
+async function finish(){
 let totals={};
 selected.forEach(p=>totals[p]=0);
 
@@ -229,7 +243,6 @@ for(let g of games){
 for(let p of selected){
 let val=parseInt(document.getElementById(g+"_"+p).value)||0;
 totals[p]+=val;
-
 await db.collection("gameRanking").add({game:g,player:p,points:val});
 }
 }
@@ -241,108 +254,128 @@ await db.collection("ranking").add({name:p,points:totals[p]});
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 await db.collection("palmares").add({name:winner});
 
-alert("🏆 "+winner);
+/* animazione */
+let i=0;
+let interval=setInterval(()=>{
+gamesArea.innerHTML="<h1>"+Math.random().toString(36).substring(2,6)+"</h1>";
+i++;
+if(i>15){
+clearInterval(interval);
+gamesArea.innerHTML="<h1>🏆 "+winner+"</h1><button onclick='resetTorneo()'>Nuovo Torneo</button>";
+}
+},100);
+}
+
+function resetTorneo(){
+gamesArea.innerHTML="";
 show("tournament");
+}
+
+/* PALMARES */
+async function loadPalmares(){
+let snap=await db.collection("palmares").get();
+let data={};
+snap.forEach(d=>{
+let n=d.data().name;
+data[n]=(data[n]||0)+1;
+});
+
+let html="";
+Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
+html+=`<div class="box">${p[0]} 🏆 ${p[1]}
+<button onclick="delName('palmares','${p[0]}')">❌</button></div>`;
+});
+palmaresList.innerHTML=html;
 }
 
 /* CLASSIFICA */
 async function loadRanking(){
 let snap=await db.collection("ranking").get();
-let html="";
+let data={};
 snap.forEach(d=>{
-html+=`<div class="box">${d.data().name} ${d.data().points}
-<button onclick="editScore('${d.id}',${d.data().points})">✏️</button>
-<button onclick="del('ranking','${d.id}')">❌</button>
-</div>`;
+let n=d.data().name;
+data[n]=(data[n]||0)+d.data().points;
+});
+
+let html="";
+Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
+html+=`<div class="box">${p[0]} ${p[1]}
+<button onclick="delName('ranking','${p[0]}')">❌</button></div>`;
 });
 rankingList.innerHTML=html;
 }
 
-window.editScore=async(id,p)=>{
-let n=prompt("Punti",p);
-if(!n)return;
-await db.collection("ranking").doc(id).update({points:parseInt(n)});
-loadRanking();
-}
-
-/* PER GIOCO ORDINATO */
+/* PER GIOCO */
 async function loadGames(){
 let snap=await db.collection("gameRanking").get();
-
 let data={};
+
 snap.forEach(d=>{
 let g=d.data().game;
 let p=d.data().player;
 let pts=d.data().points;
 
 if(!data[g])data[g]={};
-if(!data[g][p])data[g][p]=0;
-data[g][p]+=pts;
+data[g][p]=(data[g][p]||0)+pts;
 });
 
 let html="";
 for(let g of games){
-if(!data[g])continue;
-
 html+=`<div class="box"><h3>${g}</h3>`;
-
+if(data[g]){
 Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
 html+=`${p[0]} ${p[1]}
-<button onclick="editGame('${g}','${p[0]}',${p[1]})">✏️</button><br>`;
+<button onclick="delGame('${g}','${p[0]}')">❌</button><br>`;
 });
-
-html+=`</div>`;
 }
-
+html+="</div>";
+}
 gamesList.innerHTML=html;
 }
 
-window.editGame=async(g,p,pts)=>{
-let n=prompt("Punti",pts);
-if(!n)return;
-
-let snap=await db.collection("gameRanking")
-.where("game","==",g)
-.where("player","==",p)
-.get();
-
+/* DELETE PER NOME */
+async function delName(col,name){
+let snap=await db.collection(col).get();
 snap.forEach(async d=>{
-await db.collection("gameRanking").doc(d.id).update({points:parseInt(n)});
+if(d.data().name===name) await db.collection(col).doc(d.id).delete();
 });
+show(col);
+}
 
+/* DELETE GAME */
+async function delGame(g,p){
+let snap=await db.collection("gameRanking").get();
+snap.forEach(async d=>{
+if(d.data().game===g && d.data().player===p){
+await db.collection("gameRanking").doc(d.id).delete();
+}
+});
 loadGames();
 }
 
 /* RUOTA */
-window.addOption=()=>{
-let v=wheelInput.value;
-if(!v)return;
-options.push(v);
-renderWheel();
-}
+let options=["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+let colors=["red","blue","green","purple","orange"];
 
-function renderWheel(){
+function drawWheel(){
 let step=360/options.length;
-let gradient="";
+let grad="";
 options.forEach((o,i)=>{
-gradient+=`hsl(${i*step},70%,50%) ${i*step}deg ${(i+1)*step}deg,`;
+grad+=`${colors[i]} ${i*step}deg ${(i+1)*step}deg,`;
 });
-wheel.style.background=`conic-gradient(${gradient.slice(0,-1)})`;
-wheelOptions.innerHTML=options.join("<br>");
+wheel.style.background=`conic-gradient(${grad.slice(0,-1)})`;
 }
+drawWheel();
 
-window.spin=()=>{
-let deg=360*5 + Math.random()*360;
+function spin(){
+let deg=360*5+Math.random()*360;
 wheel.style.transform=`rotate(${deg}deg)`;
 
 setTimeout(()=>{
 let index=Math.floor(Math.random()*options.length);
-let color=`hsl(${index*(360/options.length)},70%,50%)`;
-alert("🎡 "+options[index]+" ("+color+")");
+wheelResult.innerHTML="🎯 "+options[index]+" ("+colors[index]+")";
 },3000);
 }
-
-};
 </script>
 
 </body>
