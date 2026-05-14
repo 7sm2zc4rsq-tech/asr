@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Torneo Del Porco Di Dio</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
@@ -12,16 +11,16 @@
 body{
 margin:0;
 font-family:'Orbitron',sans-serif;
-background:black;
+background:#111;
 color:white;
 text-align:center;
 }
 
-.screen{display:none;}
+.screen{display:none;padding:20px;}
 .active{display:block;}
 
 button{
-padding:12px;
+padding:10px;
 margin:5px;
 font-size:16px;
 }
@@ -38,12 +37,12 @@ padding:10px;
 
 <!-- HOME -->
 <div id="home" class="screen active">
-<h2>TORNEO</h2>
+<h2>Torneo</h2>
 <button onclick="show('players')">Giocatori</button>
 <button onclick="show('tournament')">Nuovo Torneo</button>
 <button onclick="show('ranking')">Classifica</button>
-<button onclick="show('games')">Per Gioco</button>
-<button onclick="show('wheel')">Ruota</button>
+<button onclick="show('gamesRanking')">Per Gioco</button>
+<button onclick="show('wheelPage')">Ruota</button>
 </div>
 
 <!-- GIOCATORI -->
@@ -52,34 +51,34 @@ padding:10px;
 <input id="playerName">
 <button onclick="addPlayer()">Aggiungi</button>
 <div id="playersList"></div>
-<button onclick="show('home')">⬅️</button>
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- TORNEO -->
 <div id="tournament" class="screen">
-<h2>Torneo</h2>
+<h2>Seleziona Giocatori</h2>
 <div id="selectPlayers"></div>
 <button onclick="prepareGames()">Continua</button>
 <div id="gamesArea"></div>
-<button onclick="show('home')">⬅️</button>
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- CLASSIFICA -->
 <div id="ranking" class="screen">
-<h2>Classifica</h2>
+<h2>Classifica Totale</h2>
 <div id="rankingList"></div>
-<button onclick="show('home')">⬅️</button>
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- PER GIOCO -->
-<div id="games" class="screen">
-<h2>Per Gioco</h2>
-<div id="gamesList"></div>
-<button onclick="show('home')">⬅️</button>
+<div id="gamesRanking" class="screen">
+<h2>Classifica per Gioco</h2>
+<div id="gamesRankingList"></div>
+<button onclick="goHome()">⬅️</button>
 </div>
 
 <!-- RUOTA -->
-<div id="wheel" class="screen">
+<div id="wheelPage" class="screen">
 <h2>Ruota</h2>
 
 <input id="wheelInput">
@@ -87,73 +86,89 @@ padding:10px;
 
 <div id="wheelOptions"></div>
 
-<button onclick="spin()">Gira</button>
+<button onclick="spinWheel()">Gira</button>
 
-<button onclick="show('home')">⬅️</button>
+<button onclick="goHome()">⬅️</button>
 </div>
 
-<script>
-let players=[];
-let ranking={};
-let gameRanking={};
-let selected=[];
-let options=[];
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-/* NAV /
+<script>
+/* FIREBASE /
+firebase.initializeApp({
+apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
+authDomain:"torneo-74c5b.firebaseapp.com",
+projectId:"torneo-74c5b"
+});
+
+const db = firebase.firestore();
+
+/ DATI /
+let selected=[];
+let wheelOptions=[];
+let games=["UNO","31","Saltacavallo","Dubito"];
+
+/ NAV /
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 
-if(id==="players") renderPlayers();
-if(id==="tournament") renderSelect();
-if(id==="ranking") renderRanking();
-if(id==="games") renderGames();
+if(id==="players") loadPlayers();
+if(id==="tournament") loadSelectPlayers();
+if(id==="ranking") loadRanking();
+if(id==="gamesRanking") loadGamesRanking();
 }
+
+function goHome(){show("home");}
 
 / GIOCATORI /
-function addPlayer(){
+async function addPlayer(){
 let n=document.getElementById("playerName").value;
 if(!n)return;
-players.push(n);
-renderPlayers();
+await db.collection("players").add({name:n});
+loadPlayers();
 }
 
-function renderPlayers(){
+async function loadPlayers(){
+let snap=await db.collection("players").get();
 let html="";
-players.forEach((p,i)=>{
-html+=<div class="box">${p} <button onclick="editPlayer(${i})">✏️</button> <button onclick="removePlayer(${i})">❌</button></div>;
+snap.forEach(d=>{
+html+=<div class="box">${d.data().name} <button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button> <button onclick="deleteItem('players','${d.id}')">❌</button> </div>;
 });
-playersList.innerHTML=html;
+document.getElementById("playersList").innerHTML=html;
 }
 
-function editPlayer(i){
-let n=prompt("Nome",players[i]);
-if(n) players[i]=n;
-renderPlayers();
+async function editPlayer(id,n){
+let nuovo=prompt("Nuovo nome",n);
+if(!nuovo)return;
+await db.collection("players").doc(id).update({name:nuovo});
+loadPlayers();
 }
 
-function removePlayer(i){
-players.splice(i,1);
-renderPlayers();
+async function deleteItem(col,id){
+await db.collection(col).doc(id).delete();
+show(col==="players"?"players":"home");
 }
 
 / SELECT /
-function renderSelect(){
+async function loadSelectPlayers(){
+selected=[];
+let snap=await db.collection("players").get();
 let html="";
-players.forEach(p=>{
-html+=<div><input type="checkbox" value="${p}" onchange="toggle(this)"> ${p}</div>;
+snap.forEach(d=>{
+let name=d.data().name;
+html+=<div><input type="checkbox" value="${name}" onchange="toggle(this)"> ${name}</div>;
 });
-selectPlayers.innerHTML=html;
+document.getElementById("selectPlayers").innerHTML=html;
 }
 
 function toggle(e){
-if(e.checked)selected.push(e.value);
-else selected=selected.filter(x=>x!==e.value);
+if(e.checked) selected.push(e.value);
+else selected=selected.filter(p=>p!==e.value);
 }
 
-/ GAMES /
-let games=["UNO","31"];
-
+/ GIOCHI /
 function prepareGames(){
 let html="";
 games.forEach(g=>{
@@ -162,65 +177,84 @@ selected.forEach(p=>{
 html+=${p} <input id="${g}_${p}" type="number" value="0"><br>;
 });
 });
-html+=<button onclick="finish()">Fine</button>;
-gamesArea.innerHTML=html;
+html+=<button onclick="finish()">Fine Torneo</button>;
+document.getElementById("gamesArea").innerHTML=html;
 }
 
-/ FINISH /
-function finish(){
-selected.forEach(p=>ranking[p]=(ranking[p]||0));
+/ FINE /
+async function finish(){
+let totals={};
+selected.forEach(p=>totals[p]=0);
 
-games.forEach(g=>{
-selected.forEach(p=>{
+for(let g of games){
+for(let p of selected){
 let val=parseInt(document.getElementById(g+"_"+p).value)||0;
+totals[p]+=val;
 
-ranking[p]+=val;
+await db.collection("gameRanking").add({game:g,player:p,points:val});
+}
+}
 
-if(!gameRanking[g])gameRanking[g]={};
-if(!gameRanking[g][p])gameRanking[g][p]=0;
+for(let p in totals){
+await db.collection("ranking").add({name:p,points:totals[p]});
+}
 
-gameRanking[g][p]+=val;
-});
-});
-
-alert("Fatto");
-show("home");
+alert("Torneo salvato");
+goHome();
 }
 
 / CLASSIFICA /
-function renderRanking(){
+async function loadRanking(){
+let snap=await db.collection("ranking").get();
 let html="";
-Object.entries(ranking).forEach(p=>{
-html+=<div class="box">${p[0]} ${p[1]}</div>;
+snap.forEach(d=>{
+html+=<div class="box">${d.data().name} ${d.data().points}</div>;
 });
-rankingList.innerHTML=html;
+document.getElementById("rankingList").innerHTML=html;
 }
 
-/ PER GIOCO /
-function renderGames(){
+/ PER GIOCO ORDINATO /
+async function loadGamesRanking(){
+let snap=await db.collection("gameRanking").get();
+
+let data={};
+
+snap.forEach(d=>{
+let g=d.data().game;
+let p=d.data().player;
+let pts=d.data().points;
+
+if(!data[g]) data[g]={};
+if(!data[g][p]) data[g][p]=0;
+
+data[g][p]+=pts;
+});
+
 let html="";
-for(let g in gameRanking){
+for(let g in data){
 html+=<div class="box"><h3>${g}</h3>;
-Object.entries(gameRanking[g]).forEach(p=>{
-html+=${p[0]} ${p[1]}<br>;
+let arr=Object.entries(data[g]).sort((a,b)=>b[1]-a[1]);
+arr.forEach(p=>{
+html+=${p[0]} - ${p[1]}<br>;
 });
 html+=</div>;
 }
-gamesList.innerHTML=html;
+
+document.getElementById("gamesRankingList").innerHTML=html;
 }
 
 / RUOTA */
 function addOption(){
-let v=wheelInput.value;
+let v=document.getElementById("wheelInput").value;
 if(!v)return;
-options.push(v);
-wheelOptions.innerHTML=options.join("<br>");
+wheelOptions.push(v);
+document.getElementById("wheelOptions").innerHTML=wheelOptions.join("<br>");
 }
 
-function spin(){
-if(options.length===0)return;
-let r=options[Math.floor(Math.random()*options.length)];
-alert(r);
+function spinWheel(){
+if(wheelOptions.length===0)return;
+let r=wheelOptions[Math.floor(Math.random()*wheelOptions.length)];
+alert("🎡 "+r);
 }
 </script>
 
