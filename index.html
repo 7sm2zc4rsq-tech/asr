@@ -29,7 +29,6 @@ width:100%;
 padding:10px;
 background:rgba(0,0,0,0.5);
 color:gold;
-font-size:22px;
 z-index:999;
 }
 
@@ -38,8 +37,8 @@ z-index:999;
 
 .menu-btn{
 width:100%;
-height:25vh;
-font-size:34px;
+height:20vh;
+font-size:28px;
 background:rgba(0,0,0,0.3);
 border:none;
 color:white;
@@ -247,28 +246,22 @@ goHome();
 
 /* FINISH */
 async function finish(){
-
 let totals={};
 selected.forEach(p=>totals[p]=0);
 
 for(let g of games){
 for(let p of selected){
-
 let val=parseInt(document.getElementById(`${g}_${p}`).value)||0;
-
 totals[p]+=val;
 
-/* classifica per gioco */
 await addDoc(collection(db,"gameRanking"),{
 game:g,
 player:p,
 points:val
 });
-
 }
 }
 
-/* classifica totale */
 for(let p in totals){
 await addDoc(collection(db,"ranking"),{
 name:p,
@@ -276,7 +269,6 @@ points:totals[p]
 });
 }
 
-/* palmares */
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 
 await addDoc(collection(db,"palmares"),{
@@ -285,7 +277,6 @@ points:totals[winner],
 date:new Date().toLocaleDateString()
 });
 
-/* storico */
 await addDoc(collection(db,"history"),{
 players:selected,
 scores:totals,
@@ -300,7 +291,12 @@ async function loadPalmares(){
 let snap=await getDocs(collection(db,"palmares"));
 palmaresList.innerHTML="";
 snap.forEach(d=>{
-palmaresList.innerHTML+=`<div class="box">${d.data().winner} (${d.data().points})</div>`;
+palmaresList.innerHTML+=`
+<div class="box">
+${d.data().winner} (${d.data().points})
+<button onclick="editValue('palmares','${d.id}',${d.data().points},'points')">✏️</button>
+<button onclick="deleteDoc(doc(db,'palmares','${d.id}'))">❌</button>
+</div>`;
 });
 }
 
@@ -309,17 +305,50 @@ async function loadRanking(){
 let snap=await getDocs(collection(db,"ranking"));
 rankingList.innerHTML="";
 snap.forEach(d=>{
-rankingList.innerHTML+=`<div class="box">${d.data().name} ${d.data().points}</div>`;
+rankingList.innerHTML+=`
+<div class="box">
+${d.data().name} ${d.data().points}
+<button onclick="editValue('ranking','${d.id}',${d.data().points},'points')">✏️</button>
+<button onclick="deleteDoc(doc(db,'ranking','${d.id}'))">❌</button>
+</div>`;
 });
 }
 
-/* CLASSIFICA PER GIOCO */
+/* CLASSIFICA PER GIOCO (DIVISA) */
 async function loadGamesRanking(){
-let snap=await getDocs(collection(db,"gameRanking"));
-gamesRankingList.innerHTML="";
+
+let snap = await getDocs(collection(db,"gameRanking"));
+
+let data = {};
+
 snap.forEach(d=>{
-gamesRankingList.innerHTML+=`<div class="box">${d.data().game} - ${d.data().player} ${d.data().points}</div>`;
+let g=d.data().game;
+let p=d.data().player;
+let pts=d.data().points;
+
+if(!data[g]) data[g]={};
+if(!data[g][p]) data[g][p]=0;
+
+data[g][p]+=pts;
 });
+
+let html="";
+
+for(let g in data){
+
+html+=`<div class="box"><h2>${g}</h2>`;
+
+let players=Object.entries(data[g]);
+players.sort((a,b)=>b[1]-a[1]);
+
+players.forEach(p=>{
+html+=`${p[0]} - ${p[1]} pt<br>`;
+});
+
+html+=`</div>`;
+}
+
+gamesRankingList.innerHTML=html;
 }
 
 /* STORICO */
@@ -329,6 +358,13 @@ historyList.innerHTML="";
 snap.forEach(d=>{
 historyList.innerHTML+=`<div class="box">🏆 ${d.data().winner}</div>`;
 });
+}
+
+/* EDIT GENERICO */
+async function editValue(col,id,current,field){
+let n=prompt("Modifica",current);
+if(!n)return;
+await updateDoc(doc(db,col,id),{[field]:parseInt(n)||n});
 }
 
 window.show=show;
