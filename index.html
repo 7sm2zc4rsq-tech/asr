@@ -143,20 +143,18 @@ color:gold;
 <button onclick="goHome()">⬅️</button>
 </div>
 
-<!-- FIREBASE COMPAT (NO BUG CLICK) -->
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-const app = firebase.initializeApp({
+const app=firebase.initializeApp({
 apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
 authDomain:"torneo-74c5b.firebaseapp.com",
 projectId:"torneo-74c5b"
 });
 
-const db = firebase.firestore();
+const db=firebase.firestore();
 
 let games=["UNO","31","Saltacavallo","Fr0cio","Dubito","Las Vegas"];
 let selected=[];
@@ -193,15 +191,17 @@ playersList.innerHTML+=`
 </div>`;
 });
 }
-async function deleteItem(col,id){
-await db.collection(col).doc(id).delete();
-show(col==="players"?"players":col==="palmares"?"palmares":col==="ranking"?"ranking":col==="gameRanking"?"gamesRanking":"home");
-}
 async function editPlayer(id,n){
 let nuovo=prompt("Nuovo nome",n);
 if(!nuovo)return;
 await db.collection("players").doc(id).update({name:nuovo});
 loadPlayers();
+}
+
+/* DELETE GENERICO */
+async function deleteItem(col,id){
+await db.collection(col).doc(id).delete();
+show(col==="players"?"players":col==="palmares"?"palmares":col==="ranking"?"ranking":col==="gameRanking"?"gamesRanking":col==="history"?"history":"home");
 }
 
 /* SELECT */
@@ -292,6 +292,14 @@ winner:winner
 slot(winner);
 }
 
+/* EDIT GENERICO */
+async function editValue(col,id,current,field){
+let n=prompt("Modifica",current);
+if(!n)return;
+await db.collection(col).doc(id).update({[field]:parseInt(n)||n});
+show(col==="ranking"?"ranking":col==="palmares"?"palmares":col==="gameRanking"?"gamesRanking":"history");
+}
+
 /* PALMARES */
 async function loadPalmares(){
 let snap=await db.collection("palmares").get();
@@ -300,7 +308,7 @@ snap.forEach(d=>{
 palmaresList.innerHTML+=`
 <div class="box">
 ${d.data().winner} (${d.data().points})
-<button onclick="editValue('palmares','${d.id}',${d.data().points})">✏️</button>
+<button onclick="editValue('palmares','${d.id}',${d.data().points},'points')">✏️</button>
 <button onclick="deleteItem('palmares','${d.id}')">❌</button>
 </div>`;
 });
@@ -314,57 +322,44 @@ snap.forEach(d=>{
 rankingList.innerHTML+=`
 <div class="box">
 ${d.data().name} ${d.data().points}
-<button onclick="editValue('ranking','${d.id}',${d.data().points})">✏️</button>
+<button onclick="editValue('ranking','${d.id}',${d.data().points},'points')">✏️</button>
 <button onclick="deleteItem('ranking','${d.id}')">❌</button>
 </div>`;
 });
 }
 
-/* CLASSIFICA PER GIOCO */
+/* PER GIOCO EDITABILE */
 async function loadGamesRanking(){
 let snap=await db.collection("gameRanking").get();
-let data={};
-
-snap.forEach(d=>{
-let g=d.data().game;
-let p=d.data().player;
-let pts=d.data().points;
-
-if(!data[g])data[g]={};
-if(!data[g][p])data[g][p]=0;
-
-data[g][p]+=pts;
-});
 
 let html="";
-for(let g in data){
-html+=`<div class="box"><h2>${g}</h2>`;
-let players=Object.entries(data[g]).sort((a,b)=>b[1]-a[1]);
-players.forEach(p=>{
-html+=`${p[0]} - ${p[1]} pt<br>`;
+snap.forEach(d=>{
+html+=`
+<div class="box">
+${d.data().game} - ${d.data().player} ${d.data().points}
+<button onclick="editValue('gameRanking','${d.id}',${d.data().points},'points')">✏️</button>
+<button onclick="deleteItem('gameRanking','${d.id}')">❌</button>
+</div>`;
 });
-html+=`</div>`;
-}
+
 gamesRankingList.innerHTML=html;
 }
 
-/* STORICO */
+/* STORICO EDITABILE */
 async function loadHistory(){
 let snap=await db.collection("history").get();
 historyList.innerHTML="";
 snap.forEach(d=>{
-historyList.innerHTML+=`<div class="box">🏆 ${d.data().winner}</div>`;
+historyList.innerHTML+=`
+<div class="box">
+🏆 ${d.data().winner}
+<button onclick="editValue('history','${d.id}','${d.data().winner}','winner')">✏️</button>
+<button onclick="deleteItem('history','${d.id}')">❌</button>
+</div>`;
 });
-}
-
-/* EDIT */
-async function editValue(col,id,current){
-let n=prompt("Modifica",current);
-if(!n)return;
-await db.collection(col).doc(id).update({points:parseInt(n)});
-show(col==="ranking"?"ranking":"palmares");
 }
 </script>
 
 </body>
 </html>
+
