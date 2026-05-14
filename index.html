@@ -140,7 +140,7 @@ margin:auto;
 <div id="wheel"></div>
 <button onclick="spin()">Gira</button>
 <div id="wheelResult"></div>
-<button onclick="spin()">Rigioca</button>
+<button onclick="resetWheel()">Rigioca</button>
 <button onclick="show('home')">⬅️</button>
 </div>
 
@@ -234,7 +234,6 @@ html+=`<button onclick="finish()">Fine Torneo</button>`;
 gamesArea.innerHTML=html;
 }
 
-/* FINE TORNEO */
 async function finish(){
 let totals={};
 selected.forEach(p=>totals[p]=0);
@@ -283,9 +282,15 @@ data[d.data().name]=(data[d.data().name]||0)+1;
 let html="";
 Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
 html+=`<div class="box">${p[0]} 🏆 ${p[1]}
+<button onclick="editPalmares('${p[0]}',${p[1]})">✏️</button>
 <button onclick="deleteByName('palmares','${p[0]}')">❌</button></div>`;
 });
 palmaresList.innerHTML=html;
+}
+
+function editPalmares(name,count){
+let n=prompt("Nuovo valore",count);
+if(!n)return;
 }
 
 /* CLASSIFICA */
@@ -300,9 +305,14 @@ data[d.data().name]=(data[d.data().name]||0)+d.data().points;
 let html="";
 Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
 html+=`<div class="box">${p[0]} ${p[1]}
+<button onclick="editRanking('${p[0]}',${p[1]})">✏️</button>
 <button onclick="deleteByName('ranking','${p[0]}')">❌</button></div>`;
 });
 rankingList.innerHTML=html;
+}
+
+function editRanking(name,pts){
+let n=prompt("Punti",pts);
 }
 
 /* PER GIOCO */
@@ -333,7 +343,7 @@ html+="</div>";
 gamesList.innerHTML=html;
 }
 
-/* DELETE BY NAME */
+/* DELETE */
 async function deleteByName(col,name){
 let snap=await db.collection(col).get();
 snap.forEach(async d=>{
@@ -344,7 +354,6 @@ await db.collection(col).doc(d.id).delete();
 show(col);
 }
 
-/* DELETE GAME */
 async function deleteGame(g,p){
 let snap=await db.collection("gameRanking").get();
 snap.forEach(async d=>{
@@ -369,7 +378,12 @@ wheel.style.background=`conic-gradient(${grad.slice(0,-1)})`;
 }
 drawWheel();
 
+let spinning=false;
+
 function spin(){
+if(spinning)return;
+spinning=true;
+
 let step=360/options.length;
 let index=Math.floor(Math.random()*options.length);
 let deg=360*5 + (360 - index*step - step/2);
@@ -378,7 +392,14 @@ wheel.style.transform=`rotate(${deg}deg)`;
 
 setTimeout(()=>{
 wheelResult.innerHTML="🎯 "+options[index]+" ("+colors[index]+")";
+spinning=false;
 },4000);
+}
+
+function resetWheel(){
+wheel.style.transform="rotate(0deg)";
+wheelResult.innerHTML="";
+spinning=false;
 }
 </script>
 
