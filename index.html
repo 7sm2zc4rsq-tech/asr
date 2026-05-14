@@ -27,9 +27,9 @@ position:fixed;
 top:0;
 width:100%;
 padding:10px;
-font-size:24px;
-background:rgba(0,0,0,0.4);
+background:rgba(0,0,0,0.5);
 color:gold;
+font-size:22px;
 z-index:999;
 }
 
@@ -38,8 +38,8 @@ z-index:999;
 
 .menu-btn{
 width:100%;
-height:33vh;
-font-size:40px;
+height:25vh;
+font-size:34px;
 background:rgba(0,0,0,0.3);
 border:none;
 color:white;
@@ -88,6 +88,7 @@ color:gold;
 <button class="menu-btn" onclick="show('players')">👤 GIOCATORI</button>
 <button class="menu-btn" onclick="show('palmares')">🏆 PALMARES</button>
 <button class="menu-btn" onclick="show('ranking')">📊 CLASSIFICA</button>
+<button class="menu-btn" onclick="show('gamesRanking')">🎯 PER GIOCO</button>
 <button class="menu-btn" onclick="show('history')">📜 STORICO</button>
 </div>
 
@@ -117,10 +118,18 @@ color:gold;
 <button onclick="goHome()">⬅️</button>
 </div>
 
+<!-- CLASSIFICA GIOCHI -->
+
+<div id="gamesRanking" class="screen">
+<h2>Classifica per Gioco</h2>
+<div id="gamesRankingList"></div>
+<button onclick="goHome()">⬅️</button>
+</div>
+
 <!-- STORICO -->
 
 <div id="history" class="screen">
-<h2>Storico Tornei</h2>
+<h2>Storico</h2>
 <div id="historyList"></div>
 <button onclick="goHome()">⬅️</button>
 </div>
@@ -140,7 +149,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app=initializeApp({
-apiKey:"AIza...",
+apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
 authDomain:"torneo-74c5b.firebaseapp.com",
 projectId:"torneo-74c5b"
 });
@@ -158,6 +167,7 @@ document.getElementById(id).classList.add("active");
 if(id==="players")loadPlayers();
 if(id==="palmares")loadPalmares();
 if(id==="ranking")loadRanking();
+if(id==="gamesRanking")loadGamesRanking();
 if(id==="history")loadHistory();
 if(id==="tournament")loadSelectPlayers();
 }
@@ -207,10 +217,13 @@ else selected=selected.filter(p=>p!==e.value);
 /* GAMES */
 function prepareGames(){
 gamesArea.innerHTML="";
+games.forEach(g=>{
+gamesArea.innerHTML+=`<div class="box"><h3>${g}</h3></div>`;
 selected.forEach(p=>{
-gamesArea.innerHTML+=`<div class="box">${p}<input id="${p}" type="number" value="0"></div>`;
+gamesArea.innerHTML+=`<div class="box">${p} <input id="${g}_${p}" type="number" value="0"></div>`;
 });
-gamesArea.innerHTML+=`<button onclick="finish()">Fine</button>`;
+});
+gamesArea.innerHTML+=`<button onclick="finish()">🏆 Fine</button>`;
 }
 
 /* SLOT */
@@ -220,12 +233,12 @@ let i=0;
 let int=setInterval(()=>{
 slotText.innerText=selected[Math.floor(Math.random()*selected.length)];
 i++;
-if(i>30){
+if(i>40){
 clearInterval(int);
 slotText.innerText=w;
 setTimeout(()=>{
 slotOverlay.style.display="none";
-alert("Vincitore: "+w);
+alert("🏆 Vincitore: "+w);
 goHome();
 },1500);
 }
@@ -234,25 +247,43 @@ goHome();
 
 /* FINISH */
 async function finish(){
+
 let totals={};
-selected.forEach(p=>totals[p]=parseInt(document.getElementById(p).value)||0);
+selected.forEach(p=>totals[p]=0);
 
-let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+for(let g of games){
+for(let p of selected){
 
-/* salva palmares */
-await addDoc(collection(db,"palmares"),{
-winner: winner,
-points: totals[winner],
-date: new Date().toLocaleDateString()
+let val=parseInt(document.getElementById(`${g}_${p}`).value)||0;
+
+totals[p]+=val;
+
+/* classifica per gioco */
+await addDoc(collection(db,"gameRanking"),{
+game:g,
+player:p,
+points:val
 });
 
-/* aggiorna classifica */
+}
+}
+
+/* classifica totale */
 for(let p in totals){
-let ref=doc(db,"ranking",p);
-await updateDoc(ref,{points: totals[p]}).catch(async()=>{
-await addDoc(collection(db,"ranking"),{name:p,points:totals[p]});
+await addDoc(collection(db,"ranking"),{
+name:p,
+points:totals[p]
 });
 }
+
+/* palmares */
+let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+
+await addDoc(collection(db,"palmares"),{
+winner:winner,
+points:totals[winner],
+date:new Date().toLocaleDateString()
+});
 
 /* storico */
 await addDoc(collection(db,"history"),{
@@ -269,7 +300,7 @@ async function loadPalmares(){
 let snap=await getDocs(collection(db,"palmares"));
 palmaresList.innerHTML="";
 snap.forEach(d=>{
-palmaresList.innerHTML+=`<div class="box">${d.data().winner} ${d.data().points}</div>`;
+palmaresList.innerHTML+=`<div class="box">${d.data().winner} (${d.data().points})</div>`;
 });
 }
 
@@ -282,6 +313,15 @@ rankingList.innerHTML+=`<div class="box">${d.data().name} ${d.data().points}</di
 });
 }
 
+/* CLASSIFICA PER GIOCO */
+async function loadGamesRanking(){
+let snap=await getDocs(collection(db,"gameRanking"));
+gamesRankingList.innerHTML="";
+snap.forEach(d=>{
+gamesRankingList.innerHTML+=`<div class="box">${d.data().game} - ${d.data().player} ${d.data().points}</div>`;
+});
+}
+
 /* STORICO */
 async function loadHistory(){
 let snap=await getDocs(collection(db,"history"));
@@ -291,7 +331,6 @@ historyList.innerHTML+=`<div class="box">🏆 ${d.data().winner}</div>`;
 });
 }
 
-/* GLOBAL */
 window.show=show;
 window.goHome=goHome;
 window.addPlayer=addPlayer;
