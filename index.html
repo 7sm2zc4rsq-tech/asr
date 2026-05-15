@@ -274,7 +274,8 @@ const db=firebase.firestore();
 
 let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected=[];
-let currentType="";  
+let currentType="";
+let currentGame="";  
 
 /* NAV */
 function show(id){
@@ -441,7 +442,8 @@ data[g][p]=(data[g][p]||0)+pts;
 
 let html="";
 for(let g of games){
-html+=`<div class="box"><h3>${g}</h3>`;
+html+=`<div class="box">
+<h3>${g} <button onclick="openGamePopup('${g}')">➕</button></h3>`;
 if(data[g]){
 Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
 html+=`${p[0]} ${p[1]}
@@ -479,7 +481,11 @@ function openPopup(type){
 currentType = type;
 document.getElementById("popup").style.display = "block";
 }
-
+function openGamePopup(game){
+currentType = "games";
+currentGame = game;
+document.getElementById("popup").style.display = "block";
+}
 function closePopup(){
 document.getElementById("popup").style.display = "none";
 document.getElementById("popupName").value="";
@@ -505,14 +511,12 @@ loadRanking();
 
 if(currentType==="games"){
 
-let game = prompt("Gioco (UNO,31,Saltacavallo,Fr0c10,Dubito,Las Vegas)");
-if(!game) return;
-
 await db.collection("gameRanking").add({
 player:name,
-game:game,
+game:currentGame,
 points:pts
 });
+
 loadGames();
 }
 
