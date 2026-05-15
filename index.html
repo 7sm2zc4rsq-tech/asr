@@ -11,6 +11,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
 <style>
+.reel{
+width:120px;
+height:120px;
+background:black;
+border:3px solid gold;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+color:white;
+box-shadow:0 0 15px gold;
+}  
 body{
 margin:0;
 font-family:'Cinzel',serif;
@@ -109,8 +122,12 @@ margin:auto;
 <div id="selectPlayers"></div>
 <button onclick="startGames()">Inizia</button>
 <div id="gamesArea"></div>
-<div id="slotContainer" style="display:none;">
-  <div id="slotBox" style="font-size:40px; margin-top:20px;"></div>
+<div id="slotContainer" style="display:none; margin-top:20px;">
+  <div style="display:flex; justify-content:center; gap:10px;">
+    <div class="reel" id="reel1"></div>
+    <div class="reel" id="reel2"></div>
+    <div class="reel" id="reel3"></div>
+  </div>
 </div>  
 <button onclick="show('home')">⬅️</button>
 </div>
@@ -257,50 +274,7 @@ let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 await db.collection("palmares").add({name:winner});
 
 /* animazione */
-startSlotAnimation(winner);
-function startSlotAnimation(winner){
-
-document.getElementById("slotContainer").style.display="block";
-
-let names = selected;
-let slot = document.getElementById("slotBox");
-
-let speed = 80;
-let cycles = 0;
-
-let interval = setInterval(()=>{
-
-// nome casuale durante animazione
-let randomName = names[Math.floor(Math.random()*names.length)];
-slot.innerHTML = randomName;
-
-cycles++;
-
-if(cycles > 40){ // durata animazione
-
-clearInterval(interval);
-
-// FERMA sul vincitore
-slot.innerHTML = "🏆 " + winner;
-
-// alert vittoria
-setTimeout(()=>{
-alert("🏆 HA VINTO: " + winner + " 🎉");
-},500);
-
-// bottone nuovo torneo
-setTimeout(()=>{
-document.getElementById("gamesArea").innerHTML = `
-<h2>🏆 ${winner}</h2>
-<button onclick="resetTorneo()">Nuovo Torneo</button>
-`;
-document.getElementById("slotContainer").style.display="none";
-},1500);
-
-}
-
-}, speed);
-}  
+startSlotPro(winner);  
 }
 
 function resetTorneo(){
@@ -438,6 +412,68 @@ function resetWheel(){
 wheel.style.transform="rotate(0deg)";
 wheelResult.innerHTML="";
 spinning=false;
+}
+function startSlotPro(winner){
+
+document.getElementById("slotContainer").style.display="block";
+
+let reels = [
+document.getElementById("reel1"),
+document.getElementById("reel2"),
+document.getElementById("reel3")
+];
+
+let names = selected;
+
+function spinReel(reel, delay, stopName){
+
+let speed = 50;
+let count = 0;
+
+let interval = setInterval(()=>{
+
+let random = names[Math.floor(Math.random()*names.length)];
+reel.innerHTML = random;
+
+count++;
+
+if(count > delay){
+
+clearInterval(interval);
+
+let slow = setInterval(()=>{
+reel.innerHTML = names[Math.floor(Math.random()*names.length)];
+},120);
+
+setTimeout(()=>{
+clearInterval(slow);
+reel.innerHTML = stopName;
+},500);
+
+}
+
+}, speed);
+}
+
+// 3 rulli con stop progressivo
+spinReel(reels[0], 20, winner);
+spinReel(reels[1], 30, winner);
+spinReel(reels[2], 40, winner);
+
+// finale
+setTimeout(()=>{
+
+alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
+
+document.getElementById("gamesArea").innerHTML = `
+<h2>🏆 ${winner}</h2>
+<button onclick="resetTorneo()">Nuovo Torneo</button>
+`;
+
+document.getElementById("slotContainer").style.display="none";
+
+}, 4000);
+
 }
 </script>
 
