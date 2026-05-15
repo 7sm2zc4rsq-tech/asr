@@ -85,6 +85,9 @@ border-right:15px solid transparent;
 border-bottom:30px solid white;
 margin:auto;
 }
+#wheel{
+position:relative;
+}  
 </style>
 
 </head>
@@ -376,38 +379,85 @@ await db.collection("gameRanking").doc(d.id).delete();
 loadGames();
 }
 
-/* RUOTA */
-let options=["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-let colors=["red","blue","green","purple","orange"];
+/* RUOTA PRO */
 
-function drawWheel(){
-let step=360/options.length;
-let grad="";
-options.forEach((o,i)=>{
-grad+=`${colors[i]} ${i*step}deg ${(i+1)*step}deg,`;
-});
-wheel.style.background=`conic-gradient(${grad.slice(0,-1)})`;
-}
-drawWheel();
+let originalOptions=["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+let originalColors=["red","blue","green","purple","orange"];
+
+let options=[...originalOptions];
+let colors=[...originalColors];
 
 let spinning=false;
 
+/* DISEGNA RUOTA CON NOMI */
+function drawWheel(){
+let step=360/options.length;
+let gradient="";
+options.forEach((o,i)=>{
+gradient+=`${colors[i]} ${i*step}deg ${(i+1)*step}deg,`;
+});
+wheel.style.background=`conic-gradient(${gradient.slice(0,-1)})`;
+
+/* scritte sopra la ruota */
+wheel.innerHTML="";
+options.forEach((o,i)=>{
+let angle=(i*360/options.length)+(180/options.length);
+
+let label=document.createElement("div");
+label.innerText=o;
+label.style.position="absolute";
+label.style.transform=`rotate(${angle}deg) translate(100px) rotate(-${angle}deg)`;
+label.style.transformOrigin="center";
+label.style.fontSize="12px";
+
+wheel.appendChild(label);
+});
+}
+
+drawWheel();
+
+/* SPIN */
 function spin(){
-if(spinning)return;
+
+if(spinning || options.length===0)return;
 spinning=true;
 
 let step=360/options.length;
 let index=Math.floor(Math.random()*options.length);
-let deg=360*5 + (360 - index*step - step/2);
+
+/* calcolo perfetto per puntatore */
+let deg=360*5 + (360 - (index*step + step/2));
 
 wheel.style.transform=`rotate(${deg}deg)`;
 
 setTimeout(()=>{
-wheelResult.innerHTML="🎯 "+options[index]+" ("+colors[index]+")";
+
+let result=options[index];
+
+wheelResult.innerHTML="🎯 "+result;
+
+/* RIMUOVE OPZIONE USCITA */
+options.splice(index,1);
+colors.splice(index,1);
+
 spinning=false;
+
+/* se finite → reset */
+if(options.length===0){
+setTimeout(()=>{
+options=[...originalOptions];
+colors=[...originalColors];
+drawWheel();
+alert("🔁 Tutte le opzioni usate, reset!");
+},1000);
+}else{
+drawWheel();
+}
+
 },4000);
 }
 
+/* RESET MANUALE */
 function resetWheel(){
 wheel.style.transform="rotate(0deg)";
 wheelResult.innerHTML="";
