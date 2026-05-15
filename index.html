@@ -190,7 +190,7 @@ position:relative;
 <div id="palmares" class="screen">
 <div id="palmaresList"></div>
 
-<button onclick="addPalmares()">➕</button>
+<button onclick="openPopup('palmares')">➕</button>
 
 <button onclick="show('home')">⬅️</button>
 </div>
@@ -200,7 +200,7 @@ position:relative;
 <div id="ranking" class="screen">
 <div id="rankingList"></div>
 
-<button onclick="addRanking()">➕</button>
+<button onclick="openPopup('ranking')">➕</button>
 
 <button onclick="show('home')">⬅️</button>
 </div>
@@ -210,7 +210,7 @@ position:relative;
 <div id="games" class="screen">
 <div id="gamesList"></div>
 
-<button onclick="addGameScore()">➕</button>
+<button onclick="openPopup('games')">➕</button>
 
 <button onclick="show('home')">⬅️</button>
 </div>
@@ -243,6 +243,7 @@ const db=firebase.firestore();
 
 let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected=[];
+let currentType="";  
 
 /* NAV */
 function show(id){
@@ -441,6 +442,51 @@ await db.collection("gameRanking").doc(d.id).delete();
 });
 loadGames();
 }
+/* 🔥 POPUP SYSTEM */
+
+function openPopup(type){
+currentType = type;
+document.getElementById("popup").style.display = "block";
+}
+
+function closePopup(){
+document.getElementById("popup").style.display = "none";
+document.getElementById("popupName").value="";
+document.getElementById("popupPoints").value="";
+}
+
+async function confirmAdd(){
+
+let name = document.getElementById("popupName").value;
+let pts = parseInt(document.getElementById("popupPoints").value) || 0;
+
+if(!name) return;
+
+if(currentType==="palmares"){
+await db.collection("palmares").add({name:name});
+loadPalmares();
+}
+
+if(currentType==="ranking"){
+await db.collection("ranking").add({name:name, points:pts});
+loadRanking();
+}
+
+if(currentType==="games"){
+
+let game = prompt("Gioco (UNO,31,Saltacavallo,Fr0c10,Dubito,Las Vegas)");
+if(!game) return;
+
+await db.collection("gameRanking").add({
+player:name,
+game:game,
+points:pts
+});
+loadGames();
+}
+
+closePopup();
+}  
 
 /* RUOTA PRO */
 
@@ -618,6 +664,37 @@ document.getElementById("slotContainer").style.display="none";
 }, 4000);
 
 }
+<div id="popup" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+z-index:999;
+">
+
+  <div style="
+  background:#111;
+  border:2px solid orange;
+  border-radius:20px;
+  padding:20px;
+  width:300px;
+  margin:100px auto;
+  box-shadow:0 0 30px orange;
+  ">
+
+    <h2>AGGIUNGI</h2>
+
+    <input id="popupName" placeholder="Nome"><br><br>
+    <input id="popupPoints" placeholder="Punti"><br><br>
+
+    <button onclick="confirmAdd()">SALVA</button>
+    <button onclick="closePopup()">CHIUDI</button>
+
+  </div>
+</div>  
 </script>
 
 </body>
