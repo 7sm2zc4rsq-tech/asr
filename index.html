@@ -401,14 +401,27 @@ wheel.style.background=`conic-gradient(${gradient.slice(0,-1)})`;
 /* scritte sopra la ruota */
 wheel.innerHTML="";
 options.forEach((o,i)=>{
-let angle=(i*360/options.length)+(180/options.length);
+let angle = (i * 360 / options.length) + (360 / options.length / 2);
 
-let label=document.createElement("div");
-label.innerText=o;
-label.style.position="absolute";
-label.style.transform=`rotate(${angle}deg) translate(100px) rotate(-${angle}deg)`;
-label.style.transformOrigin="center";
-label.style.fontSize="12px";
+let label = document.createElement("div");
+label.innerText = o;
+
+label.style.position = "absolute";
+label.style.left = "50%";
+label.style.top = "50%";
+
+label.style.transform = `
+rotate(${angle}deg)
+translate(80px)
+rotate(-${angle}deg)
+`;
+
+label.style.transformOrigin = "0 0";
+label.style.width = "80px";
+label.style.textAlign = "center";
+label.style.fontSize = "13px";
+label.style.fontWeight = "bold";
+label.style.textShadow = "0 0 5px black";
 
 wheel.appendChild(label);
 });
