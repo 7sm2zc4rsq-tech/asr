@@ -163,7 +163,7 @@ position:relative;
 <div id="wheel"></div>
 <button onclick="spin()">Gira</button>
 <div id="wheelResult"></div>
-<button onclick="resetWheel()">Rigioca</button>
+<button onclick="resetWheel()">Reset</button>
 <button onclick="show('home')">⬅️</button>
 </div>
 
@@ -401,7 +401,8 @@ wheel.style.background=`conic-gradient(${gradient.slice(0,-1)})`;
 /* scritte sopra la ruota */
 wheel.innerHTML="";
 options.forEach((o,i)=>{
-let angle = (i * 360 / options.length) + (360 / options.length / 2);
+let slice = 360 / options.length;
+let angle = i * slice;
 
 let label = document.createElement("div");
 label.innerText = o;
@@ -411,13 +412,13 @@ label.style.left = "50%";
 label.style.top = "50%";
 
 label.style.transform = `
-rotate(${angle}deg)
-translate(80px)
-rotate(-${angle}deg)
+rotate(${angle + slice/2}deg)
+translate(-50%, -50%)
+translateY(-90px)
+rotate(-${angle + slice/2}deg)
 `;
 
-label.style.transformOrigin = "0 0";
-label.style.width = "80px";
+label.style.width = "100px";
 label.style.textAlign = "center";
 label.style.fontSize = "13px";
 label.style.fontWeight = "bold";
@@ -472,9 +473,16 @@ drawWheel();
 
 /* RESET MANUALE */
 function resetWheel(){
+
 wheel.style.transform="rotate(0deg)";
 wheelResult.innerHTML="";
 spinning=false;
+
+/* RESET COMPLETO */
+options=[...originalOptions];
+colors=[...originalColors];
+
+drawWheel();
 }
 function startSlotPro(winner){
 
