@@ -138,6 +138,16 @@ margin:auto;
 #wheel{
 position:relative;
 }  
+.playerBox{
+cursor:pointer;
+transition:0.2s;
+}
+
+.playerBox:hover{
+background:rgba(255,100,0,0.3);
+transform:scale(1.05);
+box-shadow:0 0 15px orange;
+}  
 </style>
 
 </head>
@@ -167,6 +177,13 @@ position:relative;
 <div id="playersList"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
+<div id="playerPage" class="screen">
+<h2 id="playerTitle"></h2>
+
+<div id="playerStats"></div>
+
+<button onclick="show('players')">⬅️</button>
+</div>  
 
 <!-- TORNEO -->
 
@@ -301,9 +318,11 @@ async function loadPlayers(){
 let snap=await db.collection("players").get();
 let html="";
 snap.forEach(d=>{
-html+=`<div class="box">${d.data().name}
-<button onclick="editPlayer('${d.id}','${d.data().name}')">✏️</button>
-<button onclick="deleteDoc('players','${d.id}')">❌</button></div>`;
+html+=`<div class="box playerBox" onclick="openPlayer('${d.data().name}')">
+${d.data().name}
+<button onclick="event.stopPropagation(); editPlayer('${d.id}','${d.data().name}')">✏️</button>
+
+<button onclick="event.stopPropagation(); deleteDoc('players','${d.id}')">❌</button></div>`;
 });
 playersList.innerHTML=html;
 }
@@ -314,6 +333,61 @@ if(!nuovo)return;
 await db.collection("players").doc(id).update({name:nuovo});
 loadPlayers();
 }
+async function openPlayer(name){
+
+show("playerPage");
+
+document.getElementById("playerTitle").innerHTML = "👤 " + name;
+
+/* PALMARES */
+let palmaresSnap = await db.collection("palmares").get();
+let wins = 0;
+
+palmaresSnap.forEach(d=>{
+if(d.data().name === name) wins++;
+});
+
+/* PUNTI TOTALI */
+let rankingSnap = await db.collection("ranking").get();
+let totalPoints = 0;
+
+rankingSnap.forEach(d=>{
+if(d.data().name === name){
+totalPoints += d.data().points;
+}
+});
+
+/* PUNTI PER GIOCO */
+let gameSnap = await db.collection("gameRanking").get();
+let gameStats = {};
+
+gameSnap.forEach(d=>{
+if(d.data().player === name){
+let g = d.data().game;
+let pts = d.data().points;
+
+if(!gameStats[g]) gameStats[g]=0;
+gameStats[g]+=pts;
+}
+});
+
+/* HTML */
+let html = `
+<div class="box">🏆 Titoli vinti: ${wins}</div>
+<div class="box">⭐ Punti totali: ${totalPoints}</div>
+`;
+
+html += `<div class="box"><h3>🎮 Per gioco</h3>`;
+
+for(let g in gameStats){
+html += `${g}: ${gameStats[g]}<br>`;
+}
+
+html += `</div>`;
+
+document.getElementById("playerStats").innerHTML = html;
+
+}  
 
 /* DELETE */
 async function deleteDoc(col,id){
