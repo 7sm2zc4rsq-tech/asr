@@ -109,6 +109,9 @@ margin:auto;
 <div id="selectPlayers"></div>
 <button onclick="startGames()">Inizia</button>
 <div id="gamesArea"></div>
+<div id="slotContainer" style="display:none;">
+  <div id="slotBox" style="font-size:40px; margin-top:20px;"></div>
+</div>  
 <button onclick="show('home')">⬅️</button>
 </div>
 
@@ -254,15 +257,50 @@ let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 await db.collection("palmares").add({name:winner});
 
 /* animazione */
-let i=0;
-let int=setInterval(()=>{
-gamesArea.innerHTML="<h1>"+Math.random().toString(36).substring(2,6)+"</h1>";
-i++;
-if(i>15){
-clearInterval(int);
-gamesArea.innerHTML="<h1>🏆 "+winner+"</h1><button onclick='resetTorneo()'>Nuovo Torneo</button>";
+startSlotAnimation(winner);
+function startSlotAnimation(winner){
+
+document.getElementById("slotContainer").style.display="block";
+
+let names = selected;
+let slot = document.getElementById("slotBox");
+
+let speed = 80;
+let cycles = 0;
+
+let interval = setInterval(()=>{
+
+// nome casuale durante animazione
+let randomName = names[Math.floor(Math.random()*names.length)];
+slot.innerHTML = randomName;
+
+cycles++;
+
+if(cycles > 40){ // durata animazione
+
+clearInterval(interval);
+
+// FERMA sul vincitore
+slot.innerHTML = "🏆 " + winner;
+
+// alert vittoria
+setTimeout(()=>{
+alert("🏆 HA VINTO: " + winner + " 🎉");
+},500);
+
+// bottone nuovo torneo
+setTimeout(()=>{
+document.getElementById("gamesArea").innerHTML = `
+<h2>🏆 ${winner}</h2>
+<button onclick="resetTorneo()">Nuovo Torneo</button>
+`;
+document.getElementById("slotContainer").style.display="none";
+},1500);
+
 }
-},100);
+
+}, speed);
+}  
 }
 
 function resetTorneo(){
