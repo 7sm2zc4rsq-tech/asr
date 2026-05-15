@@ -442,7 +442,13 @@ let index=Math.floor(Math.random()*options.length);
 /* calcolo perfetto per puntatore */
 let deg=360*5 + (360 - (index*step + step/2));
 
+wheel.style.transition="none";
+wheel.style.transform="rotate(0deg)";
+
+setTimeout(()=>{
+wheel.style.transition="transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67)";
 wheel.style.transform=`rotate(${deg}deg)`;
+},50);
 
 setTimeout(()=>{
 
