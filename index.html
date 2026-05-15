@@ -327,7 +327,11 @@ let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 await db.collection("palmares").add({name:winner});
 
 /* animazione */
-startSlotPro(winner);  
+// sblocca audio
+let audio = document.getElementById("winSound");
+audio.play().then(()=> audio.pause()).catch(()=>{});
+
+startSlotPro(winner);
 }
 
 function resetTorneo(){
@@ -593,7 +597,6 @@ setTimeout(()=>{
 let audio = document.getElementById("winSound");
 audio.currentTime = 0;
 audio.play().catch(()=>{});
-
 alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
 
 document.getElementById("gamesArea").innerHTML = `
