@@ -218,7 +218,7 @@ position:relative;
 </div>
 
 </div>
-
+<audio id="winSound" src="win.mp3"></audio>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -589,6 +589,10 @@ spinReel(reels[2], 40, winner);
 
 // finale
 setTimeout(()=>{
+
+let audio = document.getElementById("winSound");
+audio.currentTime = 0;
+audio.play().catch(()=>{});
 
 alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
 
