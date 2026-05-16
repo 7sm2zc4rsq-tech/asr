@@ -236,34 +236,27 @@ box-shadow:0 0 15px orange;
 
 <div id="wheelPage" class="screen">
 
-<div id="picker" style="
-overflow:hidden;
-width:100%;
-max-width:400px;
-margin:auto;
-border:2px solid orange;
+<div style="margin-top:30px;">
+
+<div id="slot" style="
+font-size:40px;
+font-weight:bold;
+padding:40px;
+border:3px solid gold;
 border-radius:20px;
-padding:10px;
-position:relative;
+width:250px;
+margin:auto;
+background:black;
+box-shadow:0 0 30px gold;
 ">
+?
+</div>
 
-<!-- LINEA CENTRALE -->
-<div style="
-position:absolute;
-left:50%;
-top:0;
-transform:translateX(-50%);
-width:4px;
-height:100%;
-background:red;
-box-shadow:0 0 10px red;
-z-index:10;
-"></div>
+<button onclick="spinSlot()">Gira</button>
+<button onclick="resetSlot()">Reset</button>
 
-<div id="pickerTrack" style="
-display:flex;
-gap:10px;
-">
+<div id="wheelResult"></div>
+
 </div>
 
 </div>
@@ -627,119 +620,76 @@ loadGames();
 closePopup();
 }  
 
-let pickerOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-let spinning = false;
 
-function drawPicker(){
-let track = document.getElementById("pickerTrack");
-track.innerHTML = "";
-
-/* duplico per effetto scorrimento */
-let extended = [...pickerOptions, ...pickerOptions, ...pickerOptions];
-
-extended.forEach(opt=>{
-let div = document.createElement("div");
-
-div.innerText = opt;
-
-div.style.minWidth = "120px";
-div.style.padding = "25px";
-div.style.background = "#000";
-div.style.border = "2px solid gold";
-div.style.borderRadius = "12px";
-div.style.boxShadow = "0 0 10px gold";
-div.style.textAlign = "center";
-div.style.fontSize = "18px";
-div.style.fontWeight = "bold";
-
-track.appendChild(div);
-});
-}
-
-drawPicker();
-
-function spinPicker(){
-
-if(spinning || pickerOptions.length === 0) return;
-spinning = true;
-
-let track = document.getElementById("pickerTrack");
-
-/* reset */
-track.style.transition = "none";
-track.style.transform = "translateX(0px)";
-
-setTimeout(()=>{
-
-let index = Math.floor(Math.random() * pickerOptions.length);
-let cardWidth = 130;
-let container = document.getElementById("picker");
-let centerOffset = container.offsetWidth / 2;  
-
-/* calcolo posizione */
-let total = pickerOptions.length;
-let centerIndex = total + index; // parte centrale del loop
-let position = centerIndex * cardWidth;
-/* animazione PRO */
-track.style.transition = "transform 3.2s cubic-bezier(0.15, 0.8, 0.25, 1)";
-track.style.transform = `translateX(-${position - centerOffset}px)`;
-
-/* fine */
-setTimeout(()=>{
-
-let result = pickerOptions[index];
-
-document.getElementById("wheelResult").innerHTML = "🎯 " + result;
-
-/* effetto highlight */
-let cards = document.querySelectorAll("#pickerTrack div");
-
-let target = cards[(cards.length / 3) + index];
-
-if(target){
-target.style.background = "orange";
-target.style.color = "black";
-target.style.boxShadow = "0 0 25px orange";
-target.style.transform = "scale(1.2)";
-}
-/* rimuove */
-pickerOptions.splice(index,1);
-
-spinning = false;
-
-/* reset invisibile DOPO animazione */
-setTimeout(()=>{
-drawPicker();
-
-let track = document.getElementById("pickerTrack");
-track.style.transition = "none";
-track.style.transform = "translateX(0px)";
-
-}, 200);
-
-
-
-if(pickerOptions.length === 0){
-alert("🔁 Finite tutte! Premi reset");
-}
-
-},3200);
-
-},50);
-}
-
-function resetPicker(){
-pickerOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-drawPicker();
-document.getElementById("wheelResult").innerHTML = "";
-}
 document.addEventListener("click", () => {
 let audio = document.getElementById("winSound");
 
 audio.volume = 0.3; 
 
 audio.play().catch(()=>{});
-}, { once: true }); 
+}, { once: true });
+let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+let spinning = false;
+
+function spinSlot(){
+
+if(spinning || slotOptions.length === 0) return;
+spinning = true;
+
+let slot = document.getElementById("slot");
+
+let speed = 50;
+let duration = 2000;
+let elapsed = 0;
+
+let interval = setInterval(()=>{
+
+let random = slotOptions[Math.floor(Math.random()*slotOptions.length)];
+slot.innerText = random;
+
+elapsed += speed;
+
+if(elapsed >= duration){
+
+clearInterval(interval);
+
+/* rallentamento finale */
+let slow = setInterval(()=>{
+slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)];
+},120);
+
+setTimeout(()=>{
+
+clearInterval(slow);
+
+let index = Math.floor(Math.random()*slotOptions.length);
+let result = slotOptions[index];
+
+slot.innerText = result;
+
+document.getElementById("wheelResult").innerHTML = "🎯 " + result;
+
+/* rimuove */
+slotOptions.splice(index,1);
+
+spinning = false;
+
+if(slotOptions.length === 0){
+alert("🔁 Finite tutte! Premi reset");
+}
+
+},800);
+
+}
+
+},speed);
+}
+
+function resetSlot(){
+slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+document.getElementById("slot").innerText = "?";
+document.getElementById("wheelResult").innerHTML = "";
+}  
   
 </script>
 
