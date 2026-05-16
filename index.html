@@ -162,7 +162,7 @@ box-shadow:0 0 15px orange;
 <div class="menu">
 <button onclick="show('tournament')">Nuovo Torneo</button>
 <button onclick="show('players')">Giocatori</button>
-<button onclick="show('wheelPage')">Ruota</button>
+<button onclick="show('slotPage')">Slot Game</button>
 <button onclick="show('palmares')">Palmares</button>
 <button onclick="show('ranking')">Classifica Totale</button>
 <button onclick="show('games')">Classifica Per Gioco</button>
@@ -234,7 +234,9 @@ box-shadow:0 0 15px orange;
 
 <!-- SLOT -->
 
-<div id="wheelPage" class="screen">
+<div id="slotPage" class="screen">
+
+<h2>🎰 SLOT GAME</h2>
 
 <div style="margin-top:30px;">
 
@@ -252,20 +254,26 @@ box-shadow:0 0 30px gold;
 ?
 </div>
 
+<br>
 
+<button onclick="spinSlot()">🎰 Gira</button>
+<button onclick="resetSlot()">🔁 Reset</button>
 
 <div id="wheelResult"></div>
 
 </div>
-
-</div>
-
-<button onclick="spinPicker()">Gira</button>
-<button onclick="resetPicker()">Reset</button>
-
-<div id="wheelResult"></div>
 
 <button onclick="show('home')">⬅️</button>
+
+
+
+<div id="wheelResult"></div>
+
+</div>
+
+</div>
+
+
 
 </div>
 
