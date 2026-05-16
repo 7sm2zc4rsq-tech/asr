@@ -394,14 +394,23 @@ totalPoints += d.data().points;
 /* PUNTI PER GIOCO */
 let gameSnap = await db.collection("gameRanking").get();
 let gameStats = {};
+let tournaments = new Set(); // per evitare doppioni  
 
 gameSnap.forEach(d=>{
 if(d.data().player === name){
+
 let g = d.data().game;
 let pts = d.data().points;
 
+/* punti */
 if(!gameStats[g]) gameStats[g]=0;
 gameStats[g]+=pts;
+
+/* presenze */
+if(d.data().tournament){
+tournaments.add(d.data().tournament);
+}
+
 }
 });
 
@@ -409,6 +418,7 @@ gameStats[g]+=pts;
 let html = `
 <div class="box">🏆 Titoli vinti: ${wins}</div>
 <div class="box">⭐ Punti totali: ${totalPoints}</div>
+<div class="box">🎯 Presenze torneo: ${tournaments.size}</div>
 `;
 
 html += `<div class="box"><h3>🎮 Per gioco</h3>`;
@@ -465,7 +475,13 @@ for(let g of games){
 for(let p of selected){
 let val=parseInt(document.getElementById(g+"_"+p).value)||0;
 totals[p]+=val;
-await db.collection("gameRanking").add({game:g,player:p,points:val});
+
+await db.collection("gameRanking").add({
+game:g,
+player:p,
+points:val,
+tournament: Date.now() // 🔥 AGGIUNTA
+});
 }
 }
 
