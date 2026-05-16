@@ -491,7 +491,10 @@ await db.collection("ranking").add({name:p,points:totals[p]});
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 await db.collection("palmares").add({name:winner});
 
-/* animazione */
+/* MOSTRA SLOT */
+document.getElementById("slotContainer").style.display="block";
+
+/* ANIMAZIONE */
 startSlotPro(winner);
 }
 
@@ -705,6 +708,73 @@ function resetSlot(){
 slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
 document.getElementById("slot").innerText = "?";
 document.getElementById("wheelResult").innerHTML = "";
+}
+function startSlotPro(winner){
+
+let reels = [
+document.getElementById("reel1"),
+document.getElementById("reel2"),
+document.getElementById("reel3")
+];
+
+let names = selected;
+
+/* reset */
+reels.forEach(r=>{
+r.innerText = "";
+});
+
+/* funzione rullo */
+function spinReel(reel, stopDelay){
+
+let speed = 40;
+let elapsed = 0;
+
+let interval = setInterval(()=>{
+
+let random = names[Math.floor(Math.random()*names.length)];
+reel.innerText = random;
+
+elapsed += speed;
+
+if(elapsed >= stopDelay){
+
+clearInterval(interval);
+
+/* rallenta */
+let slow = setInterval(()=>{
+reel.innerText = names[Math.floor(Math.random()*names.length)];
+},120);
+
+setTimeout(()=>{
+clearInterval(slow);
+reel.innerText = winner;
+},600);
+
+}
+
+}, speed);
+}
+
+/* 3 rulli */
+spinReel(reels[0], 1500);
+spinReel(reels[1], 2200);
+spinReel(reels[2], 3000);
+
+/* finale */
+setTimeout(()=>{
+
+alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
+
+document.getElementById("gamesArea").innerHTML = `
+<h2>🏆 ${winner}</h2>
+<button onclick="resetTorneo()">Nuovo Torneo</button>
+`;
+
+document.getElementById("slotContainer").style.display="none";
+
+}, 3500);
+
 }  
   
 </script>
