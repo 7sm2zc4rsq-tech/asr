@@ -309,7 +309,6 @@ z-index:999;
 
   </div>
 </div>  
-<audio id="winSound" src="win.mp3"></audio>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -644,13 +643,7 @@ closePopup();
 }  
 
 
-document.addEventListener("click", () => {
-let audio = document.getElementById("winSound");
 
-audio.volume = 0.3; 
-
-audio.play().catch(()=>{});
-}, { once: true });
 let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
 let spinning = false;
 
