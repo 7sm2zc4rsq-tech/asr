@@ -672,12 +672,14 @@ track.style.transform = "translateX(0px)";
 setTimeout(()=>{
 
 let index = Math.floor(Math.random() * pickerOptions.length);
+let cardWidth = 130;
+let container = document.getElementById("picker");
+let centerOffset = container.offsetWidth / 2;  
 
 /* calcolo posizione */
-let cardWidth = 130;
-let centerOffset = window.innerWidth < 500 ? 180 : 200;
-let position = (pickerOptions.length + index) * cardWidth;
-
+let total = pickerOptions.length;
+let centerIndex = total + index; // parte centrale del loop
+let position = centerIndex * cardWidth;
 /* animazione PRO */
 track.style.transition = "transform 3.2s cubic-bezier(0.15, 0.8, 0.25, 1)";
 track.style.transform = `translateX(-${position - centerOffset}px)`;
@@ -692,7 +694,7 @@ document.getElementById("wheelResult").innerHTML = "🎯 " + result;
 /* effetto highlight */
 let cards = document.querySelectorAll("#pickerTrack div");
 
-let target = cards[pickerOptions.length + index];
+let target = cards[(cards.length / 3) + index];
 
 if(target){
 target.style.background = "orange";
@@ -705,13 +707,23 @@ pickerOptions.splice(index,1);
 
 spinning = false;
 
+/* reset invisibile DOPO animazione */
+setTimeout(()=>{
 drawPicker();
+
+let track = document.getElementById("pickerTrack");
+track.style.transition = "none";
+track.style.transform = "translateX(0px)";
+
+}, 200);
+
+
 
 if(pickerOptions.length === 0){
 alert("🔁 Finite tutte! Premi reset");
 }
 
-},3000);
+},3200);
 
 },50);
 }
