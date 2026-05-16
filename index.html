@@ -244,14 +244,27 @@ margin:auto;
 border:2px solid orange;
 border-radius:20px;
 padding:10px;
+position:relative;
 ">
 
-  <div id="pickerTrack" style="
-  display:flex;
-  gap:10px;
-  transition:transform 2s ease-out;
-  ">
-  </div>
+<!-- LINEA CENTRALE -->
+<div style="
+position:absolute;
+left:50%;
+top:0;
+transform:translateX(-50%);
+width:4px;
+height:100%;
+background:red;
+box-shadow:0 0 10px red;
+z-index:10;
+"></div>
+
+<div id="pickerTrack" style="
+display:flex;
+gap:10px;
+">
+</div>
 
 </div>
 
@@ -615,31 +628,35 @@ closePopup();
 }  
 
 let pickerOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+let spinning = false;
 
 function drawPicker(){
 let track = document.getElementById("pickerTrack");
 track.innerHTML = "";
 
-pickerOptions.forEach(opt=>{
+/* duplico per effetto scorrimento */
+let extended = [...pickerOptions, ...pickerOptions, ...pickerOptions];
+
+extended.forEach(opt=>{
 let div = document.createElement("div");
 
 div.innerText = opt;
 
-div.style.minWidth = "100px";
-div.style.padding = "20px";
-div.style.background = "black";
+div.style.minWidth = "120px";
+div.style.padding = "25px";
+div.style.background = "#000";
 div.style.border = "2px solid gold";
-div.style.borderRadius = "10px";
+div.style.borderRadius = "12px";
 div.style.boxShadow = "0 0 10px gold";
 div.style.textAlign = "center";
+div.style.fontSize = "18px";
+div.style.fontWeight = "bold";
 
 track.appendChild(div);
 });
 }
 
 drawPicker();
-
-let spinning = false;
 
 function spinPicker(){
 
@@ -648,21 +665,42 @@ spinning = true;
 
 let track = document.getElementById("pickerTrack");
 
+/* reset */
+track.style.transition = "none";
+track.style.transform = "translateX(0px)";
+
+setTimeout(()=>{
+
 let index = Math.floor(Math.random() * pickerOptions.length);
 
-/* movimento */
-let move = (index * 110) + 300;
+/* calcolo posizione */
+let cardWidth = 130;
+let centerOffset = window.innerWidth < 500 ? 180 : 200;
+let position = (pickerOptions.length + index) * cardWidth;
 
-track.style.transform = `translateX(-${move}px)`;
+/* animazione PRO */
+track.style.transition = "transform 3.2s cubic-bezier(0.15, 0.8, 0.25, 1)";
+track.style.transform = `translateX(-${position - centerOffset}px)`;
 
-/* risultato */
+/* fine */
 setTimeout(()=>{
 
 let result = pickerOptions[index];
 
 document.getElementById("wheelResult").innerHTML = "🎯 " + result;
 
-/* rimuovi */
+/* effetto highlight */
+let cards = document.querySelectorAll("#pickerTrack div");
+
+let target = cards[pickerOptions.length + index];
+
+if(target){
+target.style.background = "orange";
+target.style.color = "black";
+target.style.boxShadow = "0 0 25px orange";
+target.style.transform = "scale(1.2)";
+}
+/* rimuove */
 pickerOptions.splice(index,1);
 
 spinning = false;
@@ -673,14 +711,15 @@ if(pickerOptions.length === 0){
 alert("🔁 Finite tutte! Premi reset");
 }
 
-},2000);
+},3000);
+
+},50);
 }
 
 function resetPicker(){
 pickerOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
 drawPicker();
 document.getElementById("wheelResult").innerHTML = "";
-document.getElementById("pickerTrack").style.transform = "translateX(0)";
 }
 document.addEventListener("click", () => {
 let audio = document.getElementById("winSound");
