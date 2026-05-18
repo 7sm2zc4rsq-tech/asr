@@ -493,12 +493,7 @@ html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
 document.getElementById("gamesArea").innerHTML = html;
 await db.collection("palmares").add({name:winner});
 
-
-
-function resetTorneo(){
-gamesArea.innerHTML="";
-show("tournament");
-}
+}  f
 
 /* PALMARES */
 async function loadPalmares(){
@@ -714,7 +709,7 @@ document.getElementById("reel2"),
 document.getElementById("reel3")
 ];
 
-let names = selected;
+let names = selected.map(p => p.name);
 
 /* reset */
 reels.forEach(r=>{
