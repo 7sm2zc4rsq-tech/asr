@@ -162,7 +162,7 @@ box-shadow:0 0 15px orange;
 <div class="menu">
 <button onclick="show('tournament')">Nuovo Torneo</button>
 <button onclick="show('players')">Giocatori</button>
-<button onclick="show('slotPage')">Slot Game</button>
+<button onclick="show('tournament')">Slot Game</button>
 <button onclick="show('palmares')">Palmares</button>
 <button onclick="show('ranking')">Classifica Totale</button>
 <button onclick="show('games')">Classifica Per Gioco</button>
@@ -192,6 +192,25 @@ box-shadow:0 0 15px orange;
 <div id="selectPlayers"></div>
 <button onclick="startGames()">Inizia</button>
 <div id="gamesArea"></div>
+<h3>🎰 Slot Game</h3>
+
+<div id="slot" style="
+font-size:30px;
+padding:20px;
+border:2px solid gold;
+border-radius:15px;
+width:200px;
+margin:auto;
+background:black;
+box-shadow:0 0 20px gold;
+">?</div>
+
+<br>
+
+<button onclick="spinSlot()">Gira</button>
+<button onclick="resetSlot()">Reset</button>
+
+<div id="wheelResult"></div>
 <div id="slotContainer" style="display:none; margin-top:20px;">
   <div style="display:flex; justify-content:center; gap:10px;">
     <div class="reel" id="reel1"></div>
@@ -232,44 +251,7 @@ box-shadow:0 0 15px orange;
 <button onclick="show('home')">⬅️</button>
 </div>
 
-<!-- SLOT -->
 
-<div id="slotPage" class="screen">
-
-<h2>🎰 SLOT GAME</h2>
-
-<div style="margin-top:30px;">
-
-<div id="slot" style="
-font-size:40px;
-font-weight:bold;
-padding:40px;
-border:3px solid gold;
-border-radius:20px;
-width:250px;
-margin:auto;
-background:black;
-box-shadow:0 0 30px gold;
-">
-?
-</div>
-
-<br>
-
-<button onclick="spinSlot()">🎰 Gira</button>
-<button onclick="resetSlot()">🔁 Reset</button>
-
-<div id="wheelResult"></div>
-
-</div>
-
-<button onclick="show('home')">⬅️</button>
-
-
-
-<div id="wheelResult"></div>
-
-</div>
 
 </div>
 
@@ -444,14 +426,22 @@ selected=[];
 let snap=await db.collection("players").get();
 let html="";
 snap.forEach(d=>{
-html+=`<input type="checkbox" value="${d.data().name}" onchange="toggle(this)"> ${d.data().name}<br>`;
+html+=`<input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)"> ${d.data().name}<br>`;
 });
 selectPlayers.innerHTML=html;
 }
 
 function toggle(e){
-if(e.checked)selected.push(e.value);
-else selected=selected.filter(p=>p!==e.value);
+
+let id = e.value;
+let name = e.dataset.name;
+
+if(e.checked){
+selected.push({id:id, name:name});
+}else{
+selected = selected.filter(p=>p.id !== id);
+}
+
 }
 
 function startGames(){
@@ -459,7 +449,7 @@ let html="";
 games.forEach(g=>{
 html+=`<h3>${g}</h3>`;
 selected.forEach(p=>{
-html+=`${p}<input id="${g}_${p}" value="0"><br>`;
+html+=`${p.name}<input id="${g}_${p.id}" value="0"><br>`;
 });
 });
 html+=`<button onclick="finish()">Fine Torneo</button>`;
@@ -468,12 +458,12 @@ gamesArea.innerHTML=html;
 
 async function finish(){
 let totals={};
-selected.forEach(p=>totals[p]=0);
+selected.forEach(p=>totals[p.name]=0);
 
 for(let g of games){
 for(let p of selected){
-let val=parseInt(document.getElementById(g+"_"+p).value)||0;
-totals[p]+=val;
+let val=parseInt(document.getElementById(g+"_"+p.id).value)||0;
+totals[p.name]+=val;
 
 await db.collection("gameRanking").add({
 game:g,
@@ -489,14 +479,21 @@ await db.collection("ranking").add({name:p,points:totals[p]});
 }
 
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+let ranking = Object.entries(totals)
+.sort((a,b)=>b[1]-a[1]);
+
+let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
+
+ranking.forEach((p,i)=>{
+html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
+});
+
+html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
+
+document.getElementById("gamesArea").innerHTML = html;
 await db.collection("palmares").add({name:winner});
 
-/* MOSTRA SLOT */
-document.getElementById("slotContainer").style.display="block";
 
-/* ANIMAZIONE */
-startSlotPro(winner);
-}
 
 function resetTorneo(){
 gamesArea.innerHTML="";
@@ -648,12 +645,12 @@ closePopup();
 
 
 let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-let spinning = false;
+let slotSpinning = false;
 
 function spinSlot(){
 
-if(spinning || slotOptions.length === 0) return;
-spinning = true;
+if(slotSpinning || slotOptions.length === 0) return;
+slotSpinning = true;
 
 let slot = document.getElementById("slot");
 
@@ -691,7 +688,7 @@ document.getElementById("wheelResult").innerHTML = "🎯 " + result;
 /* rimuove */
 slotOptions.splice(index,1);
 
-spinning = false;
+slotSpinning = false;
 
 if(slotOptions.length === 0){
 alert("🔁 Finite tutte! Premi reset");
