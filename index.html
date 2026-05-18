@@ -162,7 +162,6 @@ box-shadow:0 0 15px orange;
 <div class="menu">
 <button onclick="show('tournament')">Nuovo Torneo</button>
 <button onclick="show('players')">Giocatori</button>
-<button onclick="show('tournament')">Slot Game</button>
 <button onclick="show('palmares')">Palmares</button>
 <button onclick="show('ranking')">Classifica Totale</button>
 <button onclick="show('games')">Classifica Per Gioco</button>
@@ -467,10 +466,11 @@ totals[p.name]+=val;
 
 await db.collection("gameRanking").add({
 game:g,
-player:p,
+player:p.name,
 points:val,
-tournament: Date.now() // 🔥 AGGIUNTA
+tournament: Date.now()
 });
+}
 }
 function resetTorneo(){
 
@@ -480,8 +480,6 @@ selected = [];
 loadSelect();
 
 }  
-}
-
 for(let p in totals){
 await db.collection("ranking").add({name:p,points:totals[p]});
 }
@@ -567,18 +565,24 @@ rankingList.innerHTML=html;
 }
 
 async function editRanking(name,pts){
+
 let n = prompt("Punti", pts);
 if(!n) return;
 
 let snap = await db.collection("ranking").get();
 
-snap.forEach(async d=>{
-if(d.data().name === name){
+let updated = false;
+
+for(let d of snap.docs){
+if(d.data().name === name && !updated){
+
 await db.collection("ranking").doc(d.id).update({
 points: parseInt(n)
 });
+
+updated = true;
 }
-});
+}
 
 loadRanking();
 }
@@ -614,12 +618,18 @@ gamesList.innerHTML=html;
 
 /* DELETE */
 async function deleteByName(col,name){
-let snap=await db.collection(col).get();
-snap.forEach(async d=>{
-if(d.data().name===name){
+
+let snap = await db.collection(col).get();
+
+let found = false;
+
+for(let d of snap.docs){
+if(d.data().name === name && !found){
 await db.collection(col).doc(d.id).delete();
+found = true;
 }
-});
+}
+
 show(col);
 }
 
