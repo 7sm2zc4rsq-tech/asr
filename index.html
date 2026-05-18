@@ -593,9 +593,12 @@ let snap=await db.collection("gameRanking").get();
 let data={};
 
 snap.forEach(d=>{
-let g=d.data().game;
-let p=d.data().player;
-let pts=d.data().points;
+let g = d.data().game;
+let p = d.data().player;
+let pts = d.data().points;
+
+/* BLOCCA DATI ROTTI */
+if(typeof p !== "string") return;
 
 if(!data[g])data[g]={};
 data[g][p]=(data[g][p]||0)+pts;
