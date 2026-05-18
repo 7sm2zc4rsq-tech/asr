@@ -472,6 +472,14 @@ points:val,
 tournament: Date.now() // 🔥 AGGIUNTA
 });
 }
+function resetTorneo(){
+
+gamesArea.innerHTML = "";
+selected = [];
+
+loadSelect();
+
+}  
 }
 
 for(let p in totals){
@@ -493,7 +501,7 @@ html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
 document.getElementById("gamesArea").innerHTML = html;
 await db.collection("palmares").add({name:winner});
 
-}  f
+}
 
 /* PALMARES */
 async function loadPalmares(){
@@ -513,9 +521,31 @@ html+=`<div class="box">${p[0]} 🏆 ${p[1]}
 palmaresList.innerHTML=html;
 }
 
-function editPalmares(name,count){
-let n=prompt("Nuovo valore",count);
-if(!n)return;
+async function editPalmares(name,count){
+let n = prompt("Titoli", count);
+if(!n) return;
+
+let snap = await db.collection("palmares").get();
+
+let current = count;
+let target = parseInt(n);
+
+if(target > current){
+for(let i=0;i<target-current;i++){
+await db.collection("palmares").add({name:name});
+}
+}else{
+let toDelete = current - target;
+
+snap.forEach(async d=>{
+if(toDelete>0 && d.data().name===name){
+await db.collection("palmares").doc(d.id).delete();
+toDelete--;
+}
+});
+}
+
+loadPalmares();
 }
 
 /* CLASSIFICA */
@@ -536,8 +566,21 @@ html+=`<div class="box">${p[0]} ${p[1]}
 rankingList.innerHTML=html;
 }
 
-function editRanking(name,pts){
-let n=prompt("Punti",pts);
+async function editRanking(name,pts){
+let n = prompt("Punti", pts);
+if(!n) return;
+
+let snap = await db.collection("ranking").get();
+
+snap.forEach(async d=>{
+if(d.data().name === name){
+await db.collection("ranking").doc(d.id).update({
+points: parseInt(n)
+});
+}
+});
+
+loadRanking();
 }
 
 /* PER GIOCO */
@@ -644,7 +687,11 @@ let slotSpinning = false;
 
 function spinSlot(){
 
-if(slotSpinning || slotOptions.length === 0) return;
+if(slotSpinning) return;
+if(slotOptions.length === 0){
+alert("Premi reset");
+return;
+}
 slotSpinning = true;
 
 let slot = document.getElementById("slot");
