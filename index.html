@@ -222,37 +222,34 @@ transition:0.2s;
 .homeCard:hover{
 transform:scale(1.03);
 }
+.homeCard{
+transition: all 0.2s ease;
+}
+
+.homeCard:active{
+transform:scale(0.97);
+}  
 .hero{
 margin-bottom:40px;
 }
 
 .titleMain{
-font-size:42px;
+font-size:44px;
 font-weight:700;
-letter-spacing:-1px;
+letter-spacing:-1.5px;
 color:white;
-}
-
-text-shadow:
-0 0 10px red,
-0 0 20px orange,
-0 0 40px red,
-0 0 80px orange;
-
 }
 
 .titleSub{
 color:var(--subtext);
-text-shadow:none;
+font-size:18px;
+margin-top:4px;
 }
 
 .titleTag{
-margin-top:15px;
+margin-top:10px;
 font-size:13px;
-opacity:0.6;
-
-letter-spacing:2px;
-
+color:var(--subtext);
 }
 
 /* animazioni */
@@ -283,11 +280,15 @@ font-size:18px;
 <div class="hero">
 
 <div class="titleMain">
-TORNEO
+Torneo
 </div>
 
 <div class="titleSub">
-DEL PORCO DI DIO
+Del Porco di Dio
+</div>
+
+<div class="titleTag">
+Modalità competitiva
 </div>
 
 <div class="titleTag">
