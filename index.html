@@ -647,7 +647,8 @@ games.forEach(g=>{
 html+=`<h3>${g}</h3>`;
 
 selected.forEach(p=>{
-html+=`${p.name}<input id="${g}_${p.id}" value="0"><br>`;
+html+=`${p.name}
+<input id="${g}_${p.id}" value="0" oninput="updateLiveRanking()"><br>`;
 });
 
 /* 🔥 SOLO DOPO UNO aggiungo la tabella extra */
@@ -656,9 +657,43 @@ html += `<div id="unoExtra"></div>`;
 }
 
 });
-html+=`<button onclick="finish()">Fine Torneo</button>`;
+html+=`
+<div id="liveRanking"></div>
+
+<button onclick="finish()">Fine Torneo</button>
+`;
 gamesArea.innerHTML=html;
 createUnoExtra();
+}  
+function updateLiveRanking(){
+
+let totals = {};
+
+selected.forEach(p=>{
+totals[p.name] = 0;
+});
+
+for(let g of games){
+for(let p of selected){
+
+let val = parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
+totals[p.name] += val;
+
+}
+}
+
+let ranking = Object.entries(totals)
+.sort((a,b)=>b[1]-a[1]);
+
+let html = `<h3>🔥 CLASSIFICA LIVE</h3>`;
+
+ranking.forEach((p,i)=>{
+html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
+});
+
+document.getElementById("liveRanking").innerHTML = html;
+}  
+  
 
 
 function createUnoExtra(){
@@ -678,9 +713,8 @@ ${p.name}
 <input type="number" 
 id="unoInput_${p.id}" 
 placeholder="punti"
-style="width:70px; margin-left:10px;">
-
-<button onclick="setUno('${p.id}')">OK</button>
+style="width:70px; margin-left:10px;"
+oninput="setUno('${p.id}')">
 
 <span id="unoScore_${p.id}">0</span>/51
 </div>
