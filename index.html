@@ -202,6 +202,48 @@ box-shadow:0 0 10px orange;
 button:active{
 transform:scale(0.95);
 }
+.homeGrid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+gap:20px;
+padding:10px;
+}
+
+.homeCard{
+background:linear-gradient(145deg, rgba(0,0,0,0.9), rgba(30,30,30,0.95));
+border-radius:20px;
+padding:25px 15px;
+
+cursor:pointer;
+transition:0.25s;
+
+border:1px solid rgba(255,140,0,0.3);
+
+box-shadow:
+0 0 10px rgba(255,140,0,0.2),
+inset 0 0 10px rgba(255,140,0,0.2);
+
+font-size:22px;
+}
+
+.homeCard h2{
+font-size:16px;
+margin:10px 0 5px;
+}
+
+.homeCard p{
+font-size:12px;
+opacity:0.6;
+}
+
+.homeCard:hover{
+transform:scale(1.08);
+
+box-shadow:
+0 0 25px orange,
+0 0 40px red,
+inset 0 0 15px orange;
+}
 </style>
 
 </head>
@@ -212,16 +254,45 @@ transform:scale(0.95);
 <!-- HOME -->
 
 <div id="home" class="screen active">
-<h1>Torneo Del Porco Di Dio</h1>
-<div class="menu">
-<button onclick="show('tournament')">Nuovo Torneo</button>
-<button onclick="show('players')">Giocatori</button>
-<button onclick="show('palmares')">Palmares</button>
-<button onclick="show('ranking')">Classifica Totale</button>
-<button onclick="show('games')">Classifica Per Gioco</button>
-</div>
+
+<h1 style="font-size:42px;">Torneo Del Porco Di Dio</h1>
+<p style="opacity:0.7; margin-bottom:30px;">🔥 Gestisci il caos. Domina il torneo.</p>
+
+<div class="homeGrid">
+
+<div class="homeCard" onclick="show('tournament')">
+🎮
+<h2>Nuovo Torneo</h2>
+<p>Avvia una nuova partita</p>
 </div>
 
+<div class="homeCard" onclick="show('players')">
+👥
+<h2>Giocatori</h2>
+<p>Gestisci i player</p>
+</div>
+
+<div class="homeCard" onclick="show('palmares')">
+🏆
+<h2>Palmares</h2>
+<p>Storico vittorie</p>
+</div>
+
+<div class="homeCard" onclick="show('ranking')">
+⭐
+<h2>Classifica</h2>
+<p>Punti totali</p>
+</div>
+
+<div class="homeCard" onclick="show('games')">
+🎯
+<h2>Per Gioco</h2>
+<p>Statistiche dettagliate</p>
+</div>
+
+</div>
+
+</div>
 <!-- GIOCATORI -->
 
 <div id="players" class="screen">
