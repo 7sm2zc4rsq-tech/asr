@@ -713,8 +713,9 @@ ${p.name}
 <input type="number" 
 id="unoInput_${p.id}" 
 placeholder="punti"
-style="width:70px; margin-left:10px;"
-oninput="setUno('${p.id}')">
+style="width:70px; margin-left:10px;">
+
+<button onclick="setUno('${p.id}')">OK</button>
 
 <span id="unoScore_${p.id}">0</span>/51
 </div>
@@ -726,12 +727,18 @@ document.getElementById("unoExtra").innerHTML = html;
 function setUno(id){
 
 let input = document.getElementById("unoInput_"+id);
-let val = parseInt(input.value) || 0;
+let val = parseInt(input.value);
 
+/* ❌ se vuoto o non numero */
+if(isNaN(val) || val <= 0) return;
+
+/* inizializza */
 if(!unoScores[id]) unoScores[id] = 0;
 
+/* aggiunge */
 unoScores[id] += val;
 
+/* aggiorna UI */
 let el = document.getElementById("unoScore_"+id);
 el.innerText = unoScores[id];
 
@@ -746,7 +753,10 @@ let box = document.getElementById("unoBox_"+id);
 box.style.background = "linear-gradient(45deg, darkred, black)";
 box.style.boxShadow = "0 0 20px red";
 box.style.transform = "scale(0.95)";
-el.parentElement.innerHTML += " ❌ ELIMINATO";
+
+if(!box.innerHTML.includes("ELIMINATO")){
+box.innerHTML += " ❌ ELIMINATO";
+}
 
 }
 }
