@@ -10,6 +10,14 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
+:root{
+--bg: #0f1115;
+--card: #1a1d24;
+--accent: #6c5ce7;
+--accent2: #00d4ff;
+--text: #eaeaf0;
+--subtext: #9aa0aa;
+}  
 .reel{
 width:120px;
 height:120px;
@@ -26,12 +34,10 @@ box-shadow:0 0 15px gold;
 body{
 margin:0;
 font-family:'Orbitron',sans-serif;
-color:white;
+color:var(--text);
 text-align:center;
-background:url('sfondo.jpg') no-repeat center center fixed;
-background-size:cover;
+background:linear-gradient(180deg, #0f1115, #0a0c10);
 }
-
 .overlay{
 background:rgba(0,0,0,0.75);
 min-height:100vh;
@@ -104,42 +110,39 @@ inset 0 0 20px rgba(255,50,0,0.8);
 }  
 
 .box{
-background:linear-gradient(145deg, rgba(0,0,0,0.8), rgba(30,30,30,0.9));
+background:var(--card);
 margin:12px;
 padding:15px;
-border-radius:15px;
-border:1px solid rgba(255,140,0,0.3);
+border-radius:18px;
+border:1px solid rgba(255,255,255,0.05);
 
 box-shadow:
-0 0 10px rgba(255,140,0,0.3),
-inset 0 0 10px rgba(255,140,0,0.2);
+0 10px 30px rgba(0,0,0,0.6);
 
-transition:0.2s;
+transition:0.25s;
 }
 
 .box:hover{
-transform:scale(1.02);
+transform:translateY(-3px);
 box-shadow:
-0 0 20px orange,
-inset 0 0 15px rgba(255,140,0,0.4);
+0 20px 40px rgba(0,0,0,0.8);
 }
-
 input{
 padding:10px;
 margin:6px;
 border-radius:10px;
-border:1px solid orange;
-background:black;
-color:white;
-font-family:'Orbitron',sans-serif;
+border:1px solid rgba(255,255,255,0.1);
+
+background:#0f1115;
+color:var(--text);
 
 outline:none;
 transition:0.2s;
 }
 
 input:focus{
-border-color:gold;
-box-shadow:0 0 10px gold;
+border-color:var(--accent);
+box-shadow:0 0 10px rgba(108,92,231,0.4);
 }
 
 #wheel{
@@ -176,23 +179,25 @@ color:#ffa500;
 text-shadow:0 0 10px orange;
 }
 button{
-padding:8px 15px;
-border-radius:10px;
+padding:10px 18px;
+border-radius:12px;
 border:none;
-background:linear-gradient(45deg, orange, red);
+
+background:linear-gradient(135deg, var(--accent), var(--accent2));
 color:white;
-font-weight:bold;
+font-weight:600;
+
 cursor:pointer;
 transition:0.2s;
 }
 
 button:hover{
-transform:scale(1.1);
-box-shadow:0 0 10px orange;
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,0,0,0.4);
 }
 
 button:active{
-transform:scale(0.95);
+transform:scale(0.97);
 }
 .homeGrid{
 display:grid;
@@ -202,39 +207,21 @@ padding:10px;
 }
 
 .homeCard{
-background:linear-gradient(145deg, rgba(0,0,0,0.9), rgba(30,30,30,0.95));
+background:var(--card);
 border-radius:20px;
 padding:25px 15px;
 
 cursor:pointer;
 transition:0.25s;
 
-border:1px solid rgba(255,140,0,0.3);
+border:1px solid rgba(255,255,255,0.05);
 
-box-shadow:
-0 0 10px rgba(255,140,0,0.2),
-inset 0 0 10px rgba(255,140,0,0.2);
-
-font-size:22px;
-}
-
-.homeCard h2{
-font-size:16px;
-margin:10px 0 5px;
-}
-
-.homeCard p{
-font-size:12px;
-opacity:0.6;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
 }
 
 .homeCard:hover{
-transform:scale(1.08);
-
-box-shadow:
-0 0 25px orange,
-0 0 40px red,
-inset 0 0 15px orange;
+transform:translateY(-5px) scale(1.02);
+box-shadow:0 20px 40px rgba(0,0,0,0.8);
 }
 .hero{
 margin-bottom:40px;
@@ -255,14 +242,8 @@ text-shadow:
 }
 
 .titleSub{
-font-size:20px;
-letter-spacing:4px;
-margin-top:-10px;
-
-color:#fff;
-opacity:0.85;
-
-text-shadow:0 0 10px orange;
+color:var(--subtext);
+text-shadow:none;
 }
 
 .titleTag{
@@ -277,18 +258,15 @@ letter-spacing:2px;
 /* animazioni */
 
 
-
 .titleMain{
 font-family:'Anton', sans-serif;
 font-size:55px;
 letter-spacing:6px;
 
-background:linear-gradient(90deg, #ff3c00, #ff9900, #ff3c00);
-background-size:200%;
-
+background:linear-gradient(90deg, #6c5ce7, #00d4ff);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
-
+}
 }
 .titleMain{
 font-family:'Anton', sans-serif;
