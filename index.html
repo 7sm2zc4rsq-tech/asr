@@ -191,7 +191,6 @@ box-shadow:0 0 15px orange;
 <div id="selectPlayers"></div>
 <button onclick="startGames()">Inizia</button>
 <div id="gamesArea"></div>
-<div id="unoExtra"></div>
 <h3>🎰 Slot Game</h3>
 
 <div id="slot" style="
@@ -447,27 +446,61 @@ selected = selected.filter(p=>p.id !== id);
 function startGames(){
 let html="";
 games.forEach(g=>{
+
 html+=`<h3>${g}</h3>`;
+
 selected.forEach(p=>{
 html+=`${p.name}<input id="${g}_${p.id}" value="0"><br>`;
 });
+
+/* 🔥 SOLO DOPO UNO aggiungo la tabella extra */
+if(g === "UNO"){
+html += `<div id="unoExtra"></div>`;
+}
+
 });
 html+=`<button onclick="finish()">Fine Torneo</button>`;
 gamesArea.innerHTML=html;
 createUnoExtra();
 let unoScores = {};
 
-function addUno(id, pts){
+function createUnoExtra(){
+
+let html = `<h3>🔥 UNO - Eliminazione (51)</h3>`;
+
+selected.forEach(p=>{
+html += `
+<div class="box">
+${p.name}
+
+<input type="number" 
+id="unoInput_${p.id}" 
+placeholder="punti"
+style="width:70px; margin-left:10px;">
+
+<button onclick="setUno('${p.id}')">OK</button>
+
+<span id="unoScore_${p.id}">0</span>/51
+</div>
+`;
+});
+
+document.getElementById("unoExtra").innerHTML = html;
+}
+function setUno(id){
+
+let input = document.getElementById("unoInput_"+id);
+let val = parseInt(input.value) || 0;
 
 if(!unoScores[id]) unoScores[id] = 0;
 
-unoScores[id] += pts;
+unoScores[id] += val;
 
 let el = document.getElementById("unoScore_"+id);
-
-if(el){
 el.innerText = unoScores[id];
-}
+
+/* reset input */
+input.value = "";
 
 /* eliminazione */
 if(unoScores[id] >= 51){
