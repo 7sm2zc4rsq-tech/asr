@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Torneo Del Porco Di Dio</title>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">  
 
 <link rel="apple-touch-icon" href="icon.png">
 <style>
@@ -228,20 +229,51 @@ box-shadow:
 0 0 40px rgba(0,140,255,0.4);
 }
 .titleMain{
-font-family:'Orbitron', sans-serif;
-font-size:48px;
-letter-spacing:3px;
-color:#00aaff;
+font-family: 'Audiowide', sans-serif;
+font-size:60px;
+letter-spacing:4px;
+color:#00eaff;
 
 text-shadow:
-0 0 10px #00aaff,
-0 0 20px #0070f3,
-0 0 40px rgba(0,120,255,0.8);
+0 0 10px #00eaff,
+0 0 25px #008cff,
+0 0 50px rgba(0,140,255,0.8);
 }
-.titleSub{
-color:#7f9ccf;
-font-size:18px;
-letter-spacing:2px;
+@keyframes titleIntro{
+0%{
+opacity:0;
+transform:translateY(-20px) scale(0.95);
+filter:blur(8px);
+}
+100%{
+opacity:1;
+transform:translateY(0) scale(1);
+filter:blur(0);
+}
+animation:titleIntro 1s ease-out;
+}
+position:relative;
+.titleMain::after{
+content:"";
+position:absolute;
+top:0;
+left:-100%;
+width:100%;
+height:100%;
+
+background:linear-gradient(
+120deg,
+transparent,
+rgba(255,255,255,0.3),
+transparent
+);
+
+animation:shine 3s infinite;
+}
+
+@keyframes shine{
+0%{left:-100%;}
+100%{left:100%;}
 }  
 </style>
 
