@@ -112,13 +112,43 @@ inset 0 0 20px rgba(255,50,0,0.8);
 }  
 
 .box{
-background:rgba(0,0,0,0.6);
-margin:10px;
-padding:10px;
-border-radius:10px;
+background:linear-gradient(145deg, rgba(0,0,0,0.8), rgba(30,30,30,0.9));
+margin:12px;
+padding:15px;
+border-radius:15px;
+border:1px solid rgba(255,140,0,0.3);
+
+box-shadow:
+0 0 10px rgba(255,140,0,0.3),
+inset 0 0 10px rgba(255,140,0,0.2);
+
+transition:0.2s;
 }
 
-input{padding:8px;margin:5px;}
+.box:hover{
+transform:scale(1.02);
+box-shadow:
+0 0 20px orange,
+inset 0 0 15px rgba(255,140,0,0.4);
+}
+
+input{
+padding:10px;
+margin:6px;
+border-radius:10px;
+border:1px solid orange;
+background:black;
+color:white;
+font-family:'Orbitron',sans-serif;
+
+outline:none;
+transition:0.2s;
+}
+
+input:focus{
+border-color:gold;
+box-shadow:0 0 10px gold;
+}
 
 #wheel{
 width:260px;height:260px;
@@ -148,6 +178,30 @@ background:rgba(255,100,0,0.3);
 transform:scale(1.05);
 box-shadow:0 0 15px orange;
 }  
+h3{
+margin-top:25px;
+color:#ffa500;
+text-shadow:0 0 10px orange;
+}
+button{
+padding:8px 15px;
+border-radius:10px;
+border:none;
+background:linear-gradient(45deg, orange, red);
+color:white;
+font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 10px orange;
+}
+
+button:active{
+transform:scale(0.95);
+}
 </style>
 
 </head>
@@ -466,11 +520,16 @@ let unoScores = {};
 
 function createUnoExtra(){
 
-let html = `<h3>🔥 UNO - Eliminazione (51)</h3>`;
+let html = `<h3 style="
+color:orange;
+text-shadow:0 0 10px orange;
+font-size:22px;
+margin-top:20px;
+">🔥 UNO - Eliminazione (51)</h3>`;
 
 selected.forEach(p=>{
 html += `
-<div class="box">
+<div class="box" id="unoBox_${p.id}">
 ${p.name}
 
 <input type="number" 
@@ -505,32 +564,17 @@ input.value = "";
 /* eliminazione */
 if(unoScores[id] >= 51){
 
-el.parentElement.style.background = "red";
-el.parentElement.style.opacity = "0.5";
+let box = document.getElementById("unoBox_"+id);
+
+box.style.background = "linear-gradient(45deg, darkred, black)";
+box.style.boxShadow = "0 0 20px red";
+box.style.transform = "scale(0.95)";
 el.parentElement.innerHTML += " ❌ ELIMINATO";
 
 }
 }
 }
-function createUnoExtra(){
 
-let html = `<h3>🔥 UNO - Eliminazione (51)</h3>`;
-
-selected.forEach(p=>{
-html += `
-<div class="box">
-${p.name} 
-<span id="unoScore_${p.id}">0</span>/51
-
-<button onclick="addUno('${p.id}',10)">+10</button>
-<button onclick="addUno('${p.id}',5)">+5</button>
-<button onclick="addUno('${p.id}',1)">+1</button>
-</div>
-`;
-});
-
-document.getElementById("unoExtra").innerHTML = html;
-}
 async function finish(){
 let totals={};
 selected.forEach(p=>totals[p.name]=0);
