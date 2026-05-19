@@ -503,6 +503,7 @@ let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected=[];
 let currentType="";
 let currentGame="";  
+let unoScores = {};
 
 /* NAV */
 function show(id){
@@ -658,7 +659,7 @@ html += `<div id="unoExtra"></div>`;
 html+=`<button onclick="finish()">Fine Torneo</button>`;
 gamesArea.innerHTML=html;
 createUnoExtra();
-let unoScores = {};
+
 
 function createUnoExtra(){
 
