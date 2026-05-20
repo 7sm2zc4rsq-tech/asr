@@ -178,9 +178,16 @@ firebase.initializeApp({
 
 const db = firebase.firestore();
 const auth = firebase.auth();
+const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 let user = null;
+let isAdmin = false;
 
-auth.onAuthStateChanged(u => { user = u; });
+auth.onAuthStateChanged(u => {
+  user = u;
+  isAdmin = u && u.email === ADMIN_EMAIL;
+  console.log("User:", u?.email);
+  console.log("Admin:", isAdmin);
+});
 
 let games = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected = [];
@@ -201,7 +208,7 @@ function show(id){
 
 /* GIOCATORI */
 async function addPlayer(){
-  if(!user){ alert("Devi fare il login"); return; }
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let n = document.getElementById("playerName").value;
   if(!n) return;
   await db.collection("players").add({name:n});
@@ -223,7 +230,7 @@ async function loadPlayers(){
 
 /* FIX: aggiunto parametro id, aggiunta } mancante all'if(!user) */
 async function editPlayer(id, oldName){
-  if(!user){ alert("Devi fare il login"); return; } /* ← } era mancante */
+  if(!isAdmin){ alert("Non autorizzato"); return; }
 
   let nuovo = prompt("Nuovo nome", oldName);
   if(!nuovo) return;
@@ -278,7 +285,7 @@ async function openPlayer(id, name){
 }
 
 async function deleteDoc(col, id){
-  if(!user){ alert("Devi fare il login"); return; }
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   await db.collection(col).doc(id).delete();
   show(col);
 }
@@ -398,6 +405,7 @@ async function loadPalmares(){
 }
 
 async function editPalmares(name, count){
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let n = prompt("Titoli", count);
   if(!n) return;
   let snap = await db.collection("palmares").get();
@@ -435,6 +443,7 @@ async function loadRanking(){
 }
 
 async function editRanking(name, pts){
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let n = prompt("Punti", pts);
   if(!n) return;
   let snap = await db.collection("ranking").get();
@@ -473,6 +482,7 @@ async function loadGames(){
 }
 
 async function deleteByName(col, name){
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let snap = await db.collection(col).get();
   let found = false;
   for(let d of snap.docs){
@@ -482,6 +492,7 @@ async function deleteByName(col, name){
 }
 
 async function deleteGame(g, p){
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let snap = await db.collection("gameRanking").get();
   snap.forEach(async d=>{
     if(d.data().game===g && d.data().player===p) await db.collection("gameRanking").doc(d.id).delete();
@@ -499,7 +510,7 @@ function closePopup(){
 }
 
 async function confirmAdd(){
-  if(!user){ alert("Devi fare il login"); return; }
+  if(!isAdmin){ alert("Non autorizzato"); return; }
   let name = document.getElementById("popupName").value;
   let pts  = parseInt(document.getElementById("popupPoints").value) || 0;
   if(currentType==="palmares"){ await db.collection("palmares").add({name:name}); loadPalmares(); }
