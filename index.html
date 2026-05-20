@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Torneo Del Porco Di Dio</title>
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
-<link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{
 --bg: #0a0f1c;
@@ -86,6 +85,7 @@ animation:shine 3s infinite;
 <div class="titleTag">🔥 Piangi • e Bestemmia 🔥</div>
 </div>
 <button onclick="login()">🔐 Login</button>
+<div id="loginStatus" style="padding:10px;font-size:14px;color:#7f9ccf;"></div>
 <div class="homeGrid">
 <div class="homeCard" onclick="show('tournament')">🎮<h2>Nuovo Torneo</h2><p>Avvia una nuova partita</p></div>
 <div class="homeCard" onclick="show('players')">👥<h2>Giocatori</h2><p>Gestisci i player</p></div>
@@ -155,7 +155,7 @@ animation:shine 3s infinite;
 </div>
 
 <!-- POPUP -->
-<div id="popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999;display:none;align-items:center;justify-content:center;">
+<div id="popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;">
   <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.4);padding:30px;border-radius:20px;text-align:center;">
     <h2>AGGIUNGI</h2>
     <input id="popupName" placeholder="Nome"><br><br>
@@ -179,15 +179,41 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const auth = firebase.auth();
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
-let user = null;
-let isAdmin = false;
+
+// Promise che si risolve UNA SOLA VOLTA quando Firebase ha caricato l'utente
+let resolveAuth;
+const authReady = new Promise(resolve => { resolveAuth = resolve; });
 
 auth.onAuthStateChanged(u => {
-user = u;
-isAdmin = u && u.email && u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-console.log("User:", u?.email);
-console.log("Admin:", isAdmin);
+  resolveAuth(u);
+  // Mostra stato login in home
+  const statusEl = document.getElementById("loginStatus");
+  if (statusEl) {
+    if (u) {
+      const isAdm = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+      statusEl.innerHTML = isAdm
+        ? "✅ Admin: " + u.email
+        : "👤 Loggato: " + u.email + " (non admin)";
+    } else {
+      statusEl.innerHTML = "⚠️ Non loggato";
+    }
+  }
 });
+
+// Recupera utente dopo redirect Google
+auth.getRedirectResult().catch(err => console.warn("Redirect result error:", err));
+
+// Controlla se l'utente corrente è admin — aspetta sempre che Firebase sia pronto
+async function checkAdmin() {
+  const u = await authReady;
+  if (!u) {
+    alert("Devi fare login prima. Usa il pulsante 🔐 Login.");
+    return false;
+  }
+  const ok = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+  if (!ok) alert("Non autorizzato: " + u.email);
+  return ok;
+}
 
 let games = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected = [];
@@ -208,7 +234,7 @@ function show(id){
 
 /* GIOCATORI */
 async function addPlayer(){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let n = document.getElementById("playerName").value;
   if(!n) return;
   await db.collection("players").add({name:n});
@@ -228,15 +254,11 @@ async function loadPlayers(){
   document.getElementById("playersList").innerHTML = html;
 }
 
-/* FIX: aggiunto parametro id, aggiunta } mancante all'if(!user) */
 async function editPlayer(id, oldName){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
-
+  if (!(await checkAdmin())) return;
   let nuovo = prompt("Nuovo nome", oldName);
   if(!nuovo) return;
-
   await db.collection("players").doc(id).update({name:nuovo});
-
   let cols = ["ranking","palmares","gameRanking"];
   for(let col of cols){
     let snap = await db.collection(col).get();
@@ -249,7 +271,6 @@ async function editPlayer(id, oldName){
   loadPlayers();
 }
 
-/* FIX: aggiunto parametro id */
 async function openPlayer(id, name){
   show("playerPage");
   document.getElementById("playerTitle").innerHTML = "👤 " + name;
@@ -285,7 +306,7 @@ async function openPlayer(id, name){
 }
 
 async function deleteDoc(col, id){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   await db.collection(col).doc(id).delete();
   show(col);
 }
@@ -405,7 +426,7 @@ async function loadPalmares(){
 }
 
 async function editPalmares(name, count){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let n = prompt("Titoli", count);
   if(!n) return;
   let snap = await db.collection("palmares").get();
@@ -443,7 +464,7 @@ async function loadRanking(){
 }
 
 async function editRanking(name, pts){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let n = prompt("Punti", pts);
   if(!n) return;
   let snap = await db.collection("ranking").get();
@@ -482,7 +503,7 @@ async function loadGames(){
 }
 
 async function deleteByName(col, name){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let snap = await db.collection(col).get();
   let found = false;
   for(let d of snap.docs){
@@ -492,7 +513,7 @@ async function deleteByName(col, name){
 }
 
 async function deleteGame(g, p){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let snap = await db.collection("gameRanking").get();
   snap.forEach(async d=>{
     if(d.data().game===g && d.data().player===p) await db.collection("gameRanking").doc(d.id).delete();
@@ -510,7 +531,7 @@ function closePopup(){
 }
 
 async function confirmAdd(){
-  if(!isAdmin){ alert("Non autorizzato"); return; }
+  if (!(await checkAdmin())) return;
   let name = document.getElementById("popupName").value;
   let pts  = parseInt(document.getElementById("popupPoints").value) || 0;
   if(currentType==="palmares"){ await db.collection("palmares").add({name:name}); loadPalmares(); }
