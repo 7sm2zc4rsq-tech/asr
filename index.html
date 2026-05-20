@@ -1169,8 +1169,8 @@ document.getElementById("slotContainer").style.display="none";
 
 }  
 function login(){
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-}  
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+}
   
 </script>
 
