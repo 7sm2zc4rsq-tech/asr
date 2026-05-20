@@ -465,6 +465,7 @@ box-shadow:0 10px 30px rgba(0,0,0,0.4);
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 firebase.initializeApp({
 apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
@@ -473,7 +474,9 @@ projectId:"torneo-74c5b"
 });
 
 const db=firebase.firestore();
-
+const auth = firebase.auth();
+auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());  
+  
 let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 let selected=[];
 let currentType="";
