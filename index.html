@@ -180,13 +180,11 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 
-// Promise che si risolve UNA SOLA VOLTA quando Firebase ha caricato l'utente
-let resolveAuth;
-const authReady = new Promise(resolve => { resolveAuth = resolve; });
+// currentUser viene aggiornato da onAuthStateChanged
+let currentUser = null;
 
 auth.onAuthStateChanged(u => {
-  resolveAuth(u);
-  // Mostra stato login in home
+  currentUser = u;
   const statusEl = document.getElementById("loginStatus");
   if (statusEl) {
     if (u) {
@@ -200,18 +198,14 @@ auth.onAuthStateChanged(u => {
   }
 });
 
-// Recupera utente dopo redirect Google
-auth.getRedirectResult().catch(err => console.warn("Redirect result error:", err));
-
-// Controlla se l'utente corrente è admin — aspetta sempre che Firebase sia pronto
+// Controlla se l'utente corrente è admin
 async function checkAdmin() {
-  const u = await authReady;
-  if (!u) {
+  if (!currentUser) {
     alert("Devi fare login prima. Usa il pulsante 🔐 Login.");
     return false;
   }
-  const ok = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-  if (!ok) alert("Non autorizzato: " + u.email);
+  const ok = currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+  if (!ok) alert("Non autorizzato: " + currentUser.email);
   return ok;
 }
 
@@ -603,7 +597,14 @@ function startSlotPro(winner){
 }
 
 function login(){
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(err => {
+      if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
+        auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+      } else {
+        console.error("Login error:", err);
+      }
+    });
 }
 </script>
 </body>
