@@ -513,10 +513,39 @@ ${d.data().name}
 playersList.innerHTML=html;
 }
 
-async function editPlayer(id,n){
-let nuovo=prompt("Nome",n);
-if(!nuovo)return;
+async function editPlayer(id,oldName){
+
+let nuovo = prompt("Nome", oldName);
+if(!nuovo || nuovo === oldName) return;
+
+/* aggiorna players */
 await db.collection("players").doc(id).update({name:nuovo});
+
+/* 🔥 aggiorna TUTTE le collection */
+let cols = ["ranking","palmares","gameRanking"];
+
+for(let col of cols){
+
+let snap = await db.collection(col).get();
+
+for(let d of snap.docs){
+
+let data = d.data();
+
+/* ranking e palmares */
+if(data.name === oldName){
+await db.collection(col).doc(d.id).update({name:nuovo});
+}
+
+/* gameRanking */
+if(data.player === oldName){
+await db.collection(col).doc(d.id).update({player:nuovo});
+}
+
+}
+
+}
+
 loadPlayers();
 }
 async function openPlayer(name){
@@ -759,13 +788,35 @@ gamesArea.innerHTML = "";
 selected = [];
 
 loadSelect();
-unoScores = {};
+function startGames(){
+
+unoScores = {}; 
+
+let html="";
 document.getElementById("unoExtra").innerHTML = "";
 
 }  
+// 🔥 MOSTRA SUBITO
+let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+let ranking = Object.entries(totals)
+.sort((a,b)=>b[1]-a[1]);
+
+let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
+
+ranking.forEach((p,i)=>{
+html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
+});
+
+html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
+
+document.getElementById("gamesArea").innerHTML = html;
+
+// 🔄 SALVA DOPO (in background)
 for(let p in totals){
-await db.collection("ranking").add({name:p,points:totals[p]});
+db.collection("ranking").add({name:p,points:totals[p]});
 }
+
+db.collection("palmares").add({name:winner});
 
 let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
 let ranking = Object.entries(totals)
