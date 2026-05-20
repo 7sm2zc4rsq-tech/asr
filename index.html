@@ -559,7 +559,7 @@ let palmaresSnap = await db.collection("palmares").get();
 let wins = 0;
 
 palmaresSnap.forEach(d=>{
-if(d.data().name === name) wins++;
+if(d.data().playerId === id) wins++;
 });
 
 /* PUNTI TOTALI */
@@ -567,7 +567,7 @@ let rankingSnap = await db.collection("ranking").get();
 let totalPoints = 0;
 
 rankingSnap.forEach(d=>{
-if(d.data().name === name){
+if(d.data().playerId === id){
 totalPoints += d.data().points;
 }
 });
@@ -780,10 +780,10 @@ for(let p of selected){
 let val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
 totals[p.name] += val;
 
-/* salva per gioco */
 await db.collection("gameRanking").add({
 game: g,
 player: p.name,
+playerId: p.id, // 🔥 AGGIUNTO
 points: val,
 tournament: Date.now()
 });
@@ -805,12 +805,23 @@ html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
 
 document.getElementById("gamesArea").innerHTML = html;
 
-/* 🔄 SALVA DOPO (no lag) */
 for(let p in totals){
-db.collection("ranking").add({name:p, points:totals[p]});
-}
 
-db.collection("palmares").add({name:winner});
+let playerObj = selected.find(x => x.name === p);
+
+db.collection("ranking").add({
+name: p,
+playerId: playerObj?.id,
+points: totals[p]
+});
+
+}
+let winnerObj = selected.find(x => x.name === winner);
+
+db.collection("palmares").add({
+name: winner,
+playerId: winnerObj?.id
+});
 }
 
 /* PALMARES */
