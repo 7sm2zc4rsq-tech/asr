@@ -1,394 +1,125 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Torneo Del Porco Di Dio</title>
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">  
-
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{
 --bg: #0a0f1c;
 --card: rgba(20, 30, 60, 0.6);
 --border: rgba(0, 140, 255, 0.2);
-
 --text: #e6f0ff;
 --subtext: #7f9ccf;
-
 --accent: #0070f3;
 --glow: #00aaff;
 }
 .reel{
-width:120px;
-height:120px;
-background:black;
-border:3px solid gold;
-border-radius:10px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:18px;
-color:white;
-box-shadow:0 0 15px gold;
-}  
+width:120px;height:120px;background:black;border:3px solid gold;border-radius:10px;
+display:flex;align-items:center;justify-content:center;font-size:18px;color:white;box-shadow:0 0 15px gold;
+}
 body{
-margin:0;
-font-family:'Orbitron', sans-serif;
-color:var(--text);
-
-background:
-radial-gradient(circle at 20% 20%, rgba(0,120,255,0.15), transparent 40%),
-radial-gradient(circle at 80% 0%, rgba(0,80,200,0.2), transparent 40%),
-#0a0f1c;
+margin:0;font-family:'Orbitron', sans-serif;color:var(--text);
+background:radial-gradient(circle at 20% 20%, rgba(0,120,255,0.15), transparent 40%),
+radial-gradient(circle at 80% 0%, rgba(0,80,200,0.2), transparent 40%),#0a0f1c;
 }
-h1{
-font-family:'Anton',sans-serif;  
-font-size:38px;
-color:#ff4500;
-
-text-transform:uppercase;
-letter-spacing:4px;
-
-text-shadow:
-0 0 10px red,
-0 0 20px orange,
-0 0 40px red,
-0 0 80px orange;
-}
-
-
-.screen{display:none;}
-.active{display:block;}
-
-.menu button{
-display:block;
-width:90%;
-margin:15px auto;
-padding:25px;  
-
-font-size:28px;
-font-weight:900;
-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-text-transform:uppercase;
-letter-spacing:3px;
-
-color:#fff;
-background:rgba(255,255,255,0.08);
-
-border:2px solid rgba(255,100,0,0.6);
-border-radius:25px;
-
-cursor:pointer;
-
-/* glow */
-box-shadow:
-0 0 10px rgba(255,100,0,0.6),
-inset 0 0 10px rgba(255,100,0,0.4);
-
-transition:all 0.25s ease;
-backdrop-filter:blur(6px);
-}
-.menu button:hover{
-transform:scale(1.08);
-
-background:rgba(255,100,0,0.2);
-
-box-shadow:
-0 0 20px rgba(255,100,0,1),
-0 0 40px rgba(255,50,0,0.8),
-inset 0 0 15px rgba(255,100,0,0.7);
-}
-.menu button:active{
-transform:scale(0.95);
-
-box-shadow:
-0 0 5px rgba(255,100,0,0.8),
-inset 0 0 20px rgba(255,50,0,0.8);
-}  
-
-.box{
-background:var(--card);
-backdrop-filter: blur(20px);
-
-border-radius:20px;
-padding:16px;
-margin:12px;
-
-border:1px solid var(--border);
-
-box-shadow:0 8px 30px rgba(0,0,0,0.4);
-
-transition:0.2s;
-}
-
-.box:hover{
-transform:scale(1.02);
-}
-input{
-padding:10px;
-margin:6px;
-border-radius:10px;
-border:1px solid rgba(255,255,255,0.1);
-
-background:#0f1115;
-color:var(--text);
-
-outline:none;
-transition:0.2s;
-}
-
-input:focus{
-border-color:var(--accent);
-box-shadow:0 0 10px rgba(108,92,231,0.4);
-}
-
-#wheel{
-width:260px;height:260px;
-border-radius:50%;
-margin:auto;
-transition:transform 4s ease-out;
-}
-
-#pointer{
-width:0;
-height:0;
-border-left:15px solid transparent;
-border-right:15px solid transparent;
-border-bottom:30px solid white;
-margin:auto;
-}
-#wheel{
-position:relative;
-}  
-.playerBox{
-cursor:pointer;
-transition:0.2s;
-}
-
-.playerBox:hover{
-background:rgba(255,100,0,0.3);
-transform:scale(1.05);
-box-shadow:0 0 15px orange;
-}  
-h3{
-color:var(--text);
-font-weight:600;
-}
-button{
-background:linear-gradient(135deg, #0070f3, #00aaff);
-border:none;
-border-radius:12px;
-padding:10px 18px;
-
-color:white;
-font-weight:600;
-
-box-shadow:0 0 10px rgba(0,120,255,0.5);
-
-transition:0.2s;
-}
-
-button:hover{
-box-shadow:
-0 0 20px rgba(0,140,255,0.9),
-0 0 40px rgba(0,140,255,0.6);
-}
-
-button:active{
-transform:scale(0.95);
-}
-.homeGrid{
-display:grid;
-grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-gap:20px;
-padding:10px;
-}
-
-.homeCard{
-background:rgba(10,20,40,0.8);
-border-radius:20px;
-padding:20px;
-
-border:1px solid rgba(0,120,255,0.2);
-
-box-shadow:
-0 0 10px rgba(0,120,255,0.2),
-0 0 30px rgba(0,120,255,0.1);
-
-transition:0.25s;
-}
-
-.homeCard:hover{
-transform:scale(1.06);
-
-box-shadow:
-0 0 20px rgba(0,140,255,0.6),
-0 0 40px rgba(0,140,255,0.4);
-}
+h1{font-family:'Anton',sans-serif;font-size:38px;color:#ff4500;text-transform:uppercase;letter-spacing:4px;
+text-shadow:0 0 10px red,0 0 20px orange,0 0 40px red,0 0 80px orange;}
+.screen{display:none;}.active{display:block;}
+.menu button{display:block;width:90%;margin:15px auto;padding:25px;font-size:28px;font-weight:900;
+font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;text-transform:uppercase;
+letter-spacing:3px;color:#fff;background:rgba(255,255,255,0.08);border:2px solid rgba(255,100,0,0.6);
+border-radius:25px;cursor:pointer;box-shadow:0 0 10px rgba(255,100,0,0.6),inset 0 0 10px rgba(255,100,0,0.4);
+transition:all 0.25s ease;backdrop-filter:blur(6px);}
+.menu button:hover{transform:scale(1.08);background:rgba(255,100,0,0.2);
+box-shadow:0 0 20px rgba(255,100,0,1),0 0 40px rgba(255,50,0,0.8),inset 0 0 15px rgba(255,100,0,0.7);}
+.menu button:active{transform:scale(0.95);box-shadow:0 0 5px rgba(255,100,0,0.8),inset 0 0 20px rgba(255,50,0,0.8);}
+.box{background:var(--card);backdrop-filter:blur(20px);border-radius:20px;padding:16px;margin:12px;
+border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:0.2s;}
+.box:hover{transform:scale(1.02);}
+input{padding:10px;margin:6px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);
+background:#0f1115;color:var(--text);outline:none;transition:0.2s;}
+input:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(108,92,231,0.4);}
+#wheel{width:260px;height:260px;border-radius:50%;margin:auto;transition:transform 4s ease-out;position:relative;}
+#pointer{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;
+border-bottom:30px solid white;margin:auto;}
+.playerBox{cursor:pointer;transition:0.2s;}
+.playerBox:hover{background:rgba(255,100,0,0.3);transform:scale(1.05);box-shadow:0 0 15px orange;}
+h3{color:var(--text);font-weight:600;}
+button{background:linear-gradient(135deg, #0070f3, #00aaff);border:none;border-radius:12px;
+padding:10px 18px;color:white;font-weight:600;box-shadow:0 0 10px rgba(0,120,255,0.5);transition:0.2s;cursor:pointer;}
+button:hover{box-shadow:0 0 20px rgba(0,140,255,0.9),0 0 40px rgba(0,140,255,0.6);}
+button:active{transform:scale(0.95);}
+.homeGrid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:20px;padding:10px;}
+.homeCard{background:rgba(10,20,40,0.8);border-radius:20px;padding:20px;
+border:1px solid rgba(0,120,255,0.2);box-shadow:0 0 10px rgba(0,120,255,0.2),0 0 30px rgba(0,120,255,0.1);
+transition:0.25s;cursor:pointer;}
+.homeCard:hover{transform:scale(1.06);box-shadow:0 0 20px rgba(0,140,255,0.6),0 0 40px rgba(0,140,255,0.4);}
 .titleMain{
-font-family: 'Audiowide', sans-serif;
-font-size:60px;
-letter-spacing:4px;
-color:#00eaff;
-
-text-shadow:
-0 0 10px #00eaff,
-0 0 25px #008cff,
-0 0 50px rgba(0,140,255,0.8);
+font-family:'Audiowide',sans-serif;font-size:60px;letter-spacing:4px;color:#00eaff;
+text-shadow:0 0 10px #00eaff,0 0 25px #008cff,0 0 50px rgba(0,140,255,0.8);
+position:relative;animation:titleIntro 1s ease-out;overflow:hidden;
 }
 @keyframes titleIntro{
-  0%{
-    opacity:0;
-    transform:translateY(-20px) scale(0.95);
-    filter:blur(8px);
-  }
-  100%{
-    opacity:1;
-    transform:translateY(0) scale(1);
-    filter:blur(0);
-  }
-}   
-
-.titleMain{
-  position:relative;  
-  animation:titleIntro 1s ease-out;
+0%{opacity:0;transform:translateY(-20px) scale(0.95);filter:blur(8px);}
+100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
 }
-
-position:relative;
 .titleMain::after{
-content:"";
-position:absolute;
-top:0;
-left:-100%;
-width:100%;
-height:100%;
-
-background:linear-gradient(
-120deg,
-transparent,
-rgba(255,255,255,0.3),
-transparent
-);
-
+content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.3),transparent);
 animation:shine 3s infinite;
 }
-
-@keyframes shine{
-0%{left:-100%;}
-100%{left:100%;}
-}  
+@keyframes shine{0%{left:-100%;}100%{left:100%;}}
 </style>
-
 </head>
-
 <body>
 <div class="overlay">
 
 <!-- HOME -->
-
 <div id="home" class="screen active">
-
 <div class="hero">
-
-<div class="titleMain">
-Torneo
+<div class="titleMain">Torneo</div>
+<div class="titleSub">Del Porco di Dio</div>
+<div class="titleTag">Modalità competitiva</div>
+<div class="titleTag">🔥 Piangi • e Bestemmia 🔥</div>
 </div>
-
-<div class="titleSub">
-Del Porco di Dio
-</div>
-
-<div class="titleTag">
-Modalità competitiva
-</div>
-
-<div class="titleTag">
-🔥 Piangi • e Bestemmia 🔥
-</div>
-
-</div>
-
 <button onclick="login()">🔐 Login</button>
-  
 <div class="homeGrid">
-
-<div class="homeCard" onclick="show('tournament')">
-🎮
-<h2>Nuovo Torneo</h2>
-<p>Avvia una nuova partita</p>
+<div class="homeCard" onclick="show('tournament')">🎮<h2>Nuovo Torneo</h2><p>Avvia una nuova partita</p></div>
+<div class="homeCard" onclick="show('players')">👥<h2>Giocatori</h2><p>Gestisci i player</p></div>
+<div class="homeCard" onclick="show('palmares')">🏆<h2>Palmares</h2><p>Storico vittorie</p></div>
+<div class="homeCard" onclick="show('ranking')">⭐<h2>Classifica</h2><p>Punti totali</p></div>
+<div class="homeCard" onclick="show('games')">🎯<h2>Per Gioco</h2><p>Statistiche dettagliate</p></div>
+</div>
 </div>
 
-<div class="homeCard" onclick="show('players')">
-👥
-<h2>Giocatori</h2>
-<p>Gestisci i player</p>
-</div>
-
-<div class="homeCard" onclick="show('palmares')">
-🏆
-<h2>Palmares</h2>
-<p>Storico vittorie</p>
-</div>
-
-<div class="homeCard" onclick="show('ranking')">
-⭐
-<h2>Classifica</h2>
-<p>Punti totali</p>
-</div>
-
-<div class="homeCard" onclick="show('games')">
-🎯
-<h2>Per Gioco</h2>
-<p>Statistiche dettagliate</p>
-</div>
-
-</div>
-
-</div>
 <!-- GIOCATORI -->
-
 <div id="players" class="screen">
-<input id="playerName">
+<input id="playerName" placeholder="Nome giocatore">
 <button onclick="addPlayer()">Aggiungi</button>
 <div id="playersList"></div>
 <button onclick="show('home')">⬅️</button>
 </div>
+
 <div id="playerPage" class="screen">
 <h2 id="playerTitle"></h2>
-
 <div id="playerStats"></div>
-
 <button onclick="show('players')">⬅️</button>
-</div>  
+</div>
 
 <!-- TORNEO -->
-
 <div id="tournament" class="screen">
 <h2>Seleziona Giocatori</h2>
 <div id="selectPlayers"></div>
 <button onclick="startGames()">Inizia</button>
 <div id="gamesArea"></div>
 <h3>🎰 Slot Game</h3>
-
-<div id="slot" style="
-font-size:30px;
-padding:20px;
-border:2px solid gold;
-border-radius:15px;
-width:200px;
-margin:auto;
-background:black;
-box-shadow:0 0 20px gold;
-">?</div>
-
+<div id="slot" style="font-size:30px;padding:20px;border:2px solid gold;border-radius:15px;width:200px;margin:auto;background:black;box-shadow:0 0 20px gold;">?</div>
 <br>
-
 <button onclick="spinSlot()">Gira</button>
 <button onclick="resetSlot()">Reset</button>
-
 <div id="wheelResult"></div>
 <div id="slotContainer" style="display:none; margin-top:20px;">
   <div style="display:flex; justify-content:center; gap:10px;">
@@ -396,811 +127,452 @@ box-shadow:0 0 20px gold;
     <div class="reel" id="reel2"></div>
     <div class="reel" id="reel3"></div>
   </div>
-</div>  
+</div>
 <button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- PALMARES -->
-
 <div id="palmares" class="screen">
 <div id="palmaresList"></div>
-
 <button onclick="openPopup('palmares')">➕</button>
-
 <button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- CLASSIFICA -->
-
 <div id="ranking" class="screen">
 <div id="rankingList"></div>
-
 <button onclick="openPopup('ranking')">➕</button>
-
 <button onclick="show('home')">⬅️</button>
 </div>
 
 <!-- PER GIOCO -->
-
 <div id="games" class="screen">
 <div id="gamesList"></div>
-
 <button onclick="openPopup('games')">➕</button>
-
 <button onclick="show('home')">⬅️</button>
 </div>
 
-
-
 </div>
 
-
-
-</div>
-
-</div>
-<div id="popup" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.85);
-z-index:999;
-">
-
-  <div style="
-background:rgba(255,255,255,0.06);
-backdrop-filter: blur(20px);
-
-border:1px solid var(--border);
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-  ">
-
+<!-- POPUP -->
+<div id="popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999;display:none;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.4);padding:30px;border-radius:20px;text-align:center;">
     <h2>AGGIUNGI</h2>
-
     <input id="popupName" placeholder="Nome"><br><br>
     <input id="popupPoints" placeholder="Punti"><br><br>
-
     <button onclick="confirmAdd()">SALVA</button>
     <button onclick="closePopup()">CHIUDI</button>
-
   </div>
-</div>  
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-
-<script> 
+<script>
 firebase.initializeApp({
-apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
-authDomain:"torneo-74c5b.firebaseapp.com",
-projectId:"torneo-74c5b"
+  apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
+  authDomain:"torneo-74c5b.firebaseapp.com",
+  projectId:"torneo-74c5b"
 });
 
-const db=firebase.firestore();
+const db = firebase.firestore();
 const auth = firebase.auth();
 let user = null;
 
-auth.onAuthStateChanged(u => {
-  user = u;
-});  
-  
-  
-let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
-let selected=[];
-let currentType="";
-let currentGame="";  
+auth.onAuthStateChanged(u => { user = u; });
+
+let games = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
+let selected = [];
+let currentType = "";
+let currentGame = "";
 let unoScores = {};
 
 /* NAV */
 function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-
-if(id==="players")loadPlayers();
-if(id==="ranking")loadRanking();
-if(id==="palmares")loadPalmares();
-if(id==="games")loadGames();
-if(id==="tournament")loadSelect();
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="players")   loadPlayers();
+  if(id==="ranking")   loadRanking();
+  if(id==="palmares")  loadPalmares();
+  if(id==="games")     loadGames();
+  if(id==="tournament")loadSelect();
 }
 
 /* GIOCATORI */
 async function addPlayer(){
-
-if(!user){
-  alert("Devi fare il login");
-  return;
-}
-
-let n=playerName.value;
-if(!n)return;
-await db.collection("players").add({name:n});
-loadPlayers();
+  if(!user){ alert("Devi fare il login"); return; }
+  let n = document.getElementById("playerName").value;
+  if(!n) return;
+  await db.collection("players").add({name:n});
+  loadPlayers();
 }
 
 async function loadPlayers(){
-let snap=await db.collection("players").get();
-let html="";
-snap.forEach(d=>{
-html+=`<div class="box playerBox" onclick="openPlayer('${d.data().name}')">
-${d.data().name}
-<button onclick="event.stopPropagation(); editPlayer('${d.id}','${d.data().name}')">✏️</button>
-
-<button onclick="event.stopPropagation(); deleteDoc('players','${d.id}')">❌</button></div>`;
-});
-playersList.innerHTML=html;
+  let snap = await db.collection("players").get();
+  let html = "";
+  snap.forEach(d=>{
+    html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
+      ${d.data().name}
+      <button onclick="event.stopPropagation(); editPlayer('${d.id}','${d.data().name}')">✏️</button>
+      <button onclick="event.stopPropagation(); deleteDoc('players','${d.id}')">❌</button>
+    </div>`;
+  });
+  document.getElementById("playersList").innerHTML = html;
 }
 
-async function editPlayer(id,oldName){
+/* FIX: aggiunto parametro id, aggiunta } mancante all'if(!user) */
+async function editPlayer(id, oldName){
+  if(!user){ alert("Devi fare il login"); return; } /* ← } era mancante */
 
-if(!user){
-  alert("Devi fare il login");
-  return;
+  let nuovo = prompt("Nuovo nome", oldName);
+  if(!nuovo) return;
 
+  await db.collection("players").doc(id).update({name:nuovo});
 
-/* aggiorna players */
-await db.collection("players").doc(id).update({name:nuovo});
-
-/* 🔥 aggiorna TUTTE le collection */
-let cols = ["ranking","palmares","gameRanking"];
-
-for(let col of cols){
-
-let snap = await db.collection(col).get();
-
-for(let d of snap.docs){
-
-let data = d.data();
-
-/* ranking e palmares */
-if(data.name === oldName){
-await db.collection(col).doc(d.id).update({name:nuovo});
+  let cols = ["ranking","palmares","gameRanking"];
+  for(let col of cols){
+    let snap = await db.collection(col).get();
+    for(let d of snap.docs){
+      let data = d.data();
+      if(data.name === oldName)   await db.collection(col).doc(d.id).update({name:nuovo});
+      if(data.player === oldName) await db.collection(col).doc(d.id).update({player:nuovo});
+    }
+  }
+  loadPlayers();
 }
 
-/* gameRanking */
-if(data.player === oldName){
-await db.collection(col).doc(d.id).update({player:nuovo});
+/* FIX: aggiunto parametro id */
+async function openPlayer(id, name){
+  show("playerPage");
+  document.getElementById("playerTitle").innerHTML = "👤 " + name;
+
+  let palmaresSnap = await db.collection("palmares").get();
+  let wins = 0;
+  palmaresSnap.forEach(d=>{ if(d.data().playerId === id) wins++; });
+
+  let rankingSnap = await db.collection("ranking").get();
+  let totalPoints = 0;
+  rankingSnap.forEach(d=>{ if(d.data().playerId === id) totalPoints += d.data().points; });
+
+  let gameSnap = await db.collection("gameRanking").get();
+  let gameStats = {};
+  let tournaments = new Set();
+  gameSnap.forEach(d=>{
+    if(d.data().player === name){
+      let g = d.data().game;
+      if(!gameStats[g]) gameStats[g] = 0;
+      gameStats[g] += d.data().points;
+      if(d.data().tournament) tournaments.add(d.data().tournament);
+    }
+  });
+
+  let html = `
+    <div class="box">🏆 Titoli vinti: ${wins}</div>
+    <div class="box">⭐ Punti totali: ${totalPoints}</div>
+    <div class="box">🎯 Presenze torneo: ${tournaments.size}</div>
+    <div class="box"><h3>🎮 Per gioco</h3>`;
+  for(let g in gameStats) html += `${g}: ${gameStats[g]}<br>`;
+  html += `</div>`;
+  document.getElementById("playerStats").innerHTML = html;
 }
 
-}
-
-}
-
-loadPlayers();
-}
-async function openPlayer(name){
-
-show("playerPage");
-
-document.getElementById("playerTitle").innerHTML = "👤 " + name;
-
-/* PALMARES */
-let palmaresSnap = await db.collection("palmares").get();
-let wins = 0;
-
-palmaresSnap.forEach(d=>{
-if(d.data().playerId === id) wins++;
-});
-
-/* PUNTI TOTALI */
-let rankingSnap = await db.collection("ranking").get();
-let totalPoints = 0;
-
-rankingSnap.forEach(d=>{
-if(d.data().playerId === id){
-totalPoints += d.data().points;
-}
-});
-
-/* PUNTI PER GIOCO */
-let gameSnap = await db.collection("gameRanking").get();
-let gameStats = {};
-let tournaments = new Set(); // per evitare doppioni  
-
-gameSnap.forEach(d=>{
-if(d.data().player === name){
-
-let g = d.data().game;
-let pts = d.data().points;
-
-/* punti */
-if(!gameStats[g]) gameStats[g]=0;
-gameStats[g]+=pts;
-
-/* presenze */
-if(d.data().tournament){
-tournaments.add(d.data().tournament);
-}
-
-}
-});
-
-/* HTML */
-let html = `
-<div class="box">🏆 Titoli vinti: ${wins}</div>
-<div class="box">⭐ Punti totali: ${totalPoints}</div>
-<div class="box">🎯 Presenze torneo: ${tournaments.size}</div>
-`;
-
-html += `<div class="box"><h3>🎮 Per gioco</h3>`;
-
-for(let g in gameStats){
-html += `${g}: ${gameStats[g]}<br>`;
-}
-
-html += `</div>`;
-
-document.getElementById("playerStats").innerHTML = html;
-
-}  
-
-/* DELETE */
-async function deleteDoc(col,id){
-
-if(!user){
-  alert("Devi fare il login");
-  return;
-}
-
-await db.collection(col).doc(id).delete();
-show(col);
+async function deleteDoc(col, id){
+  if(!user){ alert("Devi fare il login"); return; }
+  await db.collection(col).doc(id).delete();
+  show(col);
 }
 
 /* TORNEO */
 async function loadSelect(){
-selected=[];
-let snap=await db.collection("players").get();
-let html="";
-snap.forEach(d=>{
-html+=`<input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)"> ${d.data().name}<br>`;
-});
-selectPlayers.innerHTML=html;
+  selected = [];
+  let snap = await db.collection("players").get();
+  let html = "";
+  snap.forEach(d=>{
+    html += `<input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)"> ${d.data().name}<br>`;
+  });
+  document.getElementById("selectPlayers").innerHTML = html;
 }
 
 function toggle(e){
-
-let id = e.value;
-let name = e.dataset.name;
-
-if(e.checked){
-selected.push({id:id, name:name});
-}else{
-selected = selected.filter(p=>p.id !== id);
-}
-
+  if(e.checked) selected.push({id:e.value, name:e.dataset.name});
+  else selected = selected.filter(p => p.id !== e.value);
 }
 
 function startGames(){
+  unoScores = {};
+  let html = "";
+  games.forEach(g=>{
+    html += `<h3>${g}</h3>`;
+    selected.forEach(p=>{
+      html += `${p.name} <input id="${g}_${p.id}" value="0" oninput="updateLiveRanking()"><br>`;
+    });
+    if(g === "UNO") html += `<div id="unoExtra"></div>`;
+  });
+  html += `<div id="liveRanking"></div><button onclick="finish()">Fine Torneo</button>`;
+  document.getElementById("gamesArea").innerHTML = html;
+  createUnoExtra();
+}
 
-unoScores = {}; // 🔥 fondamentale
-
-let html="";
-games.forEach(g=>{
-
-html+=`<h3>${g}</h3>`;
-
-selected.forEach(p=>{
-html+=`${p.name}
-<input id="${g}_${p.id}" value="0" oninput="updateLiveRanking()"><br>`;
-});
-
-/* 🔥 SOLO DOPO UNO aggiungo la tabella extra */
-if(g === "UNO"){
-html += `<div id="unoExtra"></div>`;
-}  
-
-});
-html+=`
-<div id="liveRanking"></div>
-
-<button onclick="finish()">Fine Torneo</button>
-`;
-gamesArea.innerHTML=html;
-createUnoExtra();
-}  
 function updateLiveRanking(){
-
-let totals = {};
-
-selected.forEach(p=>{
-totals[p.name] = 0;
-});
-
-for(let g of games){
-for(let p of selected){
-
-let val = parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
-totals[p.name] += val;
-
+  let totals = {};
+  selected.forEach(p => totals[p.name] = 0);
+  for(let g of games){
+    for(let p of selected){
+      let val = parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
+      totals[p.name] += val;
+    }
+  }
+  let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  let html = `<h3>🔥 CLASSIFICA LIVE</h3>`;
+  ranking.forEach((p,i)=>{ html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`; });
+  document.getElementById("liveRanking").innerHTML = html;
 }
-}
-
-let ranking = Object.entries(totals)
-.sort((a,b)=>b[1]-a[1]);
-
-let html = `<h3>🔥 CLASSIFICA LIVE</h3>`;
-
-ranking.forEach((p,i)=>{
-html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
-});
-
-document.getElementById("liveRanking").innerHTML = html;
-}  
-  
-
 
 function createUnoExtra(){
-
-let html = `<h3 style="
-color:orange;
-text-shadow:0 0 10px orange;
-font-size:22px;
-margin-top:20px;
-">🔥 UNO - Eliminazione (51)</h3>`;
-
-selected.forEach(p=>{
-html += `
-<div class="box" id="unoBox_${p.id}">
-${p.name}
-
-<input type="number" 
-id="unoInput_${p.id}" 
-placeholder="punti"
-style="width:70px; margin-left:10px;">
-
-<button onclick="setUno('${p.id}')">OK</button>
-
-<span id="unoScore_${p.id}">0</span>/51
-</div>
-`;
-});
-
-document.getElementById("unoExtra").innerHTML = html;
+  let html = `<h3 style="color:orange;text-shadow:0 0 10px orange;font-size:22px;margin-top:20px;">🔥 UNO - Eliminazione (51)</h3>`;
+  selected.forEach(p=>{
+    html += `<div class="box" id="unoBox_${p.id}">
+      ${p.name}
+      <input type="number" id="unoInput_${p.id}" placeholder="punti" style="width:70px;margin-left:10px;">
+      <button onclick="setUno('${p.id}')">OK</button>
+      <span id="unoScore_${p.id}">0</span>/51
+    </div>`;
+  });
+  document.getElementById("unoExtra").innerHTML = html;
 }
+
 function setUno(id){
-
-let input = document.getElementById("unoInput_"+id);
-let val = parseInt(input.value);
-
-/* ❌ se vuoto o non numero */
-if(isNaN(val) || val <= 0) return;
-
-/* inizializza */
-if(!unoScores[id]) unoScores[id] = 0;
-
-/* aggiunge */
-unoScores[id] += val;
-
-/* aggiorna UI */
-let el = document.getElementById("unoScore_"+id);
-el.innerText = unoScores[id];
-
-/* reset input */
-input.value = "";
-
-/* eliminazione */
-if(unoScores[id] >= 51){
-
-let box = document.getElementById("unoBox_"+id);
-
-box.style.background = "linear-gradient(45deg, darkred, black)";
-box.style.boxShadow = "0 0 20px red";
-box.style.transform = "scale(0.95)";
-
-if(!box.innerHTML.includes("ELIMINATO")){
-box.innerHTML += " ❌ ELIMINATO";
-}
-
-}
+  let input = document.getElementById("unoInput_"+id);
+  let val = parseInt(input.value);
+  if(isNaN(val) || val <= 0) return;
+  if(!unoScores[id]) unoScores[id] = 0;
+  unoScores[id] += val;
+  document.getElementById("unoScore_"+id).innerText = unoScores[id];
+  input.value = "";
+  if(unoScores[id] >= 51){
+    let box = document.getElementById("unoBox_"+id);
+    box.style.background = "linear-gradient(45deg, darkred, black)";
+    box.style.boxShadow = "0 0 20px red";
+    box.style.transform = "scale(0.95)";
+    if(!box.innerHTML.includes("ELIMINATO")) box.innerHTML += " ❌ ELIMINATO";
+  }
 }
 
 async function finish(){
-
-let totals = {};
-selected.forEach(p => totals[p.name] = 0);
-
-/* calcolo punti */
-for(let g of games){
-for(let p of selected){
-
-let val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
-totals[p.name] += val;
-
-await db.collection("gameRanking").add({
-game: g,
-player: p.name,
-playerId: p.id, // 🔥 AGGIUNTO
-points: val,
-tournament: Date.now()
-});
-
-}
-}
-
-/* 🔥 CLASSIFICA SUBITO */
-let winner = Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
-let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-
-let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
-
-ranking.forEach((p,i)=>{
-html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
-});
-
-html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
-
-document.getElementById("gamesArea").innerHTML = html;
-
-for(let p in totals){
-
-let playerObj = selected.find(x => x.name === p);
-
-db.collection("ranking").add({
-name: p,
-playerId: playerObj?.id,
-points: totals[p]
-});
-
-}
-let winnerObj = selected.find(x => x.name === winner);
-
-db.collection("palmares").add({
-name: winner,
-playerId: winnerObj?.id
-});
+  let totals = {};
+  selected.forEach(p => totals[p.name] = 0);
+  for(let g of games){
+    for(let p of selected){
+      let val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
+      totals[p.name] += val;
+      await db.collection("gameRanking").add({game:g, player:p.name, playerId:p.id, points:val, tournament:Date.now()});
+    }
+  }
+  let winner = Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+  let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
+  ranking.forEach((p,i)=>{ html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`; });
+  html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
+  document.getElementById("gamesArea").innerHTML = html;
+  for(let p in totals){
+    let playerObj = selected.find(x => x.name === p);
+    db.collection("ranking").add({name:p, playerId:playerObj?.id, points:totals[p]});
+  }
+  let winnerObj = selected.find(x => x.name === winner);
+  db.collection("palmares").add({name:winner, playerId:winnerObj?.id});
 }
 
 /* PALMARES */
 async function loadPalmares(){
-let snap=await db.collection("palmares").get();
-let data={};
-
-snap.forEach(d=>{
-data[d.data().name]=(data[d.data().name]||0)+1;
-});
-
-let html="";
-Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-html+=`<div class="box">${p[0]} 🏆 ${p[1]}
-<button onclick="editPalmares('${p[0]}',${p[1]})">✏️</button>
-<button onclick="deleteByName('palmares','${p[0]}')">❌</button></div>`;
-});
-palmaresList.innerHTML=html;
+  let snap = await db.collection("palmares").get();
+  let data = {};
+  snap.forEach(d=>{ data[d.data().name] = (data[d.data().name]||0) + 1; });
+  let html = "";
+  Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
+    html += `<div class="box">${p[0]} 🏆 ${p[1]}
+      <button onclick="editPalmares('${p[0]}',${p[1]})">✏️</button>
+      <button onclick="deleteByName('palmares','${p[0]}')">❌</button></div>`;
+  });
+  document.getElementById("palmaresList").innerHTML = html;
 }
 
-async function editPalmares(name,count){
-let n = prompt("Titoli", count);
-if(!n) return;
-
-let snap = await db.collection("palmares").get();
-
-let current = count;
-let target = parseInt(n);
-
-if(target > current){
-for(let i=0;i<target-current;i++){
-await db.collection("palmares").add({name:name});
-}
-}else{
-let toDelete = current - target;
-
-snap.forEach(async d=>{
-if(toDelete>0 && d.data().name===name){
-await db.collection("palmares").doc(d.id).delete();
-toDelete--;
-}
-});
+async function editPalmares(name, count){
+  let n = prompt("Titoli", count);
+  if(!n) return;
+  let snap = await db.collection("palmares").get();
+  let target = parseInt(n);
+  if(target > count){
+    for(let i=0;i<target-count;i++) await db.collection("palmares").add({name:name});
+  } else {
+    let toDelete = count - target;
+    snap.forEach(async d=>{
+      if(toDelete>0 && d.data().name===name){ await db.collection("palmares").doc(d.id).delete(); toDelete--; }
+    });
+  }
+  loadPalmares();
 }
 
-loadPalmares();
-}
 function resetTorneo(){
-
-gamesArea.innerHTML = "";
-selected = [];
-
-loadSelect();
-
-/* reset UNO */
-unoScores = {};
+  document.getElementById("gamesArea").innerHTML = "";
+  selected = [];
+  loadSelect();
+  unoScores = {};
 }
 
 /* CLASSIFICA */
 async function loadRanking(){
-let snap=await db.collection("ranking").get();
-let data={};
-
-snap.forEach(d=>{
-data[d.data().name]=(data[d.data().name]||0)+d.data().points;
-});
-
-let html="";
-Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-html+=`<div class="box">${p[0]} ${p[1]}
-<button onclick="editRanking('${p[0]}',${p[1]})">✏️</button>
-<button onclick="deleteByName('ranking','${p[0]}')">❌</button></div>`;
-});
-rankingList.innerHTML=html;
+  let snap = await db.collection("ranking").get();
+  let data = {};
+  snap.forEach(d=>{ data[d.data().name] = (data[d.data().name]||0) + d.data().points; });
+  let html = "";
+  Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
+    html += `<div class="box">${p[0]} ${p[1]}
+      <button onclick="editRanking('${p[0]}',${p[1]})">✏️</button>
+      <button onclick="deleteByName('ranking','${p[0]}')">❌</button></div>`;
+  });
+  document.getElementById("rankingList").innerHTML = html;
 }
 
-async function editRanking(name,pts){
-
-let n = prompt("Punti", pts);
-if(!n) return;
-
-let snap = await db.collection("ranking").get();
-
-let updated = false;
-
-for(let d of snap.docs){
-if(d.data().name === name && !updated){
-
-await db.collection("ranking").doc(d.id).update({
-points: parseInt(n)
-});
-
-updated = true;
-}
-}
-
-loadRanking();
+async function editRanking(name, pts){
+  let n = prompt("Punti", pts);
+  if(!n) return;
+  let snap = await db.collection("ranking").get();
+  let updated = false;
+  for(let d of snap.docs){
+    if(d.data().name === name && !updated){
+      await db.collection("ranking").doc(d.id).update({points:parseInt(n)});
+      updated = true;
+    }
+  }
+  loadRanking();
 }
 
 /* PER GIOCO */
 async function loadGames(){
-let snap=await db.collection("gameRanking").get();
-let data={};
-
-snap.forEach(d=>{
-let g = d.data().game;
-let p = d.data().player;
-let pts = d.data().points;
-
-/* BLOCCA DATI ROTTI */
-if(typeof p !== "string") return;
-
-if(!data[g])data[g]={};
-data[g][p]=(data[g][p]||0)+pts;
-});
-
-let html="";
-let allGames = [...games, "Merda"];
-
-for(let g of allGames){
-html+=`<div class="box">
-<h3>${g} <button onclick="openGamePopup('${g}')">➕</button></h3>`;
-if(data[g]){
-Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-html+=`${p[0]} ${p[1]}
-<button onclick="deleteGame('${g}','${p[0]}')">❌</button><br>`;
-});
-}
-html+="</div>";
-}
-gamesList.innerHTML=html;
+  let snap = await db.collection("gameRanking").get();
+  let data = {};
+  snap.forEach(d=>{
+    let g=d.data().game, p=d.data().player, pts=d.data().points;
+    if(typeof p !== "string") return;
+    if(!data[g]) data[g]={};
+    data[g][p] = (data[g][p]||0) + pts;
+  });
+  let html = "";
+  let allGames = [...games, "Merda"];
+  for(let g of allGames){
+    html += `<div class="box"><h3>${g} <button onclick="openGamePopup('${g}')">➕</button></h3>`;
+    if(data[g]){
+      Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
+        html += `${p[0]} ${p[1]} <button onclick="deleteGame('${g}','${p[0]}')">❌</button><br>`;
+      });
+    }
+    html += "</div>";
+  }
+  document.getElementById("gamesList").innerHTML = html;
 }
 
-/* DELETE */
-async function deleteByName(col,name){
-
-let snap = await db.collection(col).get();
-
-let found = false;
-
-for(let d of snap.docs){
-if(d.data().name === name && !found){
-await db.collection(col).doc(d.id).delete();
-found = true;
-}
+async function deleteByName(col, name){
+  let snap = await db.collection(col).get();
+  let found = false;
+  for(let d of snap.docs){
+    if(d.data().name === name && !found){ await db.collection(col).doc(d.id).delete(); found = true; }
+  }
+  show(col);
 }
 
-show(col);
+async function deleteGame(g, p){
+  let snap = await db.collection("gameRanking").get();
+  snap.forEach(async d=>{
+    if(d.data().game===g && d.data().player===p) await db.collection("gameRanking").doc(d.id).delete();
+  });
+  loadGames();
 }
 
-async function deleteGame(g,p){
-let snap=await db.collection("gameRanking").get();
-snap.forEach(async d=>{
-if(d.data().game===g && d.data().player===p){
-await db.collection("gameRanking").doc(d.id).delete();
-}
-});
-loadGames();
-}
-/* 🔥 POPUP SYSTEM */
-
-function openPopup(type){
-currentType = type;
-document.getElementById("popup").style.display = "block";
-}
-function openGamePopup(game){
-currentType = "games";
-currentGame = game;
-document.getElementById("popup").style.display = "block";
-}
+/* POPUP */
+function openPopup(type){ currentType=type; document.getElementById("popup").style.display="flex"; }
+function openGamePopup(game){ currentType="games"; currentGame=game; document.getElementById("popup").style.display="flex"; }
 function closePopup(){
-document.getElementById("popup").style.display = "none";
-document.getElementById("popupName").value="";
-document.getElementById("popupPoints").value="";
+  document.getElementById("popup").style.display="none";
+  document.getElementById("popupName").value="";
+  document.getElementById("popupPoints").value="";
 }
 
 async function confirmAdd(){
-  if(!user){
-    alert("Devi fare il login");
-    return;
-  } 
-
+  if(!user){ alert("Devi fare il login"); return; }
   let name = document.getElementById("popupName").value;
   let pts  = parseInt(document.getElementById("popupPoints").value) || 0;
-
-  if(currentType==="palmares"){
-    await db.collection("palmares").add({name:name});
-    loadPalmares();
-  }
-
-
-
-if(currentType==="ranking"){
-await db.collection("ranking").add({name:name, points:pts});
-loadRanking();
+  if(currentType==="palmares"){ await db.collection("palmares").add({name:name}); loadPalmares(); }
+  if(currentType==="ranking"){  await db.collection("ranking").add({name:name, points:pts}); loadRanking(); }
+  if(currentType==="games"){    await db.collection("gameRanking").add({player:name, game:currentGame, points:pts}); loadGames(); }
+  closePopup();
 }
 
-if(currentType==="games"){
-
-await db.collection("gameRanking").add({
-player:name,
-game:currentGame,
-points:pts
-});
-
-loadGames();
-}
-
-closePopup();
-}  
-
-
-
+/* SLOT */
 let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
 let slotSpinning = false;
 
 function spinSlot(){
-
-if(slotSpinning) return;
-if(slotOptions.length === 0){
-alert("Premi reset");
-return;
-}
-slotSpinning = true;
-
-let slot = document.getElementById("slot");
-
-let speed = 50;
-let duration = 2000;
-let elapsed = 0;
-
-let interval = setInterval(()=>{
-
-let random = slotOptions[Math.floor(Math.random()*slotOptions.length)];
-slot.innerText = random;
-
-elapsed += speed;
-
-if(elapsed >= duration){
-
-clearInterval(interval);
-
-/* rallentamento finale */
-let slow = setInterval(()=>{
-slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)];
-},120);
-
-setTimeout(()=>{
-
-clearInterval(slow);
-
-let index = Math.floor(Math.random()*slotOptions.length);
-let result = slotOptions[index];
-
-slot.innerText = result;
-
-document.getElementById("wheelResult").innerHTML = "🎯 " + result;
-
-/* rimuove */
-slotOptions.splice(index,1);
-
-slotSpinning = false;
-
-if(slotOptions.length === 0){
-alert("🔁 Finite tutte! Premi reset");
-}
-
-},800);
-
-}
-
-},speed);
+  if(slotSpinning) return;
+  if(slotOptions.length === 0){ alert("Premi reset"); return; }
+  slotSpinning = true;
+  let slot = document.getElementById("slot");
+  let speed=50, duration=2000, elapsed=0;
+  let interval = setInterval(()=>{
+    slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)];
+    elapsed += speed;
+    if(elapsed >= duration){
+      clearInterval(interval);
+      let slow = setInterval(()=>{ slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)]; },120);
+      setTimeout(()=>{
+        clearInterval(slow);
+        let index = Math.floor(Math.random()*slotOptions.length);
+        let result = slotOptions[index];
+        slot.innerText = result;
+        document.getElementById("wheelResult").innerHTML = "🎯 " + result;
+        slotOptions.splice(index,1);
+        slotSpinning = false;
+        if(slotOptions.length === 0) alert("🔁 Finite tutte! Premi reset");
+      },800);
+    }
+  },speed);
 }
 
 function resetSlot(){
-slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-document.getElementById("slot").innerText = "?";
-document.getElementById("wheelResult").innerHTML = "";
+  slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
+  document.getElementById("slot").innerText = "?";
+  document.getElementById("wheelResult").innerHTML = "";
 }
+
 function startSlotPro(winner){
-
-let reels = [
-document.getElementById("reel1"),
-document.getElementById("reel2"),
-document.getElementById("reel3")
-];
-
-let names = selected.map(p => p.name);
-
-/* reset */
-reels.forEach(r=>{
-r.innerText = "";
-});
-
-/* funzione rullo */
-function spinReel(reel, stopDelay){
-
-let speed = 40;
-let elapsed = 0;
-
-let interval = setInterval(()=>{
-
-let random = names[Math.floor(Math.random()*names.length)];
-reel.innerText = random;
-
-elapsed += speed;
-
-if(elapsed >= stopDelay){
-
-clearInterval(interval);
-
-/* rallenta */
-let slow = setInterval(()=>{
-reel.innerText = names[Math.floor(Math.random()*names.length)];
-},120);
-
-setTimeout(()=>{
-clearInterval(slow);
-reel.innerText = winner;
-},600);
-
+  let reels = [document.getElementById("reel1"),document.getElementById("reel2"),document.getElementById("reel3")];
+  let names = selected.map(p=>p.name);
+  reels.forEach(r=>{ r.innerText=""; });
+  function spinReel(reel, stopDelay){
+    let speed=40, elapsed=0;
+    let interval = setInterval(()=>{
+      reel.innerText = names[Math.floor(Math.random()*names.length)];
+      elapsed += speed;
+      if(elapsed >= stopDelay){
+        clearInterval(interval);
+        let slow = setInterval(()=>{ reel.innerText = names[Math.floor(Math.random()*names.length)]; },120);
+        setTimeout(()=>{ clearInterval(slow); reel.innerText = winner; },600);
+      }
+    },speed);
+  }
+  spinReel(reels[0],1500);
+  spinReel(reels[1],2200);
+  spinReel(reels[2],3000);
+  setTimeout(()=>{
+    alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
+    document.getElementById("gamesArea").innerHTML = `<h2>🏆 ${winner}</h2><button onclick="resetTorneo()">Nuovo Torneo</button>`;
+    document.getElementById("slotContainer").style.display="none";
+  },3500);
 }
 
-}, speed);
-}
-
-/* 3 rulli */
-spinReel(reels[0], 1500);
-spinReel(reels[1], 2200);
-spinReel(reels[2], 3000);
-
-/* finale */
-setTimeout(()=>{
-
-alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
-
-document.getElementById("gamesArea").innerHTML = `
-<h2>🏆 ${winner}</h2>
-<button onclick="resetTorneo()">Nuovo Torneo</button>
-`;
-
-document.getElementById("slotContainer").style.display="none";
-
-}, 3500);
-
-}  
 function login(){
   auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 }
-  
 </script>
-
 </body>
 </html>
