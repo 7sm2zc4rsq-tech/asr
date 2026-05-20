@@ -4,171 +4,900 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Torneo Del Porco Di Dio</title>
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
---bg: #0a0f1c;
---card: rgba(20, 30, 60, 0.6);
---border: rgba(0, 140, 255, 0.2);
---text: #e6f0ff;
---subtext: #7f9ccf;
---accent: #0070f3;
---glow: #00aaff;
+:root {
+  --bg:       #0c0c0e;
+  --surface:  #131316;
+  --surface2: #1a1a1f;
+  --gold:     #c9a84c;
+  --gold2:    #e8c96a;
+  --goldDim:  rgba(201,168,76,0.18);
+  --goldBorder: rgba(201,168,76,0.35);
+  --text:     #f0ead8;
+  --muted:    #7a7060;
+  --danger:   #c0392b;
+  --radius:   14px;
 }
-.reel{
-width:120px;height:120px;background:black;border:3px solid gold;border-radius:10px;
-display:flex;align-items:center;justify-content:center;font-size:18px;color:white;box-shadow:0 0 15px gold;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
-body{
-margin:0;font-family:'Orbitron', sans-serif;color:var(--text);
-background:radial-gradient(circle at 20% 20%, rgba(0,120,255,0.15), transparent 40%),
-radial-gradient(circle at 80% 0%, rgba(0,80,200,0.2), transparent 40%),#0a0f1c;
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
 }
-h1{font-family:'Anton',sans-serif;font-size:38px;color:#ff4500;text-transform:uppercase;letter-spacing:4px;
-text-shadow:0 0 10px red,0 0 20px orange,0 0 40px red,0 0 80px orange;}
-.screen{display:none;}.active{display:block;}
-.menu button{display:block;width:90%;margin:15px auto;padding:25px;font-size:28px;font-weight:900;
-font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;text-transform:uppercase;
-letter-spacing:3px;color:#fff;background:rgba(255,255,255,0.08);border:2px solid rgba(255,100,0,0.6);
-border-radius:25px;cursor:pointer;box-shadow:0 0 10px rgba(255,100,0,0.6),inset 0 0 10px rgba(255,100,0,0.4);
-transition:all 0.25s ease;backdrop-filter:blur(6px);}
-.menu button:hover{transform:scale(1.08);background:rgba(255,100,0,0.2);
-box-shadow:0 0 20px rgba(255,100,0,1),0 0 40px rgba(255,50,0,0.8),inset 0 0 15px rgba(255,100,0,0.7);}
-.menu button:active{transform:scale(0.95);box-shadow:0 0 5px rgba(255,100,0,0.8),inset 0 0 20px rgba(255,50,0,0.8);}
-.box{background:var(--card);backdrop-filter:blur(20px);border-radius:20px;padding:16px;margin:12px;
-border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:0.2s;}
-.box:hover{transform:scale(1.02);}
-input{padding:10px;margin:6px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);
-background:#0f1115;color:var(--text);outline:none;transition:0.2s;}
-input:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(108,92,231,0.4);}
-#wheel{width:260px;height:260px;border-radius:50%;margin:auto;transition:transform 4s ease-out;position:relative;}
-#pointer{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;
-border-bottom:30px solid white;margin:auto;}
-.playerBox{cursor:pointer;transition:0.2s;}
-.playerBox:hover{background:rgba(255,100,0,0.3);transform:scale(1.05);box-shadow:0 0 15px orange;}
-h3{color:var(--text);font-weight:600;}
-button{background:linear-gradient(135deg, #0070f3, #00aaff);border:none;border-radius:12px;
-padding:10px 18px;color:white;font-weight:600;box-shadow:0 0 10px rgba(0,120,255,0.5);transition:0.2s;cursor:pointer;}
-button:hover{box-shadow:0 0 20px rgba(0,140,255,0.9),0 0 40px rgba(0,140,255,0.6);}
-button:active{transform:scale(0.95);}
-.homeGrid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:20px;padding:10px;}
-.homeCard{background:rgba(10,20,40,0.8);border-radius:20px;padding:20px;
-border:1px solid rgba(0,120,255,0.2);box-shadow:0 0 10px rgba(0,120,255,0.2),0 0 30px rgba(0,120,255,0.1);
-transition:0.25s;cursor:pointer;}
-.homeCard:hover{transform:scale(1.06);box-shadow:0 0 20px rgba(0,140,255,0.6),0 0 40px rgba(0,140,255,0.4);}
-.titleMain{
-font-family:'Audiowide',sans-serif;font-size:60px;letter-spacing:4px;color:#00eaff;
-text-shadow:0 0 10px #00eaff,0 0 25px #008cff,0 0 50px rgba(0,140,255,0.8);
-position:relative;animation:titleIntro 1s ease-out;overflow:hidden;
+
+/* ── SCREENS ── */
+.screen { display: none; position: relative; z-index: 1; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── PAGE WRAPPER ── */
+.page {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  flex: 1;
 }
-@keyframes titleIntro{
-0%{opacity:0;transform:translateY(-20px) scale(0.95);filter:blur(8px);}
-100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+
+/* ── TOP NAV BAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--goldBorder);
+  background: rgba(12,12,14,0.95);
+  backdrop-filter: blur(16px);
+  position: sticky; top: 0; z-index: 100;
 }
-.titleMain::after{
-content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
-background:linear-gradient(120deg,transparent,rgba(255,255,255,0.3),transparent);
-animation:shine 3s infinite;
+.topbar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--gold);
 }
-@keyframes shine{0%{left:-100%;}100%{left:100%;}}
+.back-btn {
+  background: none;
+  border: 1px solid var(--goldBorder);
+  color: var(--gold);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.back-btn:hover { background: var(--goldDim); box-shadow: none; }
+
+/* ── HOME HERO ── */
+.hero {
+  text-align: center;
+  padding: 70px 20px 50px;
+  position: relative;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--goldBorder), transparent);
+}
+.hero-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s 0.1s ease forwards;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(38px, 10vw, 80px);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.25s ease forwards;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold);
+  display: block;
+}
+.hero-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(18px, 5vw, 28px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 12px;
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.4s ease forwards;
+}
+.hero-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 36px auto;
+  max-width: 260px;
+  opacity: 0;
+  animation: fadeUp 0.6s 0.55s ease forwards;
+}
+.hero-divider::before, .hero-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--goldBorder);
+}
+.hero-divider span {
+  font-size: 14px;
+  color: var(--gold);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── LOGIN STATUS ── */
+#loginStatus {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding: 0 0 28px;
+}
+#loginStatus.ok { color: var(--gold); }
+
+/* ── LOGIN BUTTON ── */
+.login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 12px;
+  padding: 13px 32px;
+  background: none;
+  border: 1px solid var(--goldBorder);
+  border-radius: 40px;
+  color: var(--gold);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.login-btn:hover {
+  background: var(--goldDim);
+  border-color: var(--gold);
+  box-shadow: 0 0 30px rgba(201,168,76,0.15);
+}
+
+/* ── HOME GRID ── */
+.homeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 40px 0 0;
+}
+.homeCard {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.homeCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--goldBorder), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.homeCard:hover { transform: translateY(-3px); border-color: var(--goldBorder); }
+.homeCard:hover::before { opacity: 1; }
+.homeCard:active { transform: translateY(0) scale(0.98); }
+.homeCard-icon { font-size: 26px; margin-bottom: 14px; display: block; }
+.homeCard h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.homeCard p {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── SECTION HEADER ── */
+.section-header {
+  padding: 36px 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 24px;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+.section-title span { color: var(--gold); font-style: italic; }
+
+/* ── CARDS / BOXES ── */
+.box {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.box:hover { border-color: var(--goldBorder); }
+.box-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+}
+.box-pts {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+.box-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* ── RANK BADGE ── */
+.rank-badge {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--goldDim);
+  border: 1px solid var(--goldBorder);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.rank-badge.gold { background: var(--gold); color: #0c0c0e; border-color: var(--gold2); }
+.rank-badge.silver { background: #888; color: #0c0c0e; border-color: #aaa; }
+.rank-badge.bronze { background: #a0522d; color: #f0ead8; border-color: #cd853f; }
+
+/* ── BUTTONS ── */
+button {
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-gold {
+  background: var(--gold);
+  color: #0c0c0e;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 28px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.btn-gold:hover { background: var(--gold2); box-shadow: 0 4px 20px rgba(201,168,76,0.35); }
+.btn-gold:active { transform: scale(0.97); }
+
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--goldBorder);
+  color: var(--gold);
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.btn-ghost:hover { background: var(--goldDim); box-shadow: none; }
+
+.btn-icon {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1;
+}
+.btn-icon:hover { border-color: var(--goldBorder); color: var(--gold); box-shadow: none; }
+
+.btn-danger {
+  background: none;
+  border: 1px solid rgba(192,57,43,0.3);
+  color: #e74c3c;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.btn-danger:hover { background: rgba(192,57,43,0.15); box-shadow: none; }
+
+/* ── INPUT ── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+input[type=text], input[type=number], input:not([type]) {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus { border-color: var(--gold); }
+
+/* ── PLAYER BOXES ── */
+.playerBox { cursor: pointer; }
+.playerBox:hover { border-color: var(--goldBorder); background: var(--surface2); }
+
+/* ── ADD ROW ── */
+.add-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+  align-items: center;
+}
+.add-row input { flex: 1; margin: 0; }
+
+/* ── CHECKBOX LIST ── */
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.check-item:hover { border-color: var(--goldBorder); }
+.check-item input[type=checkbox] {
+  width: 18px; height: 18px;
+  accent-color: var(--gold);
+  flex-shrink: 0;
+  margin: 0; padding: 0;
+}
+.check-item span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ── SCORE INPUT ROWS ── */
+.score-game-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--gold);
+  margin: 30px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--goldBorder);
+}
+.score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.score-row span {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+.score-row input {
+  width: 80px;
+  text-align: center;
+  padding: 8px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  margin: 0;
+}
+
+/* ── LIVE RANKING ── */
+#liveRanking {
+  margin: 24px 0;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+}
+#liveRanking h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+/* ── UNO SECTION ── */
+.uno-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: #e8c96a;
+  margin: 30px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(232,201,106,0.3);
+}
+.uno-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+.uno-box span.uno-name { flex: 1; font-size: 14px; font-weight: 500; }
+.uno-box input { width: 70px; margin: 0; }
+.uno-box .uno-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  color: var(--gold);
+  min-width: 50px;
+  text-align: right;
+}
+.uno-eliminated {
+  background: rgba(139,0,0,0.2) !important;
+  border-color: rgba(192,57,43,0.4) !important;
+  opacity: 0.6;
+}
+
+/* ── SLOT ── */
+.slot-section {
+  text-align: center;
+  margin: 40px 0;
+  padding: 32px 20px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: 20px;
+}
+.slot-section h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--gold);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+#slot {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gold);
+  padding: 28px 20px;
+  border: 1px solid var(--goldBorder);
+  border-radius: 16px;
+  width: 220px;
+  margin: 0 auto 20px;
+  background: var(--bg);
+  letter-spacing: 1px;
+}
+#wheelResult {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold2);
+  margin: 16px 0;
+  min-height: 30px;
+}
+.slot-btns { display: flex; gap: 12px; justify-content: center; }
+.reel {
+  width: 110px; height: 110px;
+  background: var(--bg);
+  border: 1px solid var(--goldBorder);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--gold);
+}
+
+/* ── PALMARES ── */
+.palmares-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.palmares-item:hover { border-color: var(--goldBorder); }
+.palmares-item .p-name { flex: 1; font-size: 15px; font-weight: 500; }
+.palmares-item .p-trophies {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold);
+}
+
+/* ── GAME BLOCKS ── */
+.game-block {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.game-block-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.game-block-title h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--gold);
+}
+.game-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.game-row:last-child { border-bottom: none; }
+.game-row-name { font-size: 13px; font-weight: 400; color: var(--text); }
+.game-row-pts {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--gold);
+}
+
+/* ── POPUP ── */
+#popup {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.popup-inner {
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+}
+.popup-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 24px;
+  text-align: center;
+}
+.popup-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.popup-btns button { flex: 1; }
+
+/* ── STATS PAGE ── */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+.stat-card-icon { font-size: 24px; }
+.stat-card-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.stat-card-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ── ACTION BAR (bottom float) ── */
+.action-bar {
+  position: sticky;
+  bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 20px;
+  pointer-events: none;
+}
+.action-bar button { pointer-events: all; }
+
+/* ── FINAL RANKING ── */
+.final-winner {
+  text-align: center;
+  padding: 40px 20px 30px;
+}
+.final-winner-crown { font-size: 52px; margin-bottom: 10px; }
+.final-winner-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--gold);
+  font-style: italic;
+}
+.final-winner-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ── DIVIDER LINE ── */
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+  margin: 24px 0;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--goldBorder); border-radius: 4px; }
 </style>
 </head>
 <body>
-<div class="overlay">
 
-<!-- HOME -->
+<!-- ══════════ HOME ══════════ -->
 <div id="home" class="screen active">
-<div class="hero">
-<div class="titleMain">Torneo</div>
-<div class="titleSub">Del Porco di Dio</div>
-<div class="titleTag">Modalità competitiva</div>
-<div class="titleTag">🔥 Piangi • e Bestemmia 🔥</div>
-</div>
-<button onclick="login()">🔐 Login</button>
-<div id="loginStatus" style="padding:10px;font-size:14px;color:#7f9ccf;"></div>
-<div class="homeGrid">
-<div class="homeCard" onclick="show('tournament')">🎮<h2>Nuovo Torneo</h2><p>Avvia una nuova partita</p></div>
-<div class="homeCard" onclick="show('players')">👥<h2>Giocatori</h2><p>Gestisci i player</p></div>
-<div class="homeCard" onclick="show('palmares')">🏆<h2>Palmares</h2><p>Storico vittorie</p></div>
-<div class="homeCard" onclick="show('ranking')">⭐<h2>Classifica</h2><p>Punti totali</p></div>
-<div class="homeCard" onclick="show('games')">🎯<h2>Per Gioco</h2><p>Statistiche dettagliate</p></div>
-</div>
-</div>
-
-<!-- GIOCATORI -->
-<div id="players" class="screen">
-<input id="playerName" placeholder="Nome giocatore">
-<button onclick="addPlayer()">Aggiungi</button>
-<div id="playersList"></div>
-<button onclick="show('home')">⬅️</button>
-</div>
-
-<div id="playerPage" class="screen">
-<h2 id="playerTitle"></h2>
-<div id="playerStats"></div>
-<button onclick="show('players')">⬅️</button>
-</div>
-
-<!-- TORNEO -->
-<div id="tournament" class="screen">
-<h2>Seleziona Giocatori</h2>
-<div id="selectPlayers"></div>
-<button onclick="startGames()">Inizia</button>
-<div id="gamesArea"></div>
-<h3>🎰 Slot Game</h3>
-<div id="slot" style="font-size:30px;padding:20px;border:2px solid gold;border-radius:15px;width:200px;margin:auto;background:black;box-shadow:0 0 20px gold;">?</div>
-<br>
-<button onclick="spinSlot()">Gira</button>
-<button onclick="resetSlot()">Reset</button>
-<div id="wheelResult"></div>
-<div id="slotContainer" style="display:none; margin-top:20px;">
-  <div style="display:flex; justify-content:center; gap:10px;">
-    <div class="reel" id="reel1"></div>
-    <div class="reel" id="reel2"></div>
-    <div class="reel" id="reel3"></div>
+  <div class="page" style="padding-top:0; padding-bottom:0;">
+    <div class="hero">
+      <div class="hero-eyebrow">Modalità Competitiva</div>
+      <div class="hero-title">Il Torneo<em>Del Porco di Dio</em></div>
+      <div class="hero-subtitle">Piangi &amp; Bestemmia</div>
+      <div class="hero-divider"><span>✦</span></div>
+      <button class="login-btn" onclick="login()">
+        <span>🔐</span><span>Accedi con Google</span>
+      </button>
+      <div id="loginStatus"></div>
+    </div>
+    <div class="homeGrid">
+      <div class="homeCard" onclick="show('tournament')">
+        <span class="homeCard-icon">🎮</span>
+        <h2>Nuovo Torneo</h2>
+        <p>Avvia una nuova partita</p>
+      </div>
+      <div class="homeCard" onclick="show('players')">
+        <span class="homeCard-icon">👥</span>
+        <h2>Giocatori</h2>
+        <p>Gestisci i player</p>
+      </div>
+      <div class="homeCard" onclick="show('palmares')">
+        <span class="homeCard-icon">🏆</span>
+        <h2>Palmares</h2>
+        <p>Storico vittorie</p>
+      </div>
+      <div class="homeCard" onclick="show('ranking')">
+        <span class="homeCard-icon">⭐</span>
+        <h2>Classifica</h2>
+        <p>Punti totali</p>
+      </div>
+      <div class="homeCard" style="grid-column: span 2;" onclick="show('games')">
+        <span class="homeCard-icon">🎯</span>
+        <h2>Per Gioco</h2>
+        <p>Statistiche dettagliate per ogni gioco</p>
+      </div>
+    </div>
   </div>
 </div>
-<button onclick="show('home')">⬅️</button>
+
+<!-- ══════════ GIOCATORI ══════════ -->
+<div id="players" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">Giocatori</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">I tuoi <span>player</span></div>
+    </div>
+    <div class="add-row">
+      <input id="playerName" type="text" placeholder="Nome giocatore">
+      <button class="btn-gold" onclick="addPlayer()">+ Aggiungi</button>
+    </div>
+    <div id="playersList"></div>
+  </div>
 </div>
 
-<!-- PALMARES -->
+<!-- ══════════ PLAYER PAGE ══════════ -->
+<div id="playerPage" class="screen">
+  <div class="topbar">
+    <span class="topbar-title" id="playerTitle"></span>
+    <button class="back-btn" onclick="show('players')">← Indietro</button>
+  </div>
+  <div class="page">
+    <div class="section-header" style="padding-top:24px;">
+      <div class="section-title">Statistiche</div>
+    </div>
+    <div id="playerStats"></div>
+  </div>
+</div>
+
+<!-- ══════════ TORNEO ══════════ -->
+<div id="tournament" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">Torneo</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">Seleziona <span>giocatori</span></div>
+    </div>
+    <div id="selectPlayers"></div>
+    <div style="margin:20px 0;">
+      <button class="btn-gold" onclick="startGames()">Inizia il torneo →</button>
+    </div>
+    <div id="gamesArea"></div>
+
+    <!-- SLOT -->
+    <div class="slot-section">
+      <h3>🎰 Slot Game</h3>
+      <div id="slot">?</div>
+      <div id="wheelResult"></div>
+      <div class="slot-btns">
+        <button class="btn-gold" onclick="spinSlot()">Gira</button>
+        <button class="btn-ghost" onclick="resetSlot()">Reset</button>
+      </div>
+      <div id="slotContainer" style="display:none; margin-top:24px;">
+        <div style="display:flex; justify-content:center; gap:12px;">
+          <div class="reel" id="reel1"></div>
+          <div class="reel" id="reel2"></div>
+          <div class="reel" id="reel3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PALMARES ══════════ -->
 <div id="palmares" class="screen">
-<div id="palmaresList"></div>
-<button onclick="openPopup('palmares')">➕</button>
-<button onclick="show('home')">⬅️</button>
+  <div class="topbar">
+    <span class="topbar-title">Palmares</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">Hall of <span>Glory</span></div>
+    </div>
+    <div id="palmaresList"></div>
+    <div style="margin-top:16px;">
+      <button class="btn-ghost" onclick="openPopup('palmares')">+ Aggiungi vittoria</button>
+    </div>
+  </div>
 </div>
 
-<!-- CLASSIFICA -->
+<!-- ══════════ CLASSIFICA ══════════ -->
 <div id="ranking" class="screen">
-<div id="rankingList"></div>
-<button onclick="openPopup('ranking')">➕</button>
-<button onclick="show('home')">⬅️</button>
+  <div class="topbar">
+    <span class="topbar-title">Classifica</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">Punti <span>totali</span></div>
+    </div>
+    <div id="rankingList"></div>
+    <div style="margin-top:16px;">
+      <button class="btn-ghost" onclick="openPopup('ranking')">+ Aggiungi punteggio</button>
+    </div>
+  </div>
 </div>
 
-<!-- PER GIOCO -->
+<!-- ══════════ PER GIOCO ══════════ -->
 <div id="games" class="screen">
-<div id="gamesList"></div>
-<button onclick="openPopup('games')">➕</button>
-<button onclick="show('home')">⬅️</button>
+  <div class="topbar">
+    <span class="topbar-title">Per Gioco</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">Statistiche <span>per gioco</span></div>
+    </div>
+    <div id="gamesList"></div>
+  </div>
 </div>
 
-</div>
-
-<!-- POPUP -->
-<div id="popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;">
-  <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.4);padding:30px;border-radius:20px;text-align:center;">
-    <h2>AGGIUNGI</h2>
-    <input id="popupName" placeholder="Nome"><br><br>
-    <input id="popupPoints" placeholder="Punti"><br><br>
-    <button onclick="confirmAdd()">SALVA</button>
-    <button onclick="closePopup()">CHIUDI</button>
+<!-- ══════════ POPUP ══════════ -->
+<div id="popup" style="display:none;">
+  <div class="popup-inner">
+    <div class="popup-title">Aggiungi</div>
+    <div class="field">
+      <label>Nome</label>
+      <input id="popupName" type="text" placeholder="Nome giocatore">
+    </div>
+    <div class="field">
+      <label>Punti</label>
+      <input id="popupPoints" type="number" placeholder="0">
+    </div>
+    <div class="popup-btns">
+      <button class="btn-gold" onclick="confirmAdd()">Salva</button>
+      <button class="btn-ghost" onclick="closePopup()">Annulla</button>
+    </div>
   </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
@@ -179,31 +908,24 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const auth = firebase.auth();
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
-
-// currentUser viene aggiornato da onAuthStateChanged
 let currentUser = null;
 
 auth.onAuthStateChanged(u => {
   currentUser = u;
-  const statusEl = document.getElementById("loginStatus");
-  if (statusEl) {
-    if (u) {
-      const isAdm = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-      statusEl.innerHTML = isAdm
-        ? "✅ Admin: " + u.email
-        : "👤 Loggato: " + u.email + " (non admin)";
-    } else {
-      statusEl.innerHTML = "⚠️ Non loggato";
-    }
+  const el = document.getElementById("loginStatus");
+  if (!el) return;
+  if (u) {
+    const isAdm = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+    el.className = isAdm ? "ok" : "";
+    el.innerHTML = isAdm ? "✦ Admin: " + u.email : "Loggato: " + u.email;
+  } else {
+    el.className = "";
+    el.innerHTML = "Non loggato";
   }
 });
 
-// Controlla se l'utente corrente è admin
 async function checkAdmin() {
-  if (!currentUser) {
-    alert("Devi fare login prima. Usa il pulsante 🔐 Login.");
-    return false;
-  }
+  if (!currentUser) { alert("Devi fare login prima."); return false; }
   const ok = currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
   if (!ok) alert("Non autorizzato: " + currentUser.email);
   return ok;
@@ -215,256 +937,304 @@ let currentType = "";
 let currentGame = "";
 let unoScores = {};
 
-/* NAV */
-function show(id){
+/* ── NAV ── */
+function show(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  if(id==="players")   loadPlayers();
-  if(id==="ranking")   loadRanking();
-  if(id==="palmares")  loadPalmares();
-  if(id==="games")     loadGames();
-  if(id==="tournament")loadSelect();
+  window.scrollTo(0,0);
+  if (id==="players")   loadPlayers();
+  if (id==="ranking")   loadRanking();
+  if (id==="palmares")  loadPalmares();
+  if (id==="games")     loadGames();
+  if (id==="tournament") loadSelect();
 }
 
-/* GIOCATORI */
-async function addPlayer(){
+/* ── GIOCATORI ── */
+async function addPlayer() {
   if (!(await checkAdmin())) return;
-  let n = document.getElementById("playerName").value;
-  if(!n) return;
+  let n = document.getElementById("playerName").value.trim();
+  if (!n) return;
   await db.collection("players").add({name:n});
+  document.getElementById("playerName").value = "";
   loadPlayers();
 }
 
-async function loadPlayers(){
+async function loadPlayers() {
   let snap = await db.collection("players").get();
   let html = "";
-  snap.forEach(d=>{
+  snap.forEach(d => {
     html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
-      ${d.data().name}
-      <button onclick="event.stopPropagation(); editPlayer('${d.id}','${d.data().name}')">✏️</button>
-      <button onclick="event.stopPropagation(); deleteDoc('players','${d.id}')">❌</button>
+      <span class="box-name">${d.data().name}</span>
+      <div class="box-actions">
+        <button class="btn-icon" onclick="event.stopPropagation();editPlayer('${d.id}','${d.data().name}')">✏️</button>
+        <button class="btn-danger" onclick="event.stopPropagation();deleteDoc('players','${d.id}')">✕</button>
+      </div>
     </div>`;
   });
-  document.getElementById("playersList").innerHTML = html;
+  document.getElementById("playersList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun giocatore. Aggiungine uno!</p>';
 }
 
-async function editPlayer(id, oldName){
+async function editPlayer(id, oldName) {
   if (!(await checkAdmin())) return;
   let nuovo = prompt("Nuovo nome", oldName);
-  if(!nuovo) return;
+  if (!nuovo) return;
   await db.collection("players").doc(id).update({name:nuovo});
-  let cols = ["ranking","palmares","gameRanking"];
-  for(let col of cols){
+  for (let col of ["ranking","palmares","gameRanking"]) {
     let snap = await db.collection(col).get();
-    for(let d of snap.docs){
+    for (let d of snap.docs) {
       let data = d.data();
-      if(data.name === oldName)   await db.collection(col).doc(d.id).update({name:nuovo});
-      if(data.player === oldName) await db.collection(col).doc(d.id).update({player:nuovo});
+      if (data.name === oldName)   await db.collection(col).doc(d.id).update({name:nuovo});
+      if (data.player === oldName) await db.collection(col).doc(d.id).update({player:nuovo});
     }
   }
   loadPlayers();
 }
 
-async function openPlayer(id, name){
+async function openPlayer(id, name) {
   show("playerPage");
-  document.getElementById("playerTitle").innerHTML = "👤 " + name;
-
-  let palmaresSnap = await db.collection("palmares").get();
+  document.getElementById("playerTitle").innerHTML = name;
+  let [palSnap, rankSnap, gameSnap] = await Promise.all([
+    db.collection("palmares").get(),
+    db.collection("ranking").get(),
+    db.collection("gameRanking").get()
+  ]);
   let wins = 0;
-  palmaresSnap.forEach(d=>{ if(d.data().playerId === id) wins++; });
-
-  let rankingSnap = await db.collection("ranking").get();
+  palSnap.forEach(d => { if (d.data().playerId===id) wins++; });
   let totalPoints = 0;
-  rankingSnap.forEach(d=>{ if(d.data().playerId === id) totalPoints += d.data().points; });
-
-  let gameSnap = await db.collection("gameRanking").get();
-  let gameStats = {};
-  let tournaments = new Set();
-  gameSnap.forEach(d=>{
-    if(d.data().player === name){
+  rankSnap.forEach(d => { if (d.data().playerId===id) totalPoints += d.data().points; });
+  let gameStats = {}, tournaments = new Set();
+  gameSnap.forEach(d => {
+    if (d.data().player===name) {
       let g = d.data().game;
-      if(!gameStats[g]) gameStats[g] = 0;
+      if (!gameStats[g]) gameStats[g] = 0;
       gameStats[g] += d.data().points;
-      if(d.data().tournament) tournaments.add(d.data().tournament);
+      if (d.data().tournament) tournaments.add(d.data().tournament);
     }
   });
-
   let html = `
-    <div class="box">🏆 Titoli vinti: ${wins}</div>
-    <div class="box">⭐ Punti totali: ${totalPoints}</div>
-    <div class="box">🎯 Presenze torneo: ${tournaments.size}</div>
-    <div class="box"><h3>🎮 Per gioco</h3>`;
-  for(let g in gameStats) html += `${g}: ${gameStats[g]}<br>`;
-  html += `</div>`;
+    <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
+    <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
+    <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournaments.size}</div></div></div>`;
+  if (Object.keys(gameStats).length) {
+    html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
+    Object.entries(gameStats).sort((a,b)=>b[1]-a[1]).forEach(([g,p]) => {
+      html += `<div class="box"><span class="box-name">${g}</span><span class="box-pts">${p} pt</span></div>`;
+    });
+  }
   document.getElementById("playerStats").innerHTML = html;
 }
 
-async function deleteDoc(col, id){
+async function deleteDoc(col, id) {
   if (!(await checkAdmin())) return;
+  if (!confirm("Eliminare?")) return;
   await db.collection(col).doc(id).delete();
   show(col);
 }
 
-/* TORNEO */
-async function loadSelect(){
+/* ── TORNEO ── */
+async function loadSelect() {
   selected = [];
   let snap = await db.collection("players").get();
   let html = "";
-  snap.forEach(d=>{
-    html += `<input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)"> ${d.data().name}<br>`;
+  snap.forEach(d => {
+    html += `<label class="check-item">
+      <input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)">
+      <span>${d.data().name}</span>
+    </label>`;
   });
   document.getElementById("selectPlayers").innerHTML = html;
 }
 
-function toggle(e){
-  if(e.checked) selected.push({id:e.value, name:e.dataset.name});
+function toggle(e) {
+  if (e.checked) selected.push({id:e.value, name:e.dataset.name});
   else selected = selected.filter(p => p.id !== e.value);
 }
 
-function startGames(){
+function startGames() {
+  if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
   unoScores = {};
   let html = "";
-  games.forEach(g=>{
-    html += `<h3>${g}</h3>`;
-    selected.forEach(p=>{
-      html += `${p.name} <input id="${g}_${p.id}" value="0" oninput="updateLiveRanking()"><br>`;
+  games.forEach(g => {
+    html += `<div class="score-game-title">${g}</div>`;
+    selected.forEach(p => {
+      html += `<div class="score-row">
+        <span>${p.name}</span>
+        <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
+      </div>`;
     });
-    if(g === "UNO") html += `<div id="unoExtra"></div>`;
+    if (g==="UNO") html += `<div id="unoExtra"></div>`;
   });
-  html += `<div id="liveRanking"></div><button onclick="finish()">Fine Torneo</button>`;
+  html += `<div id="liveRanking"></div>
+    <div style="margin:28px 0;text-align:center;">
+      <button class="btn-gold" onclick="finish()">🏁 Fine Torneo</button>
+    </div>`;
   document.getElementById("gamesArea").innerHTML = html;
   createUnoExtra();
 }
 
-function updateLiveRanking(){
+function updateLiveRanking() {
   let totals = {};
   selected.forEach(p => totals[p.name] = 0);
-  for(let g of games){
-    for(let p of selected){
-      let val = parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
-      totals[p.name] += val;
-    }
-  }
-  let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-  let html = `<h3>🔥 CLASSIFICA LIVE</h3>`;
-  ranking.forEach((p,i)=>{ html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`; });
+  games.forEach(g => {
+    selected.forEach(p => {
+      totals[p.name] += parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
+    });
+  });
+  let sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  let html = `<h3>🔥 Classifica Live</h3>`;
+  sorted.forEach(([name, pts], i) => {
+    let badge = i===0 ? 'gold' : i===1 ? 'silver' : i===2 ? 'bronze' : '';
+    html += `<div class="box" style="margin-bottom:8px;">
+      <div class="rank-badge ${badge}">${i+1}</div>
+      <span class="box-name">${name}</span>
+      <span class="box-pts">${pts} pt</span>
+    </div>`;
+  });
   document.getElementById("liveRanking").innerHTML = html;
 }
 
-function createUnoExtra(){
-  let html = `<h3 style="color:orange;text-shadow:0 0 10px orange;font-size:22px;margin-top:20px;">🔥 UNO - Eliminazione (51)</h3>`;
-  selected.forEach(p=>{
-    html += `<div class="box" id="unoBox_${p.id}">
-      ${p.name}
-      <input type="number" id="unoInput_${p.id}" placeholder="punti" style="width:70px;margin-left:10px;">
-      <button onclick="setUno('${p.id}')">OK</button>
-      <span id="unoScore_${p.id}">0</span>/51
+function createUnoExtra() {
+  let html = `<div class="uno-title">🃏 UNO — Eliminazione (51)</div>`;
+  selected.forEach(p => {
+    html += `<div class="uno-box" id="unoBox_${p.id}">
+      <span class="uno-name">${p.name}</span>
+      <input type="number" id="unoInput_${p.id}" placeholder="pt" style="width:70px;">
+      <button class="btn-icon" onclick="setUno('${p.id}')">OK</button>
+      <span class="uno-score"><span id="unoScore_${p.id}">0</span>/51</span>
     </div>`;
   });
   document.getElementById("unoExtra").innerHTML = html;
 }
 
-function setUno(id){
+function setUno(id) {
   let input = document.getElementById("unoInput_"+id);
   let val = parseInt(input.value);
-  if(isNaN(val) || val <= 0) return;
-  if(!unoScores[id]) unoScores[id] = 0;
+  if (isNaN(val) || val <= 0) return;
+  if (!unoScores[id]) unoScores[id] = 0;
   unoScores[id] += val;
   document.getElementById("unoScore_"+id).innerText = unoScores[id];
   input.value = "";
-  if(unoScores[id] >= 51){
+  if (unoScores[id] >= 51) {
     let box = document.getElementById("unoBox_"+id);
-    box.style.background = "linear-gradient(45deg, darkred, black)";
-    box.style.boxShadow = "0 0 20px red";
-    box.style.transform = "scale(0.95)";
-    if(!box.innerHTML.includes("ELIMINATO")) box.innerHTML += " ❌ ELIMINATO";
+    box.classList.add("uno-eliminated");
+    if (!box.innerHTML.includes("ELIMINATO")) box.innerHTML += " <span style='color:#e74c3c;font-size:12px;font-weight:700;letter-spacing:1px;'>ELIMINATO</span>";
   }
 }
 
-async function finish(){
+async function finish() {
   let totals = {};
   selected.forEach(p => totals[p.name] = 0);
-  for(let g of games){
-    for(let p of selected){
+  for (let g of games) {
+    for (let p of selected) {
       let val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
       totals[p.name] += val;
       await db.collection("gameRanking").add({game:g, player:p.name, playerId:p.id, points:val, tournament:Date.now()});
     }
   }
-  let winner = Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
-  let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-  let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
-  ranking.forEach((p,i)=>{ html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`; });
-  html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
+  let sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  let winner = sorted[0][0];
+  let html = `<div class="final-winner">
+    <div class="final-winner-crown">👑</div>
+    <div class="final-winner-name">${winner}</div>
+    <div class="final-winner-label">Vincitore del torneo</div>
+  </div>
+  <div class="divider"></div>`;
+  sorted.forEach(([name, pts], i) => {
+    let badge = i===0 ? 'gold' : i===1 ? 'silver' : i===2 ? 'bronze' : '';
+    html += `<div class="box" style="margin-bottom:8px;">
+      <div class="rank-badge ${badge}">${i+1}</div>
+      <span class="box-name">${name}</span>
+      <span class="box-pts">${pts} pt</span>
+    </div>`;
+  });
+  html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
   document.getElementById("gamesArea").innerHTML = html;
-  for(let p in totals){
-    let playerObj = selected.find(x => x.name === p);
-    db.collection("ranking").add({name:p, playerId:playerObj?.id, points:totals[p]});
+  for (let [name] of sorted) {
+    let playerObj = selected.find(x => x.name===name);
+    db.collection("ranking").add({name, playerId:playerObj?.id, points:totals[name]});
   }
-  let winnerObj = selected.find(x => x.name === winner);
+  let winnerObj = selected.find(x => x.name===winner);
   db.collection("palmares").add({name:winner, playerId:winnerObj?.id});
 }
 
-/* PALMARES */
-async function loadPalmares(){
+/* ── PALMARES ── */
+async function loadPalmares() {
   let snap = await db.collection("palmares").get();
   let data = {};
-  snap.forEach(d=>{ data[d.data().name] = (data[d.data().name]||0) + 1; });
+  snap.forEach(d => { data[d.data().name] = (data[d.data().name]||0)+1; });
   let html = "";
-  Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-    html += `<div class="box">${p[0]} 🏆 ${p[1]}
-      <button onclick="editPalmares('${p[0]}',${p[1]})">✏️</button>
-      <button onclick="deleteByName('palmares','${p[0]}')">❌</button></div>`;
+  let i = 0;
+  Object.entries(data).sort((a,b) => b[1]-a[1]).forEach(([name, count]) => {
+    let badge = i===0 ? 'gold' : i===1 ? 'silver' : i===2 ? 'bronze' : '';
+    html += `<div class="palmares-item">
+      <div class="rank-badge ${badge}">${i+1}</div>
+      <span class="p-name">${name}</span>
+      <span class="p-trophies">🏆 ${count}</span>
+      <div class="box-actions">
+        <button class="btn-icon" onclick="editPalmares('${name}',${count})">✏️</button>
+        <button class="btn-danger" onclick="deleteByName('palmares','${name}')">✕</button>
+      </div>
+    </div>`;
+    i++;
   });
-  document.getElementById("palmaresList").innerHTML = html;
+  document.getElementById("palmaresList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
 }
 
-async function editPalmares(name, count){
+async function editPalmares(name, count) {
   if (!(await checkAdmin())) return;
   let n = prompt("Titoli", count);
-  if(!n) return;
+  if (!n) return;
   let snap = await db.collection("palmares").get();
   let target = parseInt(n);
-  if(target > count){
-    for(let i=0;i<target-count;i++) await db.collection("palmares").add({name:name});
+  if (target > count) {
+    for (let i=0; i<target-count; i++) await db.collection("palmares").add({name});
   } else {
     let toDelete = count - target;
-    snap.forEach(async d=>{
-      if(toDelete>0 && d.data().name===name){ await db.collection("palmares").doc(d.id).delete(); toDelete--; }
-    });
+    for (let d of snap.docs) {
+      if (toDelete > 0 && d.data().name===name) { await db.collection("palmares").doc(d.id).delete(); toDelete--; }
+    }
   }
   loadPalmares();
 }
 
-function resetTorneo(){
+function resetTorneo() {
   document.getElementById("gamesArea").innerHTML = "";
   selected = [];
   loadSelect();
   unoScores = {};
 }
 
-/* CLASSIFICA */
-async function loadRanking(){
+/* ── CLASSIFICA ── */
+async function loadRanking() {
   let snap = await db.collection("ranking").get();
   let data = {};
-  snap.forEach(d=>{ data[d.data().name] = (data[d.data().name]||0) + d.data().points; });
+  snap.forEach(d => { data[d.data().name] = (data[d.data().name]||0) + d.data().points; });
   let html = "";
-  Object.entries(data).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-    html += `<div class="box">${p[0]} ${p[1]}
-      <button onclick="editRanking('${p[0]}',${p[1]})">✏️</button>
-      <button onclick="deleteByName('ranking','${p[0]}')">❌</button></div>`;
+  let i = 0;
+  Object.entries(data).sort((a,b) => b[1]-a[1]).forEach(([name, pts]) => {
+    let badge = i===0 ? 'gold' : i===1 ? 'silver' : i===2 ? 'bronze' : '';
+    html += `<div class="box">
+      <div class="rank-badge ${badge}">${i+1}</div>
+      <span class="box-name">${name}</span>
+      <span class="box-pts">${pts} pt</span>
+      <div class="box-actions">
+        <button class="btn-icon" onclick="editRanking('${name}',${pts})">✏️</button>
+        <button class="btn-danger" onclick="deleteByName('ranking','${name}')">✕</button>
+      </div>
+    </div>`;
+    i++;
   });
-  document.getElementById("rankingList").innerHTML = html;
+  document.getElementById("rankingList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
 }
 
-async function editRanking(name, pts){
+async function editRanking(name, pts) {
   if (!(await checkAdmin())) return;
   let n = prompt("Punti", pts);
-  if(!n) return;
+  if (!n) return;
   let snap = await db.collection("ranking").get();
   let updated = false;
-  for(let d of snap.docs){
-    if(d.data().name === name && !updated){
+  for (let d of snap.docs) {
+    if (d.data().name===name && !updated) {
       await db.collection("ranking").doc(d.id).update({points:parseInt(n)});
       updated = true;
     }
@@ -472,134 +1242,147 @@ async function editRanking(name, pts){
   loadRanking();
 }
 
-/* PER GIOCO */
-async function loadGames(){
+/* ── PER GIOCO ── */
+async function loadGames() {
   let snap = await db.collection("gameRanking").get();
   let data = {};
-  snap.forEach(d=>{
+  snap.forEach(d => {
     let g=d.data().game, p=d.data().player, pts=d.data().points;
-    if(typeof p !== "string") return;
-    if(!data[g]) data[g]={};
+    if (typeof p !== "string") return;
+    if (!data[g]) data[g] = {};
     data[g][p] = (data[g][p]||0) + pts;
   });
   let html = "";
-  let allGames = [...games, "Merda"];
-  for(let g of allGames){
-    html += `<div class="box"><h3>${g} <button onclick="openGamePopup('${g}')">➕</button></h3>`;
-    if(data[g]){
-      Object.entries(data[g]).sort((a,b)=>b[1]-a[1]).forEach(p=>{
-        html += `${p[0]} ${p[1]} <button onclick="deleteGame('${g}','${p[0]}')">❌</button><br>`;
+  for (let g of [...games, "Merda"]) {
+    html += `<div class="game-block">
+      <div class="game-block-title">
+        <h3>${g}</h3>
+        <button class="btn-icon" onclick="openGamePopup('${g}')">+</button>
+      </div>`;
+    if (data[g]) {
+      Object.entries(data[g]).sort((a,b) => b[1]-a[1]).forEach(([player, pts]) => {
+        html += `<div class="game-row">
+          <span class="game-row-name">${player}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="game-row-pts">${pts} pt</span>
+            <button class="btn-danger" onclick="deleteGame('${g}','${player}')">✕</button>
+          </div>
+        </div>`;
       });
+    } else {
+      html += `<p style="color:var(--muted);font-size:12px;padding:8px 0;">Nessun dato</p>`;
     }
-    html += "</div>";
+    html += `</div>`;
   }
   document.getElementById("gamesList").innerHTML = html;
 }
 
-async function deleteByName(col, name){
+async function deleteByName(col, name) {
   if (!(await checkAdmin())) return;
+  if (!confirm("Eliminare " + name + "?")) return;
   let snap = await db.collection(col).get();
   let found = false;
-  for(let d of snap.docs){
-    if(d.data().name === name && !found){ await db.collection(col).doc(d.id).delete(); found = true; }
+  for (let d of snap.docs) {
+    if (d.data().name===name && !found) { await db.collection(col).doc(d.id).delete(); found=true; }
   }
   show(col);
 }
 
-async function deleteGame(g, p){
+async function deleteGame(g, p) {
   if (!(await checkAdmin())) return;
   let snap = await db.collection("gameRanking").get();
-  snap.forEach(async d=>{
-    if(d.data().game===g && d.data().player===p) await db.collection("gameRanking").doc(d.id).delete();
-  });
+  for (let d of snap.docs) {
+    if (d.data().game===g && d.data().player===p) await db.collection("gameRanking").doc(d.id).delete();
+  }
   loadGames();
 }
 
-/* POPUP */
-function openPopup(type){ currentType=type; document.getElementById("popup").style.display="flex"; }
-function openGamePopup(game){ currentType="games"; currentGame=game; document.getElementById("popup").style.display="flex"; }
-function closePopup(){
+/* ── POPUP ── */
+function openPopup(type) { currentType=type; document.getElementById("popup").style.display="flex"; }
+function openGamePopup(game) { currentType="games"; currentGame=game; document.getElementById("popup").style.display="flex"; }
+function closePopup() {
   document.getElementById("popup").style.display="none";
   document.getElementById("popupName").value="";
   document.getElementById("popupPoints").value="";
 }
+document.getElementById("popup").addEventListener("click", e => { if(e.target===document.getElementById("popup")) closePopup(); });
 
-async function confirmAdd(){
+async function confirmAdd() {
   if (!(await checkAdmin())) return;
-  let name = document.getElementById("popupName").value;
+  let name = document.getElementById("popupName").value.trim();
   let pts  = parseInt(document.getElementById("popupPoints").value) || 0;
-  if(currentType==="palmares"){ await db.collection("palmares").add({name:name}); loadPalmares(); }
-  if(currentType==="ranking"){  await db.collection("ranking").add({name:name, points:pts}); loadRanking(); }
-  if(currentType==="games"){    await db.collection("gameRanking").add({player:name, game:currentGame, points:pts}); loadGames(); }
+  if (!name) return;
+  if (currentType==="palmares") { await db.collection("palmares").add({name}); loadPalmares(); }
+  if (currentType==="ranking")  { await db.collection("ranking").add({name, points:pts}); loadRanking(); }
+  if (currentType==="games")    { await db.collection("gameRanking").add({player:name, game:currentGame, points:pts}); loadGames(); }
   closePopup();
 }
 
-/* SLOT */
+/* ── SLOT ── */
 let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
 let slotSpinning = false;
 
-function spinSlot(){
-  if(slotSpinning) return;
-  if(slotOptions.length === 0){ alert("Premi reset"); return; }
+function spinSlot() {
+  if (slotSpinning) return;
+  if (!slotOptions.length) { alert("Premi Reset"); return; }
   slotSpinning = true;
   let slot = document.getElementById("slot");
   let speed=50, duration=2000, elapsed=0;
-  let interval = setInterval(()=>{
+  let interval = setInterval(() => {
     slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)];
     elapsed += speed;
-    if(elapsed >= duration){
+    if (elapsed >= duration) {
       clearInterval(interval);
-      let slow = setInterval(()=>{ slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)]; },120);
-      setTimeout(()=>{
+      let slow = setInterval(() => { slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)]; }, 120);
+      setTimeout(() => {
         clearInterval(slow);
-        let index = Math.floor(Math.random()*slotOptions.length);
-        let result = slotOptions[index];
+        let idx = Math.floor(Math.random()*slotOptions.length);
+        let result = slotOptions[idx];
         slot.innerText = result;
-        document.getElementById("wheelResult").innerHTML = "🎯 " + result;
-        slotOptions.splice(index,1);
+        document.getElementById("wheelResult").innerHTML = "✦ " + result;
+        slotOptions.splice(idx,1);
         slotSpinning = false;
-        if(slotOptions.length === 0) alert("🔁 Finite tutte! Premi reset");
-      },800);
+        if (!slotOptions.length) alert("🔁 Finite tutte! Premi Reset.");
+      }, 800);
     }
-  },speed);
+  }, speed);
 }
 
-function resetSlot(){
+function resetSlot() {
   slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
   document.getElementById("slot").innerText = "?";
   document.getElementById("wheelResult").innerHTML = "";
 }
 
-function startSlotPro(winner){
+function startSlotPro(winner) {
   let reels = [document.getElementById("reel1"),document.getElementById("reel2"),document.getElementById("reel3")];
   let names = selected.map(p=>p.name);
-  reels.forEach(r=>{ r.innerText=""; });
-  function spinReel(reel, stopDelay){
+  reels.forEach(r => r.innerText="");
+  function spinReel(reel, stopDelay) {
     let speed=40, elapsed=0;
-    let interval = setInterval(()=>{
+    let iv = setInterval(() => {
       reel.innerText = names[Math.floor(Math.random()*names.length)];
       elapsed += speed;
-      if(elapsed >= stopDelay){
-        clearInterval(interval);
-        let slow = setInterval(()=>{ reel.innerText = names[Math.floor(Math.random()*names.length)]; },120);
-        setTimeout(()=>{ clearInterval(slow); reel.innerText = winner; },600);
+      if (elapsed >= stopDelay) {
+        clearInterval(iv);
+        let slow = setInterval(() => { reel.innerText = names[Math.floor(Math.random()*names.length)]; }, 120);
+        setTimeout(() => { clearInterval(slow); reel.innerText=winner; }, 600);
       }
-    },speed);
+    }, speed);
   }
-  spinReel(reels[0],1500);
-  spinReel(reels[1],2200);
-  spinReel(reels[2],3000);
-  setTimeout(()=>{
-    alert("🎰 JACKPOT 🎰\n🏆 VINCE: " + winner);
-    document.getElementById("gamesArea").innerHTML = `<h2>🏆 ${winner}</h2><button onclick="resetTorneo()">Nuovo Torneo</button>`;
+  spinReel(reels[0],1500); spinReel(reels[1],2200); spinReel(reels[2],3000);
+  setTimeout(() => {
+    alert("🎰 JACKPOT\n🏆 VINCE: " + winner);
+    document.getElementById("gamesArea").innerHTML = `<div class="final-winner"><div class="final-winner-crown">👑</div><div class="final-winner-name">${winner}</div></div><div style="text-align:center;margin-top:20px;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
     document.getElementById("slotContainer").style.display="none";
-  },3500);
+  }, 3500);
 }
 
-function login(){
+/* ── LOGIN ── */
+function login() {
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .catch(err => {
-      if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
+      if (err.code==="auth/popup-blocked" || err.code==="auth/popup-closed-by-user") {
         auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
       } else {
         console.error("Login error:", err);
