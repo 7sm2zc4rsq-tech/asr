@@ -477,6 +477,11 @@ projectId:"torneo-74c5b"
 
 const db=firebase.firestore();
 const auth = firebase.auth();
+let user = null;
+
+auth.onAuthStateChanged(u => {
+  user = u;
+});  
   
   
 let games=["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
@@ -499,6 +504,12 @@ if(id==="tournament")loadSelect();
 
 /* GIOCATORI */
 async function addPlayer(){
+
+if(!user){
+  alert("Devi fare il login");
+  return;
+}
+
 let n=playerName.value;
 if(!n)return;
 await db.collection("players").add({name:n});
@@ -520,8 +531,10 @@ playersList.innerHTML=html;
 
 async function editPlayer(id,oldName){
 
-let nuovo = prompt("Nome", oldName);
-if(!nuovo || nuovo === oldName) return;
+if(!user){
+  alert("Devi fare il login");
+  return;
+
 
 /* aggiorna players */
 await db.collection("players").doc(id).update({name:nuovo});
@@ -621,6 +634,12 @@ document.getElementById("playerStats").innerHTML = html;
 
 /* DELETE */
 async function deleteDoc(col,id){
+
+if(!user){
+  alert("Devi fare il login");
+  return;
+}
+
 await db.collection(col).doc(id).delete();
 show(col);
 }
@@ -1004,10 +1023,10 @@ document.getElementById("popupPoints").value="";
 
 async function confirmAdd(){
 
-let name = document.getElementById("popupName").value;
-let pts = parseInt(document.getElementById("popupPoints").value) || 0;
+if(!user){
+  alert("Devi fare il login");
+  return;
 
-if(!name) return;
 
 if(currentType==="palmares"){
 await db.collection("palmares").add({name:name});
