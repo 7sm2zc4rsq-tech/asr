@@ -240,18 +240,23 @@ text-shadow:
 0 0 50px rgba(0,140,255,0.8);
 }
 @keyframes titleIntro{
-0%{
-opacity:0;
-transform:translateY(-20px) scale(0.95);
-filter:blur(8px);
+  0%{
+    opacity:0;
+    transform:translateY(-20px) scale(0.95);
+    filter:blur(8px);
+  }
+  100%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+}   
+
+.titleMain{
+  position:relative;  
+  animation:titleIntro 1s ease-out;
 }
-100%{
-opacity:1;
-transform:translateY(0) scale(1);
-filter:blur(0);
-}
-animation:titleIntro 1s ease-out;
-}
+
 position:relative;
 .titleMain::after{
 content:"";
@@ -1022,16 +1027,20 @@ document.getElementById("popupPoints").value="";
 }
 
 async function confirmAdd(){
+  if(!user){
+    alert("Devi fare il login");
+    return;
+  } 
 
-if(!user){
-  alert("Devi fare il login");
-  return;
+  let name = document.getElementById("popupName").value;
+  let pts  = parseInt(document.getElementById("popupPoints").value) || 0;
+
+  if(currentType==="palmares"){
+    await db.collection("palmares").add({name:name});
+    loadPalmares();
+  }
 
 
-if(currentType==="palmares"){
-await db.collection("palmares").add({name:name});
-loadPalmares();
-}
 
 if(currentType==="ranking"){
 await db.collection("ranking").add({name:name, points:pts});
