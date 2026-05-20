@@ -645,6 +645,9 @@ selected = selected.filter(p=>p.id !== id);
 }
 
 function startGames(){
+
+unoScores = {}; // 🔥 fondamentale
+
 let html="";
 games.forEach(g=>{
 
@@ -766,40 +769,31 @@ box.innerHTML += " ❌ ELIMINATO";
 }
 
 async function finish(){
-let totals={};
-selected.forEach(p=>totals[p.name]=0);
 
+let totals = {};
+selected.forEach(p => totals[p.name] = 0);
+
+/* calcolo punti */
 for(let g of games){
 for(let p of selected){
-let val=parseInt(document.getElementById(g+"_"+p.id).value)||0;
-totals[p.name]+=val;
 
+let val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
+totals[p.name] += val;
+
+/* salva per gioco */
 await db.collection("gameRanking").add({
-game:g,
-player:p.name,
-points:val,
+game: g,
+player: p.name,
+points: val,
 tournament: Date.now()
 });
+
 }
 }
-function resetTorneo(){
 
-gamesArea.innerHTML = "";
-selected = [];
-
-loadSelect();
-function startGames(){
-
-unoScores = {}; 
-
-let html="";
-document.getElementById("unoExtra").innerHTML = "";
-
-}  
-// 🔥 MOSTRA SUBITO
-let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
-let ranking = Object.entries(totals)
-.sort((a,b)=>b[1]-a[1]);
+/* 🔥 CLASSIFICA SUBITO */
+let winner = Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
+let ranking = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
 
 let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
 
@@ -811,28 +805,12 @@ html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
 
 document.getElementById("gamesArea").innerHTML = html;
 
-// 🔄 SALVA DOPO (in background)
+/* 🔄 SALVA DOPO (no lag) */
 for(let p in totals){
-db.collection("ranking").add({name:p,points:totals[p]});
+db.collection("ranking").add({name:p, points:totals[p]});
 }
 
 db.collection("palmares").add({name:winner});
-
-let winner=Object.keys(totals).sort((a,b)=>totals[b]-totals[a])[0];
-let ranking = Object.entries(totals)
-.sort((a,b)=>b[1]-a[1]);
-
-let html = `<h2>🏆 CLASSIFICA FINALE</h2>`;
-
-ranking.forEach((p,i)=>{
-html += `<div class="box">${i+1}. ${p[0]} - ${p[1]} pt</div>`;
-});
-
-html += `<button onclick="resetTorneo()">Nuovo Torneo</button>`;
-
-document.getElementById("gamesArea").innerHTML = html;
-await db.collection("palmares").add({name:winner});
-
 }
 
 /* PALMARES */
@@ -878,6 +856,16 @@ toDelete--;
 }
 
 loadPalmares();
+}
+function resetTorneo(){
+
+gamesArea.innerHTML = "";
+selected = [];
+
+loadSelect();
+
+/* reset UNO */
+unoScores = {};
 }
 
 /* CLASSIFICA */
