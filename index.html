@@ -1694,18 +1694,20 @@ const efficiency = efficiencyCount > 0
 
   if (!editMode) {
     // ── READ MODE ──
-    let html = `
-      <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
-      <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
-      <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
-      <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>`;
-    <div class="stat-card">
-  <span class="stat-card-icon">⚡</span>
-  <div>
-    <div class="stat-card-label">Efficienza</div>
-    <div class="stat-card-val">${efficiency.toFixed(1)}%</div>
+   let html = `
+  <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
+  <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
+  <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
+  <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>
+
+  <div class="stat-card">
+    <span class="stat-card-icon">⚡</span>
+    <div>
+      <div class="stat-card-label">Efficienza</div>
+      <div class="stat-card-val">${efficiency.toFixed(1)}%</div>
+    </div>
   </div>
-</div>
+`;
     if (Object.keys(gameStats).length) {
       html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
       Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
