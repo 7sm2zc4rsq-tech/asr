@@ -1677,16 +1677,22 @@ histSnap.forEach(d => {
     const scores = g.scores || [];
 
     scores.forEach(s => {
-      if (s.name === name) {
+      if (!s.name) return;
+
+      // 🔥 confronto pulito
+      if (s.name.trim().toLowerCase() === name.trim().toLowerCase()) {
         const playersCount = scores.length || 1;
 
-        efficiencySum += s.points / playersCount;
+        efficiencySum += (s.points || 0) / playersCount;
         efficiencyCount++;
       }
     });
   });
 });
-
+  console.log("DEBUG EFFICIENZA:");
+console.log("Nome player:", name);
+console.log("Conteggio:", efficiencyCount);
+console.log("Somma:", efficiencySum);
 const efficiency = efficiencyCount > 0
   ? (efficiencySum / efficiencyCount * 100)
   : 0;
