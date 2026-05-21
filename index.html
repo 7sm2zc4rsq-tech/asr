@@ -1466,6 +1466,17 @@ const db   = firebase.firestore();
 const auth = firebase.auth();
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 let currentUser = null;
+  function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(result => {
+      console.log("Login ok", result.user);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Errore login");
+    });
+}
 
 auth.onAuthStateChanged(u => {
   currentUser = u;
