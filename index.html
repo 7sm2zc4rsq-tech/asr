@@ -1670,21 +1670,20 @@ async function renderPlayerStats(editMode) {
 let efficiencySum = 0;
 let efficiencyCount = 0;
 
-const playerTournaments = PLAYER_TOURNAMENTS[name] || [];
-
 histSnap.forEach(d => {
   const games = d.data().games || [];
 
   games.forEach(g => {
     const scores = g.scores || [];
-    const playerScore = scores.find(s => s.name === name);
-    if (!playerScore) return;
 
-    // prende numero giocatori dal tuo array
-    const playersCount = playerTournaments[efficiencyCount] || scores.length;
+    scores.forEach(s => {
+      if (s.name === name) {
+        const playersCount = scores.length || 1;
 
-    efficiencySum += playerScore.points / playersCount;
-    efficiencyCount++;
+        efficiencySum += s.points / playersCount;
+        efficiencyCount++;
+      }
+    });
   });
 });
 
@@ -1700,7 +1699,7 @@ const efficiency = efficiencyCount > 0
   <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
   <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>
 
-  <div class="stat-card">
+ <div class="stat-card">
     <span class="stat-card-icon">⚡</span>
     <div>
       <div class="stat-card-label">Efficienza</div>
