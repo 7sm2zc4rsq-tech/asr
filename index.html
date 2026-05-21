@@ -1674,19 +1674,26 @@ histSnap.forEach(d => {
   const games = d.data().games || [];
 
   games.forEach(g => {
-    const scores = g.scores || [];
+  const scores = g.scores || [];
+  if (scores.length === 0) return;
 
-    scores.forEach(s => {
-      if (!s.name) return;
+  const pts = scores.map(x => x.points || 0);
+  const max = Math.max(...pts);
+  const min = Math.min(...pts);
 
-      // 🔥 confronto pulito
-      if (s.name.trim().toLowerCase() === name.trim().toLowerCase()) {
-        const playersCount = scores.length || 1;
+  scores.forEach(s => {
+    if (!s.name) return;
 
-        efficiencySum += (s.points || 0) / playersCount;
-        efficiencyCount++;
+    if (s.name.trim().toLowerCase() === name.trim().toLowerCase()) {
+
+      let eff = 0;
+      if (max !== min) {
+        eff = ((s.points || 0) - min) / (max - min);
       }
-    });
+
+      efficiencySum += eff;
+      efficiencyCount++;
+    }
   });
 });
   console.log("DEBUG EFFICIENZA:");
