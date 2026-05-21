@@ -1509,6 +1509,18 @@ function fmtAvg(n) {
 
 const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
 const GAME_ICONS = { "UNO":"🃏","31":"🎴","Saltacavallo":"🐴","Fr0c10":"🐸","Dubito":"🤥","Las Vegas":"🎰","Merda":"💩" };
+const PLAYER_TOURNAMENTS = {
+  "Francesco": [4,4,5,5,6,7,7,7],
+  "Don Sisto": [4,4,5,5,6,7,7,7],
+  "Leonardo":  [4,4,5,5,6,7,7,7],
+  "Agnese":    [7,7],
+  "Peppe Zeta":[5,7,7],
+  "Federico R.":[5,7],
+  "Pene di legno":[4,4,5,5,6,7,7],
+  "Diego":     [6,7],
+  "Fes":       [6,7,7,7],
+  "Veronica":  [7]
+};  
 
 let selected    = [];
 let currentType = "";
@@ -1654,6 +1666,31 @@ async function renderPlayerStats(editMode) {
   } catch (e) {}
   const tournamentsPlayed = Math.max(0, tournamentsAuto + tournamentsOffset);
   const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
+  // 🔥 EFFICIENZA
+let efficiencySum = 0;
+let efficiencyCount = 0;
+
+const playerTournaments = PLAYER_TOURNAMENTS[name] || [];
+
+histSnap.forEach(d => {
+  const games = d.data().games || [];
+
+  games.forEach(g => {
+    const scores = g.scores || [];
+    const playerScore = scores.find(s => s.name === name);
+    if (!playerScore) return;
+
+    // prende numero giocatori dal tuo array
+    const playersCount = playerTournaments[efficiencyCount] || scores.length;
+
+    efficiencySum += playerScore.points / playersCount;
+    efficiencyCount++;
+  });
+});
+
+const efficiency = efficiencyCount > 0
+  ? (efficiencySum / efficiencyCount * 100)
+  : 0;
 
   if (!editMode) {
     // ── READ MODE ──
@@ -1662,6 +1699,13 @@ async function renderPlayerStats(editMode) {
       <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
       <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
       <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>`;
+    <div class="stat-card">
+  <span class="stat-card-icon">⚡</span>
+  <div>
+    <div class="stat-card-label">Efficienza</div>
+    <div class="stat-card-val">${efficiency.toFixed(1)}%</div>
+  </div>
+</div>
     if (Object.keys(gameStats).length) {
       html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
       Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
