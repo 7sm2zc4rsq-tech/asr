@@ -31,6 +31,8 @@
   --radius:   14px;
 }
 
+body.not-admin .admin-only { display: none !important; }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -1296,7 +1298,7 @@ input:focus { border-color: var(--gold); }
     <div class="section-header">
       <div class="section-title">I tuoi <span>player</span></div>
     </div>
-    <div class="add-row">
+    <div class="add-row admin-only">
       <input id="playerName" type="text" placeholder="Nome giocatore">
       <button class="btn-gold" onclick="addPlayer()">+ Aggiungi</button>
     </div>
@@ -1309,7 +1311,7 @@ input:focus { border-color: var(--gold); }
   <div class="topbar">
     <span class="topbar-title" id="playerTitle"></span>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="btn-icon" id="playerEditBtn" onclick="togglePlayerEdit()" style="display:none;">✏️ Modifica</button>
+      <button class="btn-icon admin-only" id="playerEditBtn" onclick="togglePlayerEdit()">✏️ Modifica</button>
       <button class="back-btn" onclick="show('players')">← Indietro</button>
     </div>
   </div>
@@ -1467,23 +1469,42 @@ let currentUser = null;
 
 auth.onAuthStateChanged(u => {
   currentUser = u;
+  document.body.classList.toggle("is-admin", isAdmin());
+  document.body.classList.toggle("not-admin", !isAdmin());
   const el = document.getElementById("loginStatus");
-  if (!el) return;
-  if (u) {
-    const isAdm = u.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-    el.className = isAdm ? "ok" : "";
-    el.innerHTML = isAdm ? "✦ Admin: " + u.email : "Loggato: " + u.email;
-  } else {
-    el.className = "";
-    el.innerHTML = "Non loggato";
+  if (el) {
+    if (u) {
+      el.className = isAdmin() ? "ok" : "";
+      el.innerHTML = isAdmin() ? "✦ Admin: " + u.email : "Loggato: " + u.email;
+    } else {
+      el.className = "";
+      el.innerHTML = "Non loggato";
+    }
+  }
+  // Re-render the currently visible screen so admin-only UI reflects state
+  const active = document.querySelector(".screen.active");
+  if (active && active.id) {
+    if (active.id === "players")  loadPlayers();
+    if (active.id === "ranking")  loadRanking();
+    if (active.id === "palmares") loadPalmares();
+    if (active.id === "games")    loadGames();
+    if (active.id === "history")  loadHistory();
+    if (active.id === "playerPage" && _currentPlayerId) openPlayer(_currentPlayerId, _currentPlayerName);
   }
 });
 
+function isAdmin() {
+  return !!(currentUser && currentUser.email && currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim());
+}
 async function checkAdmin() {
   if (!currentUser) { alert("Devi fare login prima."); return false; }
-  const ok = currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-  if (!ok) alert("Non autorizzato: " + currentUser.email);
-  return ok;
+  if (!isAdmin()) { alert("Non autorizzato: " + currentUser.email); return false; }
+  return true;
+}
+function fmtAvg(n) {
+  if (!isFinite(n)) return "0";
+  const r = Math.round(n * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
 const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
@@ -1532,7 +1553,7 @@ async function loadPlayers() {
   snap.forEach(d => {
     html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
       <span class="box-name">${d.data().name}</span>
-      <div class="box-actions">
+      <div class="box-actions admin-only">
         <button class="btn-icon" onclick="event.stopPropagation();editPlayer('${d.id}','${d.data().name}')">✏️</button>
         <button class="btn-danger" onclick="event.stopPropagation();deleteDoc('players','${d.id}')">✕</button>
       </div>
@@ -1577,15 +1598,7 @@ async function openPlayer(id, name) {
   window.scrollTo(0, 0);
   document.getElementById("playerTitle").innerHTML = name;
 
-  // Show edit button only to admin (check after auth state is known)
-  const isAdm = currentUser && currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-  const editBtn = document.getElementById("playerEditBtn");
-  if (isAdm) {
-    editBtn.style.display = "inline-flex";
-    editBtn.innerHTML = "✏️ Modifica";
-  } else {
-    editBtn.style.display = "none";
-  }
+  document.getElementById("playerEditBtn").innerHTML = "✏️ Modifica";
 
   await renderPlayerStats(false);
 }
@@ -1627,18 +1640,28 @@ async function renderPlayerStats(editMode) {
   });
 
   // Count unique tournaments from history
-  let tournamentsPlayed = 0;
+  let tournamentsAuto = 0;
   histSnap.forEach(d => {
     const sc = d.data().scores || [];
-    if (sc.some(s => s.name === name)) tournamentsPlayed++;
+    if (sc.some(s => s.name === name)) tournamentsAuto++;
   });
+
+  // Load player doc for tournamentsOffset (manual adjustment)
+  let tournamentsOffset = 0;
+  try {
+    const pDoc = await db.collection("players").doc(id).get();
+    if (pDoc.exists) tournamentsOffset = parseInt(pDoc.data().tournamentsOffset) || 0;
+  } catch (e) {}
+  const tournamentsPlayed = Math.max(0, tournamentsAuto + tournamentsOffset);
+  const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
 
   if (!editMode) {
     // ── READ MODE ──
     let html = `
       <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
       <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
-      <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>`;
+      <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
+      <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>`;
     if (Object.keys(gameStats).length) {
       html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
       Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
@@ -1668,6 +1691,13 @@ async function renderPlayerStats(editMode) {
           <div class="stat-card-label">Punti totali (classifica globale)</div>
           <input class="stat-card-edit-input" id="edit_totalPoints" type="number" value="${totalPoints}" min="0">
         </div>
+      </div>
+      <div class="stat-card editable">
+        <span class="stat-card-icon">🎯</span>
+        <div style="flex:1">
+          <div class="stat-card-label">Tornei giocati (presenze)</div>
+          <input class="stat-card-edit-input" id="edit_tournaments" type="number" value="${tournamentsPlayed}" min="0">
+        </div>
       </div>`;
 
     // Per-game edit
@@ -1691,6 +1721,7 @@ async function renderPlayerStats(editMode) {
     document.getElementById("playerStats").dataset.rankingDocs   = JSON.stringify(rankingDocs);
     document.getElementById("playerStats").dataset.gameStatDocs  = JSON.stringify(gameStatDocs);
     document.getElementById("playerStats").dataset.wins          = wins;
+    document.getElementById("playerStats").dataset.tournamentsAuto = tournamentsAuto;
     document.getElementById("playerStats").dataset.palSnapIds    = JSON.stringify(
       palSnap.docs.filter(d => d.data().playerId === id || d.data().name === name).map(d => d.id)
     );
@@ -1756,6 +1787,14 @@ async function savePlayerEdit() {
     }
     await db.collection("gameRanking").add({ game: g, player: name, playerId: id, points: newPts });
   }
+
+  // ── Update tournaments played (presenze) via offset on player doc ──
+  const tournamentsAuto = parseInt(container.dataset.tournamentsAuto || "0");
+  const newTournaments  = parseInt(document.getElementById("edit_tournaments").value) || 0;
+  const newOffset       = newTournaments - tournamentsAuto;
+  try {
+    await db.collection("players").doc(id).set({ tournamentsOffset: newOffset }, { merge: true });
+  } catch (e) { console.error("offset save error", e); }
 
   _playerEditMode = false;
   document.getElementById("playerEditBtn").innerHTML = "✏️ Modifica";
@@ -1939,7 +1978,7 @@ async function loadPalmares() {
       <div class="rank-badge ${badge}">${i+1}</div>
       <span class="p-name">${name}</span>
       <span class="p-trophies">🏆 ${count}</span>
-      <div class="box-actions">
+      <div class="box-actions admin-only">
         <button class="btn-icon" onclick="editPalmares('${name}',${count})">✏️</button>
         <button class="btn-danger" onclick="deleteByName('palmares','${name}')">✕</button>
       </div>
@@ -1987,7 +2026,7 @@ async function loadRanking() {
       <div class="rank-badge ${badge}">${i+1}</div>
       <span class="box-name">${name}</span>
       <span class="box-pts">${pts} pt</span>
-      <div class="box-actions">
+      <div class="box-actions admin-only">
         <button class="btn-icon" onclick="editRanking('${name}',${pts})">✏️</button>
         <button class="btn-danger" onclick="deleteByName('ranking','${name}')">✕</button>
       </div>
@@ -2050,7 +2089,7 @@ async function loadGames() {
           <div class="gp-header-name">${g}</div>
           <div class="gp-header-sub">${players.length} giocatori · ${players.reduce((s,[,p])=>s+p,0)} pt totali</div>
         </div>
-        <button class="gp-header-add" onclick="openGamePopup('${g}')">+</button>
+        <button class="gp-header-add admin-only" onclick="openGamePopup('${g}')">+</button>
       </div>`;
 
     if (players.length === 0) {
@@ -2080,7 +2119,7 @@ async function loadGames() {
           <span class="gp-row-num">${idx+1}</span>
           <span class="gp-row-name">${name}</span>
           <span class="gp-row-pts">${pts} pt</span>
-          <button class="gp-row-del btn-danger" onclick="deleteGame('${g}','${name}')">✕</button>
+          <button class="gp-row-del btn-danger admin-only" onclick="deleteGame('${g}','${name}')">✕</button>
         </div>`;
       });
       panelsHtml += `</div>`;
@@ -2223,9 +2262,8 @@ async function openTournamentDetail(docId) {
   });
 
   // ── Delete button (admin only) ──
-  const isAdm = currentUser && currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
-  if (isAdm) {
-    html += `<div style="margin-top:28px;text-align:center;">
+  if (isAdmin()) {
+    html += `<div class="admin-only" style="margin-top:28px;text-align:center;">
       <button class="btn-danger" style="padding:10px 20px;border-radius:10px;" onclick="deleteTournament('${docId}')">🗑 Elimina torneo</button>
     </div>`;
   }
