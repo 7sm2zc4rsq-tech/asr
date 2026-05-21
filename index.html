@@ -1882,6 +1882,8 @@ async function deleteDoc(col, id) {
    TORNEO — SETUP & GAMES
 ════════════════════════════════════════ */
 async function loadSelect() {
+  console.log("loadSelect disattivata");
+}
   selected = [];
   const snap = await db.collection("players").get();
   let html = "";
