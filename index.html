@@ -1882,19 +1882,19 @@ async function deleteDoc(col, id) {
    TORNEO — SETUP & GAMES
 ════════════════════════════════════════ */
 async function loadSelect() {
-  console.log("loadSelect disattivata");
-}
   selected = [];
   const snap = await db.collection("players").get();
   let html = "";
   snap.forEach(d => {
     html += `<label class="check-item">
-      <input type="checkbox" value="${d.id}" data-name="${d.data().name}" onchange="toggle(this)">
+      <input type="checkbox" value="${d.id}" 
+        data-name="${d.data().name}" onchange="toggle(this)">
       <span>${d.data().name}</span>
     </label>`;
   });
   document.getElementById("selectPlayers").innerHTML = html;
 }
+
 
 function toggle(e) {
   if (e.checked) selected.push({ id: e.value, name: e.dataset.name });
