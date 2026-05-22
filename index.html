@@ -2181,10 +2181,9 @@ let gameWeight = GAME_WEIGHTS[g.name] || 1;
 
 efficiencySum += eff * weight * gameWeight;
 efficiencyWeight += weight * gameWeight;
-          });
-        });
-      };
-    });
+});
+});
+});
 
     let performance = efficiencyWeight > 0
       ? efficiencySum / efficiencyWeight
