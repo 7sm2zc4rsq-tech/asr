@@ -2310,13 +2310,13 @@ async function loadRanking() {
 
   document.getElementById("efficiencyRanking").innerHTML = html;
 }
- function getEfficiencyLabel(e) {
-  if (e < 25) return "Base · rendimento basso";
-  if (e < 40) return "In sviluppo · dati limitati";
-  if (e < 55) return "Competitivo · rendimento medio";
-  if (e < 70) return "Affidabile · buon rendimento";
-  if (e < 85) return "Elite · rendimento alto";
-  return "Dominante · rendimento massimo";
+function getEfficiencyLabel(e) {
+  if (e < 25) return "🌱 Base · rendimento basso";
+  if (e < 40) return "🧭 In sviluppo · dati limitati";
+  if (e < 55) return "⚔️ Competitivo · rendimento medio";
+  if (e < 70) return "🛡️ Affidabile · buon rendimento";
+  if (e < 85) return "💎 Elite · rendimento alto";
+  return "👑 Dominante · rendimento massimo";
 }
  
 
