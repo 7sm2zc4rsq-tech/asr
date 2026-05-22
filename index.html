@@ -1950,9 +1950,9 @@ function calcEfficiency(name, histSnap, tournamentsPlayed = 0) {
 
   const extraTournaments = PLAYER_TOURNAMENTS[name]?.length || 0;
   const totalTournaments = tournamentsPlayed + extraTournaments;
-  const experienceFactor = Math.log(1 + totalTournaments) / Math.log(6);
+  const experienceFactor = Math.min(Math.log(1 + totalTournaments) / Math.log(6), 1);
 
-  return performance * experienceFactor * 100;
+return performance * experienceFactor * 100;
 }
 async function togglePlayerEdit() {
   if (!(await checkAdmin())) return;
