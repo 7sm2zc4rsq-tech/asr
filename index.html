@@ -46,7 +46,9 @@ body {
 body::before {
   content: '';
   position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='2'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='50'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%230c0c0e' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  opacity: 0.5;
   pointer-events: none; z-index: 0;
 }
 
@@ -92,6 +94,7 @@ body::before {
   transition: all 0.2s;
 }
 .back-btn:hover { background: var(--goldDim); box-shadow: none; }
+.back-btn:active { transform: scale(0.95); }
 
 .hero {
   text-align: center;
@@ -198,6 +201,7 @@ body::before {
   border-color: var(--gold);
   box-shadow: 0 0 30px rgba(201,168,76,0.15);
 }
+.login-btn:active { transform: scale(0.97); }
 
 .homeGrid {
   display: grid;
@@ -269,8 +273,10 @@ body::before {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  cursor: pointer;
 }
 .box:hover { border-color: var(--goldBorder); }
+.box:active { transform: scale(0.98); }
 .box-name {
   font-size: 14px;
   font-weight: 500;
@@ -331,6 +337,7 @@ button {
   letter-spacing: 1px;
 }
 .btn-ghost:hover { background: var(--goldDim); box-shadow: none; }
+.btn-ghost:active { transform: scale(0.95); }
 
 .btn-icon {
   background: var(--surface2);
@@ -342,6 +349,7 @@ button {
   line-height: 1;
 }
 .btn-icon:hover { border-color: var(--goldBorder); color: var(--gold); box-shadow: none; }
+.btn-icon:active { transform: scale(0.9); }
 
 .btn-danger {
   background: none;
@@ -352,6 +360,7 @@ button {
   font-size: 13px;
 }
 .btn-danger:hover { background: rgba(192,57,43,0.15); box-shadow: none; }
+.btn-danger:active { transform: scale(0.9); }
 
 .field {
   display: flex;
@@ -382,6 +391,7 @@ input:focus { border-color: var(--gold); }
 
 .playerBox { cursor: pointer; }
 .playerBox:hover { border-color: var(--goldBorder); background: var(--surface2); }
+.playerBox:active { transform: scale(0.98); }
 
 .add-row {
   display: flex;
@@ -404,11 +414,13 @@ input:focus { border-color: var(--gold); }
   transition: all 0.2s;
 }
 .check-item:hover { border-color: var(--goldBorder); }
+.check-item:active { transform: scale(0.98); }
 .check-item input[type=checkbox] {
   width: 18px; height: 18px;
   accent-color: var(--gold);
   flex-shrink: 0;
   margin: 0; padding: 0;
+  cursor: pointer;
 }
 .check-item span {
   font-size: 14px;
@@ -557,8 +569,10 @@ input:focus { border-color: var(--gold); }
   border-radius: var(--radius);
   margin-bottom: 10px;
   transition: border-color 0.2s;
+  cursor: pointer;
 }
 .palmares-item:hover { border-color: var(--goldBorder); }
+.palmares-item:active { transform: scale(0.98); }
 .palmares-item .p-name { flex: 1; font-size: 15px; font-weight: 500; }
 .palmares-item .p-trophies {
   font-family: 'Cormorant Garamond', serif;
@@ -566,7 +580,6 @@ input:focus { border-color: var(--gold); }
   color: var(--gold);
 }
 
-/* ── OLD game-block kept for tournament usage ── */
 .game-block {
   background: var(--surface);
   border: 1px solid rgba(255,255,255,0.05);
@@ -612,6 +625,9 @@ input:focus { border-color: var(--gold); }
   align-items: center;
   justify-content: center;
   padding: 20px;
+}
+#popup.active {
+  display: flex;
 }
 .popup-inner {
   background: var(--surface);
@@ -701,7 +717,6 @@ input:focus { border-color: var(--gold); }
    PER GIOCO — REDESIGN
 ══════════════════════════════════════════ */
 
-/* Game nav tabs */
 .game-tabs-wrap {
   position: sticky;
   top: 65px;
@@ -742,12 +757,11 @@ input:focus { border-color: var(--gold); }
   border-color: var(--gold);
   color: var(--gold);
 }
+.game-tab:active { transform: scale(0.95); }
 
-/* Game panel */
 .game-panel { display: none; animation: fadeUp 0.3s ease forwards; }
 .game-panel.active { display: block; }
 
-/* Panel header */
 .gp-header {
   display: flex;
   align-items: center;
@@ -806,8 +820,8 @@ input:focus { border-color: var(--gold); }
   color: #0c0c0e;
   border-color: var(--gold);
 }
+.gp-header-add:active { transform: scale(0.9); }
 
-/* Podium for top 3 */
 .gp-podium {
   display: flex;
   align-items: flex-end;
@@ -870,7 +884,6 @@ input:focus { border-color: var(--gold); }
   grid-column: 1/-1;
 }
 
-/* Leaderboard rows */
 .gp-list { margin-top: 0; }
 .gp-list-header {
   display: flex;
@@ -887,6 +900,7 @@ input:focus { border-color: var(--gold); }
 .gp-list-header .col-rank { width: 36px; flex-shrink: 0; }
 .gp-list-header .col-name { flex: 1; }
 .gp-list-header .col-pts { width: 70px; text-align: right; flex-shrink: 0; }
+.gp-list-header .col-eff { width: 50px; text-align: right; flex-shrink: 0; }
 .gp-list-header .col-act { width: 34px; flex-shrink: 0; }
 
 .gp-row {
@@ -932,6 +946,16 @@ input:focus { border-color: var(--gold); }
   min-width: 60px;
   text-align: right;
 }
+
+.gp-row-eff {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 50px;
+  text-align: right;
+}
+
 .gp-row-del {
   background: none;
   border: none;
@@ -941,14 +965,15 @@ input:focus { border-color: var(--gold); }
   border-radius: 6px;
   flex-shrink: 0;
   transition: all 0.15s;
+  cursor: pointer;
 }
 .gp-row:hover .gp-row-del {
   color: rgba(231,76,60,0.5);
   background: rgba(192,57,43,0.08);
 }
 .gp-row-del:hover { color: #e74c3c !important; background: rgba(192,57,43,0.18) !important; }
+.gp-row-del:active { transform: scale(0.85); }
 
-/* Empty state */
 .gp-empty {
   text-align: center;
   padding: 40px 20px;
@@ -957,7 +982,6 @@ input:focus { border-color: var(--gold); }
 }
 .gp-empty-icon { font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.4; }
 
-/* Bar chart mini inside panel */
 .gp-bar-wrap {
   margin: 4px 0 4px 34px;
   flex: 1;
@@ -965,7 +989,7 @@ input:focus { border-color: var(--gold); }
   background: rgba(255,255,255,0.05);
   border-radius: 4px;
   overflow: hidden;
-  display: none; /* shown via JS */
+  display: none;
 }
 .gp-bar-fill {
   height: 100%;
@@ -973,9 +997,6 @@ input:focus { border-color: var(--gold); }
   background: linear-gradient(90deg, var(--gold), var(--gold2));
 }
 
-/* ══════════════════════════════════════════
-   CRONOLOGIA TORNEI
-══════════════════════════════════════════ */
 .history-card {
   background: var(--surface);
   border: 1px solid rgba(255,255,255,0.05);
@@ -998,1613 +1019,634 @@ input:focus { border-color: var(--gold); }
 }
 .history-card:hover { border-color: var(--goldBorder); background: var(--surface2); }
 .history-card:hover::before { opacity: 1; }
-.history-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.history-card-num {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
+.history-card:active { transform: scale(0.98); }
+.history-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--gold);
+  margin-bottom: 6px;
 }
 .history-card-date {
   font-size: 11px;
   color: var(--muted);
 }
-.history-card-winner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.history-card-crown { font-size: 20px; }
-.history-card-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px;
-  font-weight: 300;
-  color: var(--gold);
-  font-style: italic;
-}
-.history-card-players {
-  font-size: 11px;
-  color: var(--muted);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.history-player-chip {
-  background: var(--surface2);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--muted);
-}
-.history-player-chip.winner {
-  background: var(--goldDim);
-  border-color: var(--goldBorder);
-  color: var(--gold);
-}
 
-/* Tournament detail */
-.td-hero {
+.profile-header {
   text-align: center;
-  padding: 32px 20px 24px;
-  background: var(--surface);
-  border: 1px solid var(--goldBorder);
-  border-radius: var(--radius);
-  margin: 24px 0 20px;
-  position: relative;
-  overflow: hidden;
+  padding: 30px 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 24px;
 }
-.td-hero::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-.td-hero-date {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.td-hero-crown { font-size: 36px; margin-bottom: 4px; }
-.td-hero-name {
+.profile-name {
   font-family: 'Cormorant Garamond', serif;
   font-size: 42px;
   font-weight: 300;
-  color: var(--gold);
-  font-style: italic;
+  color: var(--text);
+  margin-bottom: 8px;
 }
-.td-hero-label {
-  font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 4px;
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
 }
-.td-section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
-  color: var(--gold);
-  margin: 24px 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--goldBorder);
-}
-.td-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 10px;
-  margin-bottom: 6px;
-}
-.td-row-num {
-  width: 22px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  text-align: center;
-  flex-shrink: 0;
-}
-.td-row-name { flex: 1; font-size: 14px; font-weight: 500; }
-.td-row-pts {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px;
-  color: var(--gold);
-}
-.td-game-block {
+.profile-stat {
   background: var(--surface);
   border: 1px solid rgba(255,255,255,0.05);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
 }
-.td-game-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: var(--surface2);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  cursor: pointer;
-  user-select: none;
+.profile-stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
-.td-game-header-name {
+.profile-stat-value {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 20px;
-  color: var(--gold);
-  flex: 1;
-}
-.td-game-body { padding: 8px 0; }
-.td-game-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 7px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.td-game-row:last-child { border-bottom: none; }
-.td-game-row-name { font-size: 13px; color: var(--text); }
-.td-game-row-pts {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 16px;
+  font-size: 24px;
+  font-weight: 600;
   color: var(--gold);
 }
 
-/* ══════════════════════════════════════════
-   PLAYER EDIT MODE
-══════════════════════════════════════════ */
-.stat-card.editable {
-  flex-wrap: wrap;
-  cursor: default;
-}
-.stat-card-edit-input {
-  width: 90px;
-  padding: 6px 10px;
-  background: var(--bg);
-  border: 1px solid var(--goldBorder);
-  border-radius: 8px;
-  color: var(--gold);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
-  font-weight: 600;
-  text-align: center;
-  outline: none;
-}
-.stat-card-edit-input:focus { border-color: var(--gold2); }
-.edit-mode-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: var(--goldDim);
-  border: 1px solid var(--goldBorder);
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.5px;
-}
-.save-edit-btn {
-  margin-left: auto;
-  background: var(--gold);
-  color: #0c0c0e;
-  border: none;
-  border-radius: 20px;
-  padding: 6px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  cursor: pointer;
-}
-.save-edit-btn:hover { background: var(--gold2); }
-.game-edit-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 10px;
-  margin-bottom: 6px;
-}
-.game-edit-row-name { font-size: 14px; font-weight: 500; flex: 1; }
-.game-edit-input {
-  width: 80px;
-  padding: 6px 10px;
-  background: var(--bg);
-  border: 1px solid var(--goldBorder);
-  border-radius: 8px;
-  color: var(--gold);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
-  outline: none;
-}
-.game-edit-input:focus { border-color: var(--gold2); }
 </style>
 </head>
 <body>
 
-<!-- ══════════ HOME ══════════ -->
-<div id="home" class="screen active">
-  <div class="page" style="padding-top:0; padding-bottom:0;">
+<!-- Home Screen -->
+<div id="homeScreen" class="screen active">
+  <div class="topbar">
+    <div class="topbar-title">Torneo</div>
+    <button id="adminBtn" class="back-btn">⚙️ ADMIN</button>
+  </div>
+  <div class="page">
     <div class="hero">
-      <div class="hero-eyebrow">Modalità Competitiva</div>
-      <div class="hero-title">Il Torneo<em>Del Porco di Dio</em></div>
-      <div class="hero-subtitle">Piangi &amp; Bestemmia</div>
-      <div class="hero-divider"><span>✦</span></div>
-      <button class="login-btn" onclick="login()">
-        <span>🔐</span><span>Accedi con Google</span>
-      </button>
-      <div id="loginStatus"></div>
+      <div class="hero-eyebrow">🎪 Benvenuto</div>
+      <h1 class="hero-title">Torneo<em>Del Porco Di Dio</em></h1>
+      <div class="hero-subtitle">Tra amici, non c'è vittoria che non sia gloriosa</div>
+      <div class="hero-divider"><span>★</span></div>
+    </div>
+    <div id="loginStatus">Non autenticato</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <button id="loginBtn" class="login-btn" onclick="loginUser()">🔐 LOGIN</button>
+      <button id="createPlayerBtn" class="login-btn" onclick="createNewPlayer()">➕ NUOVO GIOCATORE</button>
     </div>
     <div class="homeGrid">
-      <div class="homeCard" onclick="show('tournament')">
-        <span class="homeCard-icon">🎮</span>
-        <h2>Nuovo Torneo</h2>
-        <p>Avvia una nuova partita</p>
-      </div>
-      <div class="homeCard" onclick="show('players')">
-        <span class="homeCard-icon">👥</span>
-        <h2>Giocatori</h2>
-        <p>Gestisci i player</p>
-      </div>
-      <div class="homeCard" onclick="show('palmares')">
+      <div class="homeCard" onclick="navigateTo('leaderboardScreen')">
         <span class="homeCard-icon">🏆</span>
-        <h2>Palmares</h2>
-        <p>Storico vittorie</p>
-      </div>
-      <div class="homeCard" onclick="show('ranking')">
-        <span class="homeCard-icon">⭐</span>
         <h2>Classifica</h2>
-        <p>Punti totali</p>
+        <p>Vedi tutti i giocatori</p>
       </div>
-      <div class="homeCard" onclick="show('games')">
-        <span class="homeCard-icon">🎯</span>
-        <h2>Per Gioco</h2>
-        <p>Statistiche per ogni gioco</p>
+      <div class="homeCard" onclick="navigateTo('gamesScreen')">
+        <span class="homeCard-icon">🎮</span>
+        <h2>Giochi</h2>
+        <p>Aggiungi punteggi</p>
       </div>
-      <div class="homeCard" onclick="show('history')">
+      <div class="homeCard" onclick="navigateTo('palmaresScreen')">
+        <span class="homeCard-icon">👑</span>
+        <h2>Palmares</h2>
+        <p>Vittorie e trofei</p>
+      </div>
+      <div class="homeCard" onclick="navigateTo('historyScreen')">
         <span class="homeCard-icon">📜</span>
         <h2>Cronologia</h2>
-        <p>Storico di tutti i tornei</p>
+        <p>Tornei passati</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════ GIOCATORI ══════════ -->
-<div id="players" class="screen">
+<!-- Leaderboard Screen -->
+<div id="leaderboardScreen" class="screen">
   <div class="topbar">
-    <span class="topbar-title">Giocatori</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
+    <div class="topbar-title">Classifica Generale</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
   </div>
   <div class="page">
     <div class="section-header">
-      <div class="section-title">I tuoi <span>player</span></div>
+      <h1 class="section-title">Giocatori <span>Top</span></h1>
     </div>
-    <div class="add-row admin-only">
-      <input id="playerName" type="text" placeholder="Nome giocatore">
-      <button class="btn-gold" onclick="addPlayer()">+ Aggiungi</button>
-    </div>
-    <div id="playersList"></div>
+    <div id="leaderboardList"></div>
   </div>
 </div>
 
-<!-- ══════════ PLAYER PAGE ══════════ -->
-<div id="playerPage" class="screen">
+<!-- Games Screen -->
+<div id="gamesScreen" class="screen">
   <div class="topbar">
-    <span class="topbar-title" id="playerTitle"></span>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="btn-icon admin-only" id="playerEditBtn" onclick="togglePlayerEdit()">✏️ Modifica</button>
-      <button class="back-btn" onclick="show('players')">← Indietro</button>
-    </div>
+    <div class="topbar-title">Giochi</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
   </div>
   <div class="page">
-    <div class="section-header" style="padding-top:24px;">
-      <div class="section-title">Statistiche</div>
+    <div class="game-tabs-wrap">
+      <div class="game-tabs" id="gameTabs"></div>
     </div>
-    <div id="playerStats"></div>
+    <div id="gamePanels"></div>
   </div>
 </div>
 
-<!-- ══════════ TORNEO ══════════ -->
-<div id="tournament" class="screen">
+<!-- Palmares Screen -->
+<div id="palmaresScreen" class="screen">
   <div class="topbar">
-    <span class="topbar-title">Torneo</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
+    <div class="topbar-title">Palmares</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
   </div>
   <div class="page">
     <div class="section-header">
-      <div class="section-title">Seleziona <span>giocatori</span></div>
-    </div>
-    <div id="selectPlayers"></div>
-    <div style="margin:20px 0;">
-      <button class="btn-gold" onclick="startGames()">Inizia il torneo →</button>
-    </div>
-    <div id="gamesArea"></div>
-
-    <div class="slot-section">
-      <h3>🎰 Slot Game</h3>
-      <div id="slot">?</div>
-      <div id="wheelResult"></div>
-      <div class="slot-btns">
-        <button class="btn-gold" onclick="spinSlot()">Gira</button>
-        <button class="btn-ghost" onclick="resetSlot()">Reset</button>
-      </div>
-      <div id="slotContainer" style="display:none; margin-top:24px;">
-        <div style="display:flex; justify-content:center; gap:12px;">
-          <div class="reel" id="reel1"></div>
-          <div class="reel" id="reel2"></div>
-          <div class="reel" id="reel3"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ PALMARES ══════════ -->
-<div id="palmares" class="screen">
-  <div class="topbar">
-    <span class="topbar-title">Palmares</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
-  </div>
-  <div class="page">
-    <div class="section-header">
-      <div class="section-title">Hall of <span>Glory</span></div>
+      <h1 class="section-title">Trofei <span>& Vittorie</span></h1>
     </div>
     <div id="palmaresList"></div>
-    <div style="margin-top:16px;">
-      <button class="btn-ghost" onclick="openPopup('palmares')">+ Aggiungi vittoria</button>
-    </div>
   </div>
 </div>
 
-<!-- ══════════ CLASSIFICA ══════════ -->
-<div id="ranking" class="screen">
+<!-- History Screen -->
+<div id="historyScreen" class="screen">
   <div class="topbar">
-    <span class="topbar-title">Classifica</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
+    <div class="topbar-title">Cronologia Tornei</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
   </div>
   <div class="page">
     <div class="section-header">
-      <div class="section-title">Punti <span>totali</span></div>
-      <div class="divider"></div>
-
-<div class="section-title">Efficienza <span>giocatori</span></div>
-<div id="efficiencyRanking"></div>
-    </div>
-    <div id="rankingList"></div>
-    <div class="divider"></div>
-
-<div class="section-title">Efficienza <span>giocatori</span></div>
-    <div style="margin-top:16px;">
-      <button class="btn-ghost" onclick="openPopup('ranking')">+ Aggiungi punteggio</button>
-    </div>
-  </div>
-</div>
-  
-
-<!-- ══════════ PER GIOCO ══════════ -->
-<div id="games" class="screen">
-  <div class="topbar">
-    <span class="topbar-title">Per Gioco</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
-  </div>
-  <div class="page">
-    <div class="section-header">
-      <div class="section-title">Statistiche <span>per gioco</span></div>
-    </div>
-    <!-- tabs + panels injected here -->
-    <div id="gamesList"></div>
-  </div>
-</div>
-
-
-<!-- ══════════ CRONOLOGIA TORNEI ══════════ -->
-<div id="history" class="screen">
-  <div class="topbar">
-    <span class="topbar-title">Cronologia</span>
-    <button class="back-btn" onclick="show('home')">← Home</button>
-  </div>
-  <div class="page">
-    <div class="section-header">
-      <div class="section-title">Storico <span>tornei</span></div>
+      <h1 class="section-title">Tornei <span>Passati</span></h1>
     </div>
     <div id="historyList"></div>
   </div>
 </div>
 
-<!-- ══════════ DETTAGLIO TORNEO ══════════ -->
-<div id="tournamentDetail" class="screen">
+<!-- Player Profile Screen -->
+<div id="playerProfileScreen" class="screen">
   <div class="topbar">
-    <span class="topbar-title" id="tdTitle">Torneo</span>
-    <button class="back-btn" onclick="show('history')">← Indietro</button>
+    <div class="topbar-title" id="profileTitle">Profilo</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
   </div>
   <div class="page">
-    <div id="tdContent"></div>
+    <div class="profile-header">
+      <div class="profile-name" id="profileName"></div>
+      <div class="profile-stats" id="profileStats"></div>
+    </div>
+    <div id="profileGames"></div>
   </div>
 </div>
 
-<!-- ══════════ POPUP ══════════ -->
-<div id="popup" style="display:none;">
+<!-- Admin Screen -->
+<div id="adminScreen" class="screen admin-only">
+  <div class="topbar">
+    <div class="topbar-title">Admin Panel</div>
+    <button class="back-btn" onclick="navigateTo('homeScreen')">← INDIETRO</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <h1 class="section-title">Gestione <span>Tornei</span></h1>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <button class="btn-gold" onclick="exportData()">📥 Esporta Dati</button>
+      <button class="btn-ghost" style="margin-left: 10px;" onclick="clearAllData()">🗑️ Cancella Tutto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup -->
+<div id="popup">
   <div class="popup-inner">
-    <div class="popup-title">Aggiungi</div>
-    <div class="field">
-      <label>Nome</label>
-      <input id="popupName" type="text" placeholder="Nome giocatore">
-    </div>
-    <div class="field">
-      <label>Punti</label>
-      <input id="popupPoints" type="number" placeholder="0">
-    </div>
+    <div class="popup-title" id="popupTitle"></div>
+    <div id="popupContent"></div>
     <div class="popup-btns">
-      <button class="btn-gold" onclick="confirmAdd()">Salva</button>
-      <button class="btn-ghost" onclick="closePopup()">Annulla</button>
+      <button class="btn-ghost" onclick="closePopup()">CHIUDI</button>
+      <button class="btn-gold" id="popupConfirm" onclick="confirmPopup()">OK</button>
     </div>
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
-firebase.initializeApp({
-  apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
-  authDomain:"torneo-74c5b.firebaseapp.com",
-  projectId:"torneo-74c5b"
-});
+// ═══════════════════════════════════════════════════════════════════════════════
+// GLOBAL STATE & STORAGE
+// ═══════════════════════════════════════════════════════════════════════════════
 
-const db   = firebase.firestore();
-const auth = firebase.auth();
-const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 let currentUser = null;
-  function login() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(result => {
-      console.log("Login ok", result.user);
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Errore login");
-    });
+const STORAGE_KEY = 'torneoData';
+const GAMES = ['Briscola', 'Scala 40', 'Poker', 'UNO', 'Tressette'];
+
+function loadData() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : { players: {}, games: {}, tournaments: [] };
 }
 
-auth.onAuthStateChanged(u => {
-  currentUser = u;
-  document.body.classList.toggle("is-admin", isAdmin());
-  document.body.classList.toggle("not-admin", !isAdmin());
-  const el = document.getElementById("loginStatus");
-  if (el) {
-    if (u) {
-      el.className = isAdmin() ? "ok" : "";
-      el.innerHTML = isAdmin() ? "✦ Admin: " + u.email : "Loggato: " + u.email;
-    } else {
-      el.className = "";
-      el.innerHTML = "Non loggato";
-    }
-  }
-  // Re-render the currently visible screen so admin-only UI reflects state
-  const active = document.querySelector(".screen.active");
-  if (active && active.id) {
-    if (active.id === "players")  loadPlayers();
-    if (active.id === "ranking")  loadRanking();
-    if (active.id === "palmares") loadPalmares();
-    if (active.id === "games")    loadGames();
-    if (active.id === "history")  loadHistory();
-    if (active.id === "playerPage" && _currentPlayerId) openPlayer(_currentPlayerId, _currentPlayerName);
-  }
-});
-
-function isAdmin() {
-  return !!(currentUser && currentUser.email && currentUser.email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim());
-}
-async function checkAdmin() {
-  if (!currentUser) { alert("Devi fare login prima."); return false; }
-  if (!isAdmin()) { alert("Non autorizzato: " + currentUser.email); return false; }
-  return true;
-}
-function fmtAvg(n) {
-  if (!isFinite(n)) return "0";
-  const r = Math.round(n * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
-const GAME_ICONS = { "UNO":"🃏","31":"🎴","Saltacavallo":"🐴","Fr0c10":"🐸","Dubito":"🤥","Las Vegas":"🎰","Merda":"💩" };
-const PLAYER_TOURNAMENTS = {
-  "Francesco": [4,4,5,5,6,7,7,7],
-  "Don Sisto": [4,4,5,5,6,7,7,7],
-  "Leonardo":  [4,4,5,5,6,7,7,7],
-  "Agnese":    [7,7],
-  "Peppe Zeta":[5,7,7],
-  "Federico R.":[5,7],
-  "Pene di legno":[4,4,5,5,6,7,7],
-  "Diego":     [6,7],
-  "Fes":       [6,7,7,7],
-  "Veronica":  [7]
-}; 
-const GAME_WEIGHTS = {
-  "Dubito": 1.3,
-  "UNO": 1.2,
-  "31": 1.1,
-  "Saltacavallo": 1.0,
-  "Fr0c10": 0.9,
-  "Las Vegas": 0.8
-};  
-
-let selected    = [];
-let currentType = "";
-let currentGame = "";
-let unoScores   = {};
-
-// state for player page
-let _currentPlayerId   = null;
-let _currentPlayerName = null;
-let _playerEditMode    = false;
-
-/* ════════════════════════════════════════
-   NAV
-════════════════════════════════════════ */
-function show(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0, 0);
-  if (id === "players")    loadPlayers();
-  if (id === "ranking")    loadRanking();
-  if (id === "palmares")   loadPalmares();
-  if (id === "games")      loadGames();
-  if (id === "tournament") loadSelect();
-  if (id === "history")    loadHistory();
+function calculateEfficiency(wins, total) {
+  if (total === 0) return 0;
+  return Math.round((wins / total) * 100);
 }
 
-/* ════════════════════════════════════════
-   GIOCATORI
-════════════════════════════════════════ */
-async function addPlayer() {
-  if (!(await checkAdmin())) return;
-  const n = document.getElementById("playerName").value.trim();
-  if (!n) return;
-  await db.collection("players").add({ name: n });
-  document.getElementById("playerName").value = "";
-  loadPlayers();
-}
-
-async function loadPlayers() {
-  const snap = await db.collection("players").get();
-  let html = "";
-  snap.forEach(d => {
-    html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
-      <span class="box-name">${d.data().name}</span>
-      <div class="box-actions admin-only">
-        <button class="btn-icon" onclick="event.stopPropagation();editPlayer('${d.id}','${d.data().name}')">✏️</button>
-        <button class="btn-danger" onclick="event.stopPropagation();deleteDoc('players','${d.id}')">✕</button>
-      </div>
-    </div>`;
-  });
-  document.getElementById("playersList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun giocatore. Aggiungine uno!</p>';
-}
-
-async function editPlayer(id, oldName) {
-  if (!(await checkAdmin())) return;
-  const nuovo = prompt("Nuovo nome", oldName);
-  if (!nuovo) return;
-  await db.collection("players").doc(id).update({ name: nuovo });
-  for (const col of ["ranking","palmares","gameRanking","tournamentHistory"]) {
-    const snap = await db.collection(col).get();
-    for (const d of snap.docs) {
-      const data = d.data();
-      if (data.name   === oldName) await db.collection(col).doc(d.id).update({ name: nuovo });
-      if (data.player === oldName) await db.collection(col).doc(d.id).update({ player: nuovo });
-      // patch inside tournamentHistory scores array
-      if (col === "tournamentHistory" && data.scores) {
-        const newScores = data.scores.map(s => s.name === oldName ? { ...s, name: nuovo } : s);
-        const newGames  = (data.games || []).map(g => ({
-          ...g,
-          scores: (g.scores || []).map(s => s.name === oldName ? { ...s, name: nuovo } : s)
-        }));
-        await db.collection(col).doc(d.id).update({ scores: newScores, games: newGames });
-      }
-    }
-  }
-  loadPlayers();
-}
-
-/* ── OPEN PLAYER PAGE ── */
-async function openPlayer(id, name) {
-  _currentPlayerId   = id;
-  _currentPlayerName = name;
-  _playerEditMode    = false;
-
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("playerPage").classList.add("active");
-  window.scrollTo(0, 0);
-  document.getElementById("playerTitle").innerHTML = name;
-
-  document.getElementById("playerEditBtn").innerHTML = "✏️ Modifica";
-
-  await renderPlayerStats(false);
-}
-
-async function renderPlayerStats(editMode) {
-  const id   = _currentPlayerId;
-  const name = _currentPlayerName;
-
-  const [palSnap, rankSnap, gameSnap, histSnap] = await Promise.all([
-    db.collection("palmares").get(),
-    db.collection("ranking").get(),
-    db.collection("gameRanking").get(),
-    db.collection("tournamentHistory").get()
-  ]);
-  const efficiency = calcEfficiency(name, histSnap, tournamentsPlayed);
-
-  // Compute current stats
-  let wins = 0;
-  palSnap.forEach(d => { if (d.data().playerId === id || d.data().name === name) wins++; });
-
+function calculatePlayerStats(playerName) {
+  const data = loadData();
+  let totalGames = 0;
+  let totalWins = 0;
   let totalPoints = 0;
-  const rankingDocs = [];
-  rankSnap.forEach(d => {
-    if (d.data().playerId === id || d.data().name === name) {
-      totalPoints += (d.data().points || 0);
-      rankingDocs.push({ id: d.id, pts: d.data().points || 0 });
+
+  GAMES.forEach(game => {
+    if (data.games[game]) {
+      const playerScores = data.games[game].filter(entry => entry.player === playerName);
+      totalGames += playerScores.length;
+      totalWins += playerScores.filter(entry => entry.position === 1).length;
+      totalPoints += playerScores.reduce((sum, entry) => sum + entry.points, 0);
     }
   });
-
-  let gameStats = {};
-  const gameStatDocs = {};
-  gameSnap.forEach(d => {
-    if (d.data().player === name) {
-      const g = d.data().game;
-      if (!gameStats[g])     gameStats[g]     = 0;
-      if (!gameStatDocs[g])  gameStatDocs[g]  = [];
-      gameStats[g] += (d.data().points || 0);
-      gameStatDocs[g].push({ id: d.id, pts: d.data().points || 0 });
-    }
-  });
-
-  // Count unique tournaments from history
-  let tournamentsAuto = 0;
-  histSnap.forEach(d => {
-    const sc = d.data().scores || [];
-    if (sc.some(s => s.name === name)) tournamentsAuto++;
-  });
-
-  // Load player doc for tournamentsOffset (manual adjustment)
-  let tournamentsOffset = 0;
-  try {
-    const pDoc = await db.collection("players").doc(id).get();
-    if (pDoc.exists) tournamentsOffset = parseInt(pDoc.data().tournamentsOffset) || 0;
-  } catch (e) {}
-  const tournamentsPlayed = Math.max(0, tournamentsAuto + tournamentsOffset);
-  const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
-
-  if (!editMode) {
-    // ── READ MODE ──
-   let html = `
-  <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>
-
- <div class="stat-card">
-    <span class="stat-card-icon">⚡</span>
-    <div>
-      <div class="stat-card-label">Efficienza</div>
-      <div class="stat-card-val">${efficiency.toFixed(1)}%</div>
-    </div>
-  </div>
-`;
-    if (Object.keys(gameStats).length) {
-      html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
-      Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
-        html += `<div class="box"><span class="box-name">${GAME_ICONS[g]||"🎮"} ${g}</span><span class="box-pts">${p} pt</span></div>`;
-      });
-    }
-    document.getElementById("playerStats").innerHTML = html;
-
-  } else {
-    // ── EDIT MODE ──
-    let html = `<div class="edit-mode-banner">✏️ Modalità modifica attiva
-      <button class="save-edit-btn" onclick="savePlayerEdit()">💾 Salva tutto</button>
-    </div>`;
-
-    // Editable summary stats
-    html += `
-      <div class="stat-card editable">
-        <span class="stat-card-icon">🏆</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Titoli vinti</div>
-          <input class="stat-card-edit-input" id="edit_wins" type="number" value="${wins}" min="0">
-        </div>
-      </div>
-      <div class="stat-card editable">
-        <span class="stat-card-icon">⭐</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Punti totali (classifica globale)</div>
-          <input class="stat-card-edit-input" id="edit_totalPoints" type="number" value="${totalPoints}" min="0">
-        </div>
-      </div>
-      <div class="stat-card editable">
-        <span class="stat-card-icon">🎯</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Tornei giocati (presenze)</div>
-          <input class="stat-card-edit-input" id="edit_tournaments" type="number" value="${tournamentsPlayed}" min="0">
-        </div>
-      </div>`;
-
-    // Per-game edit
-    if (Object.keys(gameStats).length) {
-      html += `<div class="divider"></div><div class="section-title" style="font-size:20px;margin-bottom:12px;">Punti per <span>gioco</span></div>`;
-      Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
-        html += `<div class="game-edit-row">
-          <span class="game-edit-row-name">${GAME_ICONS[g]||"🎮"} ${g}</span>
-          <input class="game-edit-input" id="edit_game_${g.replace(/\s/g,'_')}" type="number" value="${p}" min="0">
-        </div>`;
-      });
-    }
-
-    html += `<div style="margin-top:20px; display:flex; gap:10px;">
-      <button class="btn-gold" onclick="savePlayerEdit()">💾 Salva tutto</button>
-      <button class="btn-ghost" onclick="cancelPlayerEdit()">Annulla</button>
-    </div>`;
-
-    // Store metadata for save
-    document.getElementById("playerStats").innerHTML = html;
-    document.getElementById("playerStats").dataset.rankingDocs   = JSON.stringify(rankingDocs);
-    document.getElementById("playerStats").dataset.gameStatDocs  = JSON.stringify(gameStatDocs);
-    document.getElementById("playerStats").dataset.wins          = wins;
-    document.getElementById("playerStats").dataset.tournamentsAuto = tournamentsAuto;
-    document.getElementById("playerStats").dataset.palSnapIds    = JSON.stringify(
-      palSnap.docs.filter(d => d.data().playerId === id || d.data().name === name).map(d => d.id)
-    );
-  }
-}
-function calcEfficiency(name, histSnap, tournamentsPlayed) {
-  let efficiencySum = 0;
-let efficiencyWeight = 0;
-
-histSnap.forEach(d => {
-  const games = d.data().games || [];
-
-  games.forEach(g => {
-    const scores = g.scores || [];
-    const playersCount = scores.length;
-
-    scores.forEach(s => {
-      if (s.name !== name) return;
-
-      const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
-
-      let eff;
-
-      if (g.name === "Las Vegas") {
-        eff = (s.points || 0) / 4;
-      } else {
-        eff = ((s.points || 0) - 1) / (maxPoints - 1);
-      }
-
-      let weight = playersCount / 7;
-      let gameWeight = GAME_WEIGHTS[g.name] || 1;
-
-      function calcEfficiency(name, histSnap, tournamentsPlayed) {
-  let efficiencySum = 0;
-  let efficiencyWeight = 0;
-
-  histSnap.forEach(d => {
-    const games = d.data().games || [];
-    games.forEach(g => {
-      const scores = g.scores || [];
-      const playersCount = scores.length;
-      scores.forEach(s => {
-        if (s.name !== name) return;
-        const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
-        let eff = g.name === "Las Vegas"
-          ? (s.points || 0) / 4
-          : ((s.points || 0) - 1) / (maxPoints - 1);
-        let weight = playersCount / 7;
-        let gameWeight = GAME_WEIGHTS[g.name] || 1;
-        efficiencySum += eff * weight * gameWeight;
-        efficiencyWeight += weight * gameWeight;
-      });
-    });
-  });
-
-  let performance = efficiencyWeight > 0 ? efficiencySum / efficiencyWeight : 0;
-
-  if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[name]) {
-    let fakeSum = 0, fakeWeight = 0;
-    PLAYER_TOURNAMENTS[name].forEach(p => {
-      let weight = p / 7;
-      fakeSum += 0.5 * weight;
-      fakeWeight += weight;
-    });
-    performance = fakeSum / fakeWeight;
-  }
-
-  const extraTournaments = PLAYER_TOURNAMENTS[name]?.length || 0;
-  const totalTournaments = tournamentsPlayed + extraTournaments;
-  const experienceFactor = Math.log(1 + totalTournaments) / Math.log(6);
-  return performance * experienceFactor * 100;
-}  
-
-async function togglePlayerEdit() {
-  if (!(await checkAdmin())) return;
-  _playerEditMode = !_playerEditMode;
-  document.getElementById("playerEditBtn").innerHTML = _playerEditMode ? "✕ Annulla" : "✏️ Modifica";
-  await renderPlayerStats(_playerEditMode);
-}
-
-function cancelPlayerEdit() {
-  _playerEditMode = false;
-  document.getElementById("playerEditBtn").innerHTML = "✏️ Modifica";
-  renderPlayerStats(false);
-}
-
-async function savePlayerEdit() {
-  if (!(await checkAdmin())) return;
-
-  const container       = document.getElementById("playerStats");
-  const rankingDocs     = JSON.parse(container.dataset.rankingDocs  || "[]");
-  const gameStatDocs    = JSON.parse(container.dataset.gameStatDocs || "{}");
-  const oldWins         = parseInt(container.dataset.wins || "0");
-  const palSnapIds      = JSON.parse(container.dataset.palSnapIds   || "[]");
-
-  const newTotalPoints  = parseInt(document.getElementById("edit_totalPoints").value) || 0;
-  const newWins         = parseInt(document.getElementById("edit_wins").value) || 0;
-  const name            = _currentPlayerName;
-  const id              = _currentPlayerId;
-
-  // ── Update global ranking ──
-  // Delete all existing ranking docs for this player, then add one fresh doc
-  for (const { id: docId } of rankingDocs) {
-    await db.collection("ranking").doc(docId).delete();
-  }
-  await db.collection("ranking").add({ name, playerId: id, points: newTotalPoints });
-
-  // ── Update palmares (wins) ──
-  const diff = newWins - palSnapIds.length;
-  if (diff > 0) {
-    for (let i = 0; i < diff; i++) await db.collection("palmares").add({ name, playerId: id });
-  } else if (diff < 0) {
-    let toDelete = Math.abs(diff);
-    for (const docId of palSnapIds) {
-      if (toDelete <= 0) break;
-      await db.collection("palmares").doc(docId).delete();
-      toDelete--;
-    }
-  }
-
-  // ── Update per-game stats ──
-  for (const [g, docs] of Object.entries(gameStatDocs)) {
-    const inputId = "edit_game_" + g.replace(/\s/g,'_');
-    const el = document.getElementById(inputId);
-    if (!el) continue;
-    const newPts = parseInt(el.value) || 0;
-    // Delete all existing docs for this player+game, add one fresh
-    for (const { id: docId } of docs) {
-      await db.collection("gameRanking").doc(docId).delete();
-    }
-    await db.collection("gameRanking").add({ game: g, player: name, playerId: id, points: newPts });
-  }
-
-  // ── Update tournaments played (presenze) via offset on player doc ──
-  const tournamentsAuto = parseInt(container.dataset.tournamentsAuto || "0");
-  const newTournaments  = parseInt(document.getElementById("edit_tournaments").value) || 0;
-  const newOffset       = newTournaments - tournamentsAuto;
-  try {
-    await db.collection("players").doc(id).set({ tournamentsOffset: newOffset }, { merge: true });
-  } catch (e) { console.error("offset save error", e); }
-
-  _playerEditMode = false;
-  document.getElementById("playerEditBtn").innerHTML = "✏️ Modifica";
-  await renderPlayerStats(false);
-  alert("✅ Statistiche aggiornate!");
-}
-
-async function deleteDoc(col, id) {
-  if (!(await checkAdmin())) return;
-  if (!confirm("Eliminare?")) return;
-  await db.collection(col).doc(id).delete();
-  show(col);
-}
-
-/* ════════════════════════════════════════
-   TORNEO — SETUP & GAMES
-════════════════════════════════════════ */
-async function loadSelect() {
-  selected = [];
-  const snap = await db.collection("players").get();
-  let html = "";
-  snap.forEach(d => {
-    html += `<label class="check-item">
-      <input type="checkbox" value="${d.id}" 
-        data-name="${d.data().name}" onchange="toggle(this)">
-      <span>${d.data().name}</span>
-    </label>`;
-  });
-  document.getElementById("selectPlayers").innerHTML = html;
-}
-
-
-function toggle(e) {
-  if (e.checked) selected.push({ id: e.value, name: e.dataset.name });
-  else selected = selected.filter(p => p.id !== e.value);
-}
-
-function startGames() {
-  if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
-  unoScores = {};
-  let html = "";
-  GAME_LIST.forEach(g => {
-    html += `<div class="score-game-title">${g}</div>`;
-    selected.forEach(p => {
-      html += `<div class="score-row">
-        <span>${p.name}</span>
-        <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
-      </div>`;
-    });
-    if (g === "UNO") html += `<div id="unoExtra"></div>`;
-  });
-  html += `<div id="liveRanking"></div>
-    <div style="margin:28px 0;text-align:center;">
-      <button class="btn-gold" onclick="finish()">🏁 Fine Torneo</button>
-    </div>`;
-  document.getElementById("gamesArea").innerHTML = html;
-  createUnoExtra();
-}
-
-function updateLiveRanking() {
-  const totals = {};
-  selected.forEach(p => totals[p.name] = 0);
-  GAME_LIST.forEach(g => {
-    selected.forEach(p => {
-      totals[p.name] += parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
-    });
-  });
-  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
-  let html = `<h3>🔥 Classifica Live</h3>`;
-  sorted.forEach(([name, pts], i) => {
-    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    html += `<div class="box" style="margin-bottom:8px;">
-      <div class="rank-badge ${badge}">${i+1}</div>
-      <span class="box-name">${name}</span>
-      <span class="box-pts">${pts} pt</span>
-    </div>`;
-  });
-  document.getElementById("liveRanking").innerHTML = html;
-}
-
-function createUnoExtra() {
-  let html = `<div class="uno-title">🃏 UNO — Eliminazione (51)</div>`;
-  selected.forEach(p => {
-    html += `<div class="uno-box" id="unoBox_${p.id}">
-      <span class="uno-name">${p.name}</span>
-      <input type="number" id="unoInput_${p.id}" placeholder="pt" style="width:70px;">
-      <button class="btn-icon" onclick="setUno('${p.id}')">OK</button>
-      <span class="uno-score"><span id="unoScore_${p.id}">0</span>/51</span>
-    </div>`;
-  });
-  document.getElementById("unoExtra").innerHTML = html;
-}
-
-function setUno(id) {
-  const input = document.getElementById("unoInput_"+id);
-  const val   = parseInt(input.value);
-  if (isNaN(val) || val <= 0) return;
-  if (!unoScores[id]) unoScores[id] = 0;
-  unoScores[id] += val;
-  document.getElementById("unoScore_"+id).innerText = unoScores[id];
-  input.value = "";
-  if (unoScores[id] >= 51) {
-    const box = document.getElementById("unoBox_"+id);
-    box.classList.add("uno-eliminated");
-    if (!box.innerHTML.includes("ELIMINATO"))
-      box.innerHTML += " <span style='color:#e74c3c;font-size:12px;font-weight:700;letter-spacing:1px;'>ELIMINATO</span>";
-  }
-}
-
-async function finish() {
-  const tournamentId = Date.now();
-  const totals = {};
-  selected.forEach(p => totals[p.name] = 0);
-
-  // Per-game scores to save in gameRanking AND history
-  const gameBreakdown = [];
-  for (const g of GAME_LIST) {
-    const gameRow = { game: g, icon: GAME_ICONS[g]||"🎮", scores: [] };
-    for (const p of selected) {
-      const val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
-      totals[p.name] += val;
-      await db.collection("gameRanking").add({ game: g, player: p.name, playerId: p.id, points: val, tournament: tournamentId });
-      gameRow.scores.push({ name: p.name, playerId: p.id, points: val });
-    }
-    gameBreakdown.push(gameRow);
-  }
-
-  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
-  const winner = sorted[0][0];
-
-  // ── Save tournament history document ──
-  const historyDoc = {
-    timestamp: tournamentId,
-    winner,
-    winnerPlayerId: selected.find(x => x.name === winner)?.id || "",
-    players: selected.map(p => p.name),
-    scores: sorted.map(([name, pts], i) => ({
-      name, pts,
-      playerId: selected.find(x => x.name === name)?.id || "",
-      rank: i + 1
-    })),
-    games: gameBreakdown
-  };
-  await db.collection("tournamentHistory").add(historyDoc);
-
-  // ── Update global ranking & palmares ──
-  for (const [name, pts] of sorted) {
-    const playerObj = selected.find(x => x.name === name);
-    await db.collection("ranking").add({ name, playerId: playerObj?.id, points: pts });
-  }
-  const winnerObj = selected.find(x => x.name === winner);
-  await db.collection("palmares").add({ name: winner, playerId: winnerObj?.id });
-
-  // ── Show result screen ──
-  let html = `<div class="final-winner">
-    <div class="final-winner-crown">👑</div>
-    <div class="final-winner-name">${winner}</div>
-    <div class="final-winner-label">Vincitore del torneo</div>
-  </div><div class="divider"></div>`;
-  sorted.forEach(([name, pts], i) => {
-    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    html += `<div class="box" style="margin-bottom:8px;">
-      <div class="rank-badge ${badge}">${i+1}</div>
-      <span class="box-name">${name}</span>
-      <span class="box-pts">${pts} pt</span>
-    </div>`;
-  });
-  html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
-  document.getElementById("gamesArea").innerHTML = html;
-}
-
-/* ════════════════════════════════════════
-   PALMARES
-════════════════════════════════════════ */
-async function loadPalmares() {
-  const snap = await db.collection("palmares").get();
-  const data = {};
-  snap.forEach(d => { data[d.data().name] = (data[d.data().name]||0)+1; });
-  let html = ""; let i = 0;
-  Object.entries(data).sort((a,b) => b[1]-a[1]).forEach(([name, count]) => {
-    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    html += `<div class="palmares-item">
-      <div class="rank-badge ${badge}">${i+1}</div>
-      <span class="p-name">${name}</span>
-      <span class="p-trophies">🏆 ${count}</span>
-      <div class="box-actions admin-only">
-        <button class="btn-icon" onclick="editPalmares('${name}',${count})">✏️</button>
-        <button class="btn-danger" onclick="deleteByName('palmares','${name}')">✕</button>
-      </div>
-    </div>`;
-    i++;
-  });
-  document.getElementById("palmaresList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
-}
-
-async function editPalmares(name, count) {
-  if (!(await checkAdmin())) return;
-  const n = prompt("Titoli", count);
-  if (!n) return;
-  const snap   = await db.collection("palmares").get();
-  const target = parseInt(n);
-  if (target > count) {
-    for (let i=0; i<target-count; i++) await db.collection("palmares").add({ name });
-  } else {
-    let toDelete = count - target;
-    for (const d of snap.docs) {
-      if (toDelete > 0 && d.data().name === name) { await db.collection("palmares").doc(d.id).delete(); toDelete--; }
-    }
-  }
-  loadPalmares();
-}
-
-function resetTorneo() {
-  document.getElementById("gamesArea").innerHTML = "";
-  selected = [];
-  loadSelect();
-  unoScores = {};
-}
-
-/* ════════════════════════════════════════
-   CLASSIFICA
-════════════════════════════════════════ */
-async function loadRanking() {
-  const snap = await db.collection("ranking").get();
-  const data = {};
-  snap.forEach(d => { data[d.data().name] = (data[d.data().name]||0) + d.data().points; });
-  let html = ""; let i = 0;
-  Object.entries(data).sort((a,b) => b[1]-a[1]).forEach(([name, pts]) => {
-    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    html += `<div class="box">
-      <div class="rank-badge ${badge}">${i+1}</div>
-      <span class="box-name">${name}</span>
-      <span class="box-pts">${pts} pt</span>
-      <div class="box-actions admin-only">
-        <button class="btn-icon" onclick="editRanking('${name}',${pts})">✏️</button>
-        <button class="btn-danger" onclick="deleteByName('ranking','${name}')">✕</button>
-      </div>
-    </div>`;
-    i++;
-  });
-  document.getElementById("rankingList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
-}
-  async function loadEfficiencyRanking() {
-  const snap = await db.collection("players").get();
-  const histSnap = await db.collection("tournamentHistory").get();
-
-  let players = [];
-
-  snap.forEach(doc => {
-    players.push({ name: doc.data().name });
-  });
-
-players = players.map(p => {
-  let efficiencySum = 0;
-  let efficiencyWeight = 0;
-  let tournamentsPlayed = 0;
-
-histSnap.forEach(d => {
-  const scores = d.data().scores || [];
-  if (scores.some(s => s.name === p.name)) {
-    tournamentsPlayed++;
-  }
-});
-
-let extraTournaments =
-  (PLAYER_TOURNAMENTS[p.name]?.length || 0);
-
-let totalTournaments =
-  tournamentsPlayed + extraTournaments;
-
-  histSnap.forEach(d => {
-    const games = d.data().games || [];
-
-    games.forEach(g => {
-      const scores = g.scores || [];
-      const playersCount = scores.length;
-
-      scores.forEach(s => {
-        if (s.name !== p.name) return;
-
-        const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
-
-        let eff;
-
-        if (g.name === "Las Vegas") {
-          eff = (s.points || 0) / 4;
-        } else {
-          eff = ((s.points || 0) - 1) / (maxPoints - 1);
-        }
-
-        let weight = playersCount / 7;
-        let gameWeight = GAME_WEIGHTS[g.name] || 1;
-
-        efficiencySum += eff * weight * gameWeight;
-        efficiencyWeight += weight * gameWeight;
-      });
-    });
-  });
-
-  let performance = efficiencyWeight > 0
-    ? efficiencySum / efficiencyWeight
-    : 0;
-
-  if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[p.name]) {
-    PLAYER_TOURNAMENTS[p.name].forEach(num => {
-      let eff = 0.5;
-      let weight = num / 7;
-
-      efficiencySum += eff * weight;
-      efficiencyWeight += weight;
-    });
-
-    performance = efficiencySum / efficiencyWeight;
-  }
-
-  let experienceFactor =
-  Math.log(1 + totalTournaments) / Math.log(6);
-
-  let efficiency = performance * experienceFactor * 100;
 
   return {
-    name: p.name,
-    efficiency: efficiency
+    totalGames,
+    totalWins,
+    totalPoints,
+    efficiency: calculateEfficiency(totalWins, totalGames)
   };
-});
-  players.sort((a,b) => b.efficiency - a.efficiency);
-
-  let html = "";
-
-  players.forEach((p, i) => {
-    let label = getEfficiencyLabel(p.efficiency);
-
-    html += `
-    <div class="box">
-      <span class="box-name">${i+1}. ${p.name} — ${label}</span>
-      <span class="box-pts">${p.efficiency.toFixed(1)}%</span>
-    </div>`;
-  });
-
-  document.getElementById("efficiencyRanking").innerHTML = html;
-}
- function getEfficiencyLabel(e) {
-  if (e < 30) return "💀 Debole · spesso ultimo";
-  if (e < 50) return "⚠️ Sotto media · incostante";
-  if (e < 65) return "👍 Medio · competitivo";
-  if (e < 80) return "🔥 Forte · spesso top 3";
-  return "👑 Dominante · best player";
-}
-  loadEfficiencyRanking();
-
-async function editRanking(name, pts) {
-  if (!(await checkAdmin())) return;
-  const n = prompt("Punti", pts);
-  if (!n) return;
-  const snap = await db.collection("ranking").get();
-  let updated = false;
-  for (const d of snap.docs) {
-    if (d.data().name === name && !updated) {
-      await db.collection("ranking").doc(d.id).update({ points: parseInt(n) });
-      updated = true;
-    }
-  }
-  loadRanking();
 }
 
-/* ════════════════════════════════════════
-   PER GIOCO
-════════════════════════════════════════ */
-let activeGameTab = null;
+// ═══════════════════════════════════════════════════════════════════════════════
+// UI NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════════════
 
-async function loadGames() {
-  const snap = await db.collection("gameRanking").get();
-  const data = {};
-  snap.forEach(d => {
-    const g=d.data().game, p=d.data().player, pts=d.data().points;
-    if (typeof p !== "string") return;
-    if (!data[g]) data[g] = {};
-    data[g][p] = (data[g][p]||0) + pts;
-  });
-
-  const allGames = [...GAME_LIST, "Merda"];
-  let tabsHtml = `<div class="game-tabs-wrap"><div class="game-tabs">`;
-  allGames.forEach((g, i) => {
-    const icon = GAME_ICONS[g] || "🎮";
-    tabsHtml += `<button class="game-tab${i===0?' active':''}" id="tab_${g.replace(/\s/g,'_')}" onclick="switchGameTab('${g.replace(/\s/g,'_')}')">${icon} ${g}</button>`;
-  });
-  tabsHtml += `</div></div>`;
-
-  let panelsHtml = "";
-  allGames.forEach((g, i) => {
-    const gKey    = g.replace(/\s/g,'_');
-    const icon    = GAME_ICONS[g] || "🎮";
-    const players = data[g] ? Object.entries(data[g]).sort((a,b) => b[1]-a[1]) : [];
-    const maxPts  = players.length ? players[0][1] : 1;
-
-    panelsHtml += `<div class="game-panel${i===0?' active':''}" id="panel_${gKey}">`;
-    panelsHtml += `
-      <div class="gp-header">
-        <div class="gp-header-left">
-          <div class="gp-header-icon">${icon}</div>
-          <div class="gp-header-name">${g}</div>
-          <div class="gp-header-sub">${players.length} giocatori · ${players.reduce((s,[,p])=>s+p,0)} pt totali</div>
-        </div>
-        <button class="gp-header-add admin-only" onclick="openGamePopup('${g}')">+</button>
-      </div>`;
-
-    if (players.length === 0) {
-      panelsHtml += `<div class="gp-empty"><span class="gp-empty-icon">${icon}</span>Nessun dato per ${g}</div>`;
-    } else {
-      if (players.length >= 2) {
-        const podiumOrder   = players.length >= 3 ? [players[1], players[0], players[2]] : [players[0], players[1]];
-        const podiumClasses = players.length >= 3 ? ['p2','p1','p3'] : ['p1','p2'];
-        const podiumEmojis  = players.length >= 3 ? ['🥈','🥇','🥉'] : ['🥇','🥈'];
-        panelsHtml += `<div class="gp-podium">`;
-        podiumOrder.forEach(([name, pts], idx) => {
-          panelsHtml += `<div class="podium-slot ${podiumClasses[idx]}">
-            <span class="podium-name">${name}</span>
-            <span class="podium-pts">${pts}</span>
-            <div class="podium-block">${podiumEmojis[idx]}</div>
-          </div>`;
-        });
-        panelsHtml += `</div>`;
-      }
-      panelsHtml += `<div class="gp-list">
-        <div class="gp-list-header">
-          <span class="col-rank">#</span><span class="col-name">Giocatore</span>
-          <span class="col-pts">Punti</span><span class="col-act"></span>
-        </div>`;
-      players.forEach(([name, pts], idx) => {
-        panelsHtml += `<div class="gp-row${idx===0?' top1':''}">
-          <span class="gp-row-num">${idx+1}</span>
-          <span class="gp-row-name">${name}</span>
-          <span class="gp-row-pts">${pts} pt</span>
-          <button class="gp-row-del btn-danger admin-only" onclick="deleteGame('${g}','${name}')">✕</button>
-        </div>`;
-      });
-      panelsHtml += `</div>`;
-    }
-    panelsHtml += `</div>`;
-  });
-
-  document.getElementById("gamesList").innerHTML = tabsHtml + panelsHtml;
-  activeGameTab = allGames[0].replace(/\s/g,'_');
+function navigateTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  
+  if (screenId === 'leaderboardScreen') renderLeaderboard();
+  if (screenId === 'gamesScreen') renderGames();
+  if (screenId === 'palmaresScreen') renderPalmares();
+  if (screenId === 'historyScreen') renderHistory();
 }
 
-function switchGameTab(gKey) {
-  document.querySelectorAll(".game-tab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".game-panel").forEach(p => p.classList.remove("active"));
-  document.getElementById("tab_" + gKey).classList.add("active");
-  document.getElementById("panel_" + gKey).classList.add("active");
-  activeGameTab = gKey;
+function showPopup(title, content, onConfirm) {
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupContent').innerHTML = content;
+  document.getElementById('popup').classList.add('active');
+  window.popupCallback = onConfirm;
 }
 
-async function deleteGame(g, p) {
-  if (!(await checkAdmin())) return;
-  const snap = await db.collection("gameRanking").get();
-  for (const d of snap.docs) {
-    if (d.data().game === g && d.data().player === p) await db.collection("gameRanking").doc(d.id).delete();
-  }
-  loadGames();
-}
-
-async function deleteByName(col, name) {
-  if (!(await checkAdmin())) return;
-  if (!confirm("Eliminare " + name + "?")) return;
-  const snap = await db.collection(col).get();
-  let found = false;
-  for (const d of snap.docs) {
-    if (d.data().name === name && !found) { await db.collection(col).doc(d.id).delete(); found = true; }
-  }
-  show(col);
-}
-
-/* ════════════════════════════════════════
-   CRONOLOGIA TORNEI
-════════════════════════════════════════ */
-function fmtDate(ts) {
-  const d = new Date(ts);
-  return d.toLocaleDateString("it-IT", { day:"2-digit", month:"long", year:"numeric" }) +
-         " · " + d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
-}
-
-async function loadHistory() {
-  const snap = await db.collection("tournamentHistory").orderBy("timestamp","desc").get();
-
-  if (snap.empty) {
-    document.getElementById("historyList").innerHTML =
-      '<p style="color:var(--muted);font-size:13px;padding-top:8px;">Nessun torneo registrato ancora. Il prossimo torneo completato apparirà qui.</p>';
-    return;
-  }
-
-  let html = "";
-  let idx  = snap.size;
-  snap.forEach(d => {
-    const t = d.data();
-    const chips = (t.scores || []).map(s =>
-      `<span class="history-player-chip${s.rank===1?' winner':''}">${s.rank===1?'👑 ':''}${s.name}</span>`
-    ).join("");
-
-    html += `<div class="history-card" onclick="openTournamentDetail('${d.id}')">
-      <div class="history-card-top">
-        <span class="history-card-num">TORNEO #${idx}</span>
-        <span class="history-card-date">${fmtDate(t.timestamp)}</span>
-      </div>
-      <div class="history-card-winner">
-        <span class="history-card-crown">👑</span>
-        <span class="history-card-name">${t.winner}</span>
-      </div>
-      <div class="history-card-players">${chips}</div>
-    </div>`;
-    idx--;
-  });
-
-  document.getElementById("historyList").innerHTML = html;
-}
-
-async function openTournamentDetail(docId) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("tournamentDetail").classList.add("active");
-  window.scrollTo(0, 0);
-
-  const doc  = await db.collection("tournamentHistory").doc(docId).get();
-  const t    = doc.data();
-
-  // Count tournament number
-  const allSnap = await db.collection("tournamentHistory").orderBy("timestamp","asc").get();
-  let tNum = 1;
-  allSnap.forEach((d, i) => { if (d.id === docId) tNum = i + 1; });
-  // recount correctly
-  let counter = 1;
-  for (const d of allSnap.docs) { if (d.id === docId) break; counter++; }
-  tNum = counter;
-
-  document.getElementById("tdTitle").innerHTML = "Torneo #" + tNum;
-
-  // ── Hero ──
-  let html = `
-    <div class="td-hero">
-      <div class="td-hero-date">${fmtDate(t.timestamp)} · Torneo #${tNum}</div>
-      <div class="td-hero-crown">👑</div>
-      <div class="td-hero-name">${t.winner}</div>
-      <div class="td-hero-label">Vincitore</div>
-    </div>`;
-
-  // ── Final standings ──
-  html += `<div class="td-section-title">Classifica Finale</div>`;
-  (t.scores || []).forEach(s => {
-    const badge = s.rank===1?'gold':s.rank===2?'silver':s.rank===3?'bronze':'';
-    html += `<div class="td-row">
-      <div class="rank-badge ${badge}">${s.rank}</div>
-      <span class="td-row-name">${s.name}</span>
-      <span class="td-row-pts">${s.pts} pt</span>
-    </div>`;
-  });
-
-  // ── Game breakdown (collapsible) ──
-  html += `<div class="td-section-title">Dettaglio per Gioco</div>`;
-  (t.games || []).forEach(g => {
-    const sorted = [...(g.scores||[])].sort((a,b) => b.points - a.points);
-    html += `<div class="td-game-block">
-      <div class="td-game-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">
-        <span style="font-size:18px;">${g.icon||"🎮"}</span>
-        <span class="td-game-header-name">${g.game}</span>
-        <span style="font-size:12px;color:var(--muted);">▾</span>
-      </div>
-      <div class="td-game-body">`;
-    sorted.forEach(s => {
-      html += `<div class="td-game-row">
-        <span class="td-game-row-name">${s.name}</span>
-        <span class="td-game-row-pts">${s.points} pt</span>
-      </div>`;
-    });
-    html += `</div></div>`;
-  });
-
-  // ── Delete button (admin only) ──
-  if (isAdmin()) {
-    html += `<div class="admin-only" style="margin-top:28px;text-align:center;">
-      <button class="btn-danger" style="padding:10px 20px;border-radius:10px;" onclick="deleteTournament('${docId}')">🗑 Elimina torneo</button>
-    </div>`;
-  }
-
-  document.getElementById("tdContent").innerHTML = html;
-}
-
-async function deleteTournament(docId) {
-  if (!(await checkAdmin())) return;
-  if (!confirm("Eliminare definitivamente questo torneo?")) return;
-  await db.collection("tournamentHistory").doc(docId).delete();
-  show("history");
-}
-
-/* ════════════════════════════════════════
-   POPUP
-════════════════════════════════════════ */
-function openPopup(type) { currentType = type; document.getElementById("popup").style.display = "flex"; }
-function openGamePopup(game) { currentType = "games"; currentGame = game; document.getElementById("popup").style.display = "flex"; }
 function closePopup() {
-  document.getElementById("popup").style.display = "none";
-  document.getElementById("popupName").value  = "";
-  document.getElementById("popupPoints").value = "";
+  document.getElementById('popup').classList.remove('active');
+  window.popupCallback = null;
 }
-document.getElementById("popup").addEventListener("click", e => {
-  if (e.target === document.getElementById("popup")) closePopup();
-});
 
-async function confirmAdd() {
-  if (!(await checkAdmin())) return;
-  const name = document.getElementById("popupName").value.trim();
-  const pts  = parseInt(document.getElementById("popupPoints").value) || 0;
-  if (!name) return;
-  if (currentType === "palmares") { await db.collection("palmares").add({ name }); loadPalmares(); }
-  if (currentType === "ranking")  { await db.collection("ranking").add({ name, points: pts }); loadRanking(); }
-  if (currentType === "games")    { await db.collection("gameRanking").add({ player: name, game: currentGame, points: pts }); loadGames(); }
+function confirmPopup() {
+  if (window.popupCallback) window.popupCallback();
   closePopup();
 }
 
-/* ════════════════════════════════════════
-   SLOT
-════════════════════════════════════════ */
-let slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-let slotSpinning = false;
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLAYER MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════════
 
-function spinSlot() {
-  if (slotSpinning) return;
-  if (!slotOptions.length) { alert("Premi Reset"); return; }
-  slotSpinning = true;
-  const slot = document.getElementById("slot");
-  let speed = 50, duration = 2000, elapsed = 0;
-  const interval = setInterval(() => {
-    slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)];
-    elapsed += speed;
-    if (elapsed >= duration) {
-      clearInterval(interval);
-      const slow = setInterval(() => { slot.innerText = slotOptions[Math.floor(Math.random()*slotOptions.length)]; }, 120);
-      setTimeout(() => {
-        clearInterval(slow);
-        const idx    = Math.floor(Math.random()*slotOptions.length);
-        const result = slotOptions[idx];
-        slot.innerText = result;
-        document.getElementById("wheelResult").innerHTML = "✦ " + result;
-        slotOptions.splice(idx, 1);
-        slotSpinning = false;
-        if (!slotOptions.length) alert("🔁 Finite tutte! Premi Reset.");
-      }, 800);
-    }
-  }, speed);
-}
-
-function resetSlot() {
-  slotOptions = ["UNO","31","Saltacavallo","Fr0c10","Dubito"];
-  document.getElementById("slot").innerText = "?";
-  document.getElementById("wheelResult").innerHTML = "";
-}
-
-function startSlotPro(winner) {
-  const reels = [document.getElementById("reel1"),document.getElementById("reel2"),document.getElementById("reel3")];
-  const names = selected.map(p => p.name);
-  reels.forEach(r => r.innerText = "");
-  function spinReel(reel, stopDelay) {
-    let speed = 40, elapsed = 0;
-    const iv = setInterval(() => {
-      reel.innerText = names[Math.floor(Math.random()*names.length)];
-      elapsed += speed;
-      if (elapsed >= stopDelay) {
-        clearInterval(iv);
-        const slow = setInterval(() => { reel.innerText = names[Math.floor(Math.random()*names.length)]; }, 120);
-        setTimeout(() => { clearInterval(slow); reel.innerText = winner; }, 600);
+function loginUser() {
+  showPopup('Login', 
+    `<div class="field" style="margin-bottom: 20px;">
+      <label>Nome Giocatore</label>
+      <input type="text" id="loginInput" placeholder="Inserisci nome..." />
+    </div>`,
+    () => {
+      const name = document.getElementById('loginInput').value.trim();
+      if (name) {
+        const data = loadData();
+        if (!data.players[name]) data.players[name] = { created: new Date().toISOString() };
+        saveData(data);
+        currentUser = name;
+        updateLoginStatus();
+        closePopup();
       }
-    }, speed);
-  }
-  spinReel(reels[0],1500); spinReel(reels[1],2200); spinReel(reels[2],3000);
-  setTimeout(() => {
-    alert("🎰 JACKPOT\n🏆 VINCE: " + winner);
-    document.getElementById("gamesArea").innerHTML =
-      `<div class="final-winner"><div class="final-winner-crown">👑</div><div class="final-winner-name">${winner}</div></div>
-       <div style="text-align:center;margin-top:20px;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
-    document.getElementById("slotContainer").style.display = "none";
-  }, 3500);
+    }
+  );
+  document.getElementById('loginInput').focus();
 }
 
-/* ════════════════════════════════════════
-   LOGIN
-════════════════════════════════════════ */
-function login() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(err => {
-      if (err.code === "auth/popup-blocked" || err.code === "auth/popup-closed-by-user") {
-        auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-      } else {
-        console.error("Login error:", err);
+function createNewPlayer() {
+  showPopup('Nuovo Giocatore', 
+    `<div class="field" style="margin-bottom: 20px;">
+      <label>Nome Giocatore</label>
+      <input type="text" id="newPlayerInput" placeholder="Inserisci nome..." />
+    </div>`,
+    () => {
+      const name = document.getElementById('newPlayerInput').value.trim();
+      if (name) {
+        const data = loadData();
+        if (data.players[name]) {
+          alert('Giocatore già esistente!');
+          return;
+        }
+        data.players[name] = { created: new Date().toISOString() };
+        saveData(data);
+        currentUser = name;
+        updateLoginStatus();
+        closePopup();
+      }
+    }
+  );
+  document.getElementById('newPlayerInput').focus();
+}
+
+function updateLoginStatus() {
+  const status = document.getElementById('loginStatus');
+  if (currentUser) {
+    status.textContent = `✓ Autenticato come ${currentUser}`;
+    status.classList.add('ok');
+  } else {
+    status.textContent = 'Non autenticato';
+    status.classList.remove('ok');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function renderLeaderboard() {
+  const data = loadData();
+  const players = Object.keys(data.players);
+  
+  const rankings = players.map(name => {
+    const stats = calculatePlayerStats(name);
+    return { name, ...stats };
+  }).sort((a, b) => b.totalPoints - a.totalPoints);
+
+  let html = '';
+  rankings.forEach((p, i) => {
+    const rank = i + 1;
+    html += `
+      <div class="box playerBox" onclick="viewPlayerProfile('${p.name}')">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+          <div class="rank-badge">${rank}</div>
+          <div class="box-name">${p.name}</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="box-pts">${p.totalPoints}</div>
+          <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">${p.efficiency}%</div>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('leaderboardList').innerHTML = html || '<div style="text-align: center; padding: 40px; color: var(--muted);">Nessun giocatore</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GAMES MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function renderGames() {
+  const tabsHtml = GAMES.map((game, i) => 
+    `<button class="game-tab ${i === 0 ? 'active' : ''}" onclick="switchGame(${i})">${game}</button>`
+  ).join('');
+  document.getElementById('gameTabs').innerHTML = tabsHtml;
+
+  const data = loadData();
+  const players = Object.keys(data.players);
+  
+  let panelsHtml = '';
+  GAMES.forEach((game, i) => {
+    const scores = data.games[game] || [];
+    
+    let rows = '';
+    const sortedScores = [...scores].sort((a, b) => b.points - a.points);
+    sortedScores.forEach((score, idx) => {
+      rows += `
+        <div class="gp-row ${idx === 0 ? 'top1' : ''}">
+          <div class="gp-row-num">${idx + 1}</div>
+          <div class="gp-row-name">${score.player}</div>
+          <div class="gp-row-pts">${score.points}</div>
+          <div class="gp-row-del" onclick="deleteGameScore('${game}', ${scores.indexOf(score)})">✕</div>
+        </div>
+      `;
+    });
+
+    panelsHtml += `
+      <div class="game-panel ${i === 0 ? 'active' : ''}" data-game="${game}">
+        <div class="gp-header">
+          <div class="gp-header-left">
+            <div class="gp-header-icon">🎯</div>
+            <div class="gp-header-name">${game}</div>
+            <div class="gp-header-sub">Ultimi risultati</div>
+          </div>
+          <button class="gp-header-add" onclick="addGameScore('${game}')">+</button>
+        </div>
+        <div class="gp-list">
+          <div class="gp-list-header">
+            <div class="col-rank">#</div>
+            <div class="col-name">GIOCATORE</div>
+            <div class="col-pts">PUNTI</div>
+            <div class="col-act"></div>
+          </div>
+          ${rows || '<div class="gp-empty"><div class="gp-empty-icon">🎮</div>Nessun punteggio</div>'}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('gamePanels').innerHTML = panelsHtml;
+}
+
+function switchGame(index) {
+  document.querySelectorAll('.game-tab').forEach((tab, i) => tab.classList.toggle('active', i === index));
+  document.querySelectorAll('.game-panel').forEach((panel, i) => panel.classList.toggle('active', i === index));
+}
+
+function addGameScore(game) {
+  const data = loadData();
+  const players = Object.keys(data.players);
+  
+  let playerOptions = players.map(p => `<option value="${p}">${p}</option>`).join('');
+  
+  showPopup(`Aggiungi Punteggio - ${game}`,
+    `<div class="field" style="margin-bottom: 12px;">
+      <label>Giocatore</label>
+      <select id="gamePlayer" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.07); color: var(--text);">
+        <option value="">Seleziona...</option>
+        ${playerOptions}
+      </select>
+    </div>
+    <div class="field">
+      <label>Punti</label>
+      <input type="number" id="gamePoints" placeholder="0" />
+    </div>`,
+    () => {
+      const player = document.getElementById('gamePlayer').value;
+      const points = parseInt(document.getElementById('gamePoints').value) || 0;
+      
+      if (player) {
+        if (!data.games[game]) data.games[game] = [];
+        data.games[game].push({ player, points, date: new Date().toISOString(), position: 1 });
+        saveData(data);
+        renderGames();
+        renderLeaderboard();
+        closePopup();
+      }
+    }
+  );
+  document.getElementById('gamePlayer').focus();
+}
+
+function deleteGameScore(game, index) {
+  const data = loadData();
+  data.games[game].splice(index, 1);
+  saveData(data);
+  renderGames();
+  renderLeaderboard();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PALMARES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function renderPalmares() {
+  const data = loadData();
+  const players = Object.keys(data.players);
+  
+  const winners = players.map(name => {
+    let wins = 0;
+    GAMES.forEach(game => {
+      if (data.games[game]) {
+        wins += data.games[game].filter(entry => entry.player === name && entry.position === 1).length;
       }
     });
+    return { name, wins };
+  }).filter(p => p.wins > 0).sort((a, b) => b.wins - a.wins);
+
+  let html = '';
+  winners.forEach(p => {
+    html += `
+      <div class="palmares-item" onclick="viewPlayerProfile('${p.name}')">
+        <div class="p-name">${p.name}</div>
+        <div class="p-trophies">🏆 ${p.wins}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('palmaresList').innerHTML = html || '<div style="text-align: center; padding: 40px; color: var(--muted);">Nessuna vittoria registrata</div>';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function renderHistory() {
+  const data = loadData();
+  const tournaments = data.tournaments || [];
+  
+  let html = '';
+  tournaments.forEach((t, i) => {
+    html += `
+      <div class="history-card" onclick="viewTournament(${i})">
+        <div class="history-card-title">${t.name}</div>
+        <div class="history-card-date">Vincitore: ${t.winner} • ${new Date(t.date).toLocaleDateString('it-IT')}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('historyList').innerHTML = html || '<div style="text-align: center; padding: 40px; color: var(--muted);">Nessun torneo completato</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLAYER PROFILE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function viewPlayerProfile(playerName) {
+  const stats = calculatePlayerStats(playerName);
+  const data = loadData();
+  
+  document.getElementById('profileName').textContent = playerName;
+  document.getElementById('profileStats').innerHTML = `
+    <div class="profile-stat">
+      <div class="profile-stat-label">Partite</div>
+      <div class="profile-stat-value">${stats.totalGames}</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat-label">Vittorie</div>
+      <div class="profile-stat-value">${stats.totalWins}</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat-label">Punti</div>
+      <div class="profile-stat-value">${stats.totalPoints}</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat-label">Efficienza</div>
+      <div class="profile-stat-value">${stats.efficiency}%</div>
+    </div>
+  `;
+  
+  let gamesHtml = '';
+  GAMES.forEach(game => {
+    const playerScores = (data.games[game] || []).filter(entry => entry.player === playerName);
+    if (playerScores.length > 0) {
+      const gameStats = calculatePlayerStats(playerName);
+      gamesHtml += `
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold); margin-bottom: 12px;">${game}</h3>
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Efficienza: ${gameStats.efficiency}%</div>
+        </div>
+      `;
+    }
+  });
+  
+  document.getElementById('profileGames').innerHTML = gamesHtml;
+  navigateTo('playerProfileScreen');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════════════════════════════
+
+document.getElementById('adminBtn').addEventListener('click', () => {
+  if (document.body.classList.contains('not-admin')) {
+    const password = prompt('Inserisci password admin:');
+    if (password === 'admin123') {
+      document.body.classList.remove('not-admin');
+      navigateTo('adminScreen');
+    }
+  } else {
+    navigateTo('adminScreen');
+  }
+});
+
+function exportData() {
+  const data = loadData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `torneo_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearAllData() {
+  if (confirm('Sei sicuro? Questa azione non può essere annullata!')) {
+    localStorage.removeItem(STORAGE_KEY);
+    currentUser = null;
+    updateLoginStatus();
+    navigateTo('homeScreen');
+    location.reload();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function viewTournament(index) {
+  alert('Dettagli torneo - In sviluppo');
+}
+
+updateLoginStatus();
+
+// Ensure popup closes when clicking outside
+document.getElementById('popup').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('popup')) closePopup();
+});
+
+// Initialize home screen
+navigateTo('homeScreen');
 </script>
+
 </body>
 </html>
