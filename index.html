@@ -2214,11 +2214,11 @@ async function loadRanking() {
   document.getElementById("efficiencyRanking").innerHTML = html;
 }
  function getEfficiencyLabel(e) {
-  if (e < 30) return "💀 Scarso";
-  if (e < 50) return "⚠️ Debole";
-  if (e < 65) return "👍 Medio";
-  if (e < 80) return "🔥 Forte";
-  return "👑 Dominante";
+  if (e < 30) return "💀 Debole · spesso ultimo";
+  if (e < 50) return "⚠️ Sotto media · incostante";
+  if (e < 65) return "👍 Medio · competitivo";
+  if (e < 80) return "🔥 Forte · spesso top 3";
+  return "👑 Dominante · best player";
 }
   loadEfficiencyRanking();
 
