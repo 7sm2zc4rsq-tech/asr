@@ -497,6 +497,96 @@ input:focus { border-color: var(--gold); }
   border-color: rgba(192,57,43,0.4) !important;
   opacity: 0.6;
 }
+.life-panel {
+  margin: 12px 0 24px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+}
+
+.life-panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.life-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.life-row:last-child {
+  border-bottom: none;
+}
+
+.life-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.life-hearts {
+  min-width: 48px;
+  color: #e74c3c;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.life-row.eliminated {
+  opacity: 0.45;
+}
+
+.life-row.eliminated .life-name::after {
+  content: " · eliminato";
+  color: #e74c3c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.twoturn-panel {
+  margin: 12px 0 24px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+}
+
+.twoturn-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.twoturn-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 70px 70px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.twoturn-row span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.twoturn-row input {
+  text-align: center;
+  padding: 8px;
+}
+
+.twoturn-final {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  color: var(--gold);
+  text-align: center;
+}  
 
 .slot-section {
   text-align: center;
@@ -1688,6 +1778,7 @@ let selected    = [];
 let currentType = "";
 let currentGame = "";
 let unoScores   = {};
+let lifeScores  = {};
 
 // state for player page
 let _currentPlayerId   = null;
@@ -2074,36 +2165,158 @@ function toggle(e) {
 
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
+
   unoScores = {};
+  lifeScores = {};
+
   let html = "";
+
   GAME_LIST.forEach(g => {
     html += `<div class="score-game-title">${g}</div>`;
+
+    if (g === "Dubito" || g === "Fr0c10") {
+      html += createTwoTurnGame(g);
+      return;
+    }
+
     selected.forEach(p => {
       html += `<div class="score-row">
         <span>${p.name}</span>
         <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
       </div>`;
     });
-    if (g === "UNO") html += `<div id="unoExtra"></div>`;
+
+    if (g === "UNO") {
+      html += `<div id="unoExtra"></div>`;
+    }
+
+    if (g === "31" || g === "Saltacavallo") {
+      html += createLifePanel(g);
+    }
   });
+
   html += `<div id="liveRanking"></div>
     <div style="margin:28px 0;text-align:center;">
       <button class="btn-gold" onclick="finish()">🏁 Fine Torneo</button>
     </div>`;
+
   document.getElementById("gamesArea").innerHTML = html;
+
   createUnoExtra();
+  updateLiveRanking();
 }
+function createLifePanel(game) {
+  let html = `<div class="life-panel">
+    <div class="life-panel-title">Vite ${game}</div>`;
+
+  selected.forEach(p => {
+    const key = game + "_" + p.id;
+    lifeScores[key] = 2;
+
+    html += `<div class="life-row" id="lifeRow_${key}">
+      <span class="life-name">${p.name}</span>
+      <button class="btn-icon" onclick="changeLife('${game}','${p.id}',-1)">−</button>
+      <span class="life-hearts" id="lifeHearts_${key}">❤❤</span>
+      <button class="btn-icon" onclick="changeLife('${game}','${p.id}',1)">+</button>
+    </div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function changeLife(game, playerId, delta) {
+  const key = game + "_" + playerId;
+
+  if (lifeScores[key] === undefined) lifeScores[key] = 2;
+  lifeScores[key] = Math.max(0, Math.min(2, lifeScores[key] + delta));
+
+  const hearts = "❤".repeat(lifeScores[key]) || "0";
+  document.getElementById("lifeHearts_" + key).innerText = hearts;
+
+  const row = document.getElementById("lifeRow_" + key);
+  row.classList.toggle("eliminated", lifeScores[key] <= 0);
+}
+
+function createTwoTurnGame(game) {
+  let html = `<div class="twoturn-panel">
+    <div class="twoturn-title">${game} · due turni</div>`;
+
+  selected.forEach(p => {
+    html += `<div class="twoturn-row">
+      <span>${p.name}</span>
+      <input type="number" id="${game}_turn1_${p.id}" value="0" placeholder="T1" oninput="updateTwoTurnGame('${game}')">
+      <input type="number" id="${game}_turn2_${p.id}" value="0" placeholder="T2" oninput="updateTwoTurnGame('${game}')">
+      <div class="twoturn-final" id="${game}_final_${p.id}">0</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function updateTwoTurnGame(game) {
+  const finalPoints = calcTwoTurnFinalPoints(game);
+
+  selected.forEach(p => {
+    const el = document.getElementById(`${game}_final_${p.id}`);
+    if (el) el.innerText = finalPoints[p.id] || 0;
+  });
+
+  updateLiveRanking();
+}
+
+function calcTwoTurnFinalPoints(game) {
+  const rows = selected.map(p => {
+    const t1 = parseInt(document.getElementById(`${game}_turn1_${p.id}`)?.value) || 0;
+    const t2 = parseInt(document.getElementById(`${game}_turn2_${p.id}`)?.value) || 0;
+
+    return {
+      id: p.id,
+      name: p.name,
+      total: t1 + t2
+    };
+  });
+
+  rows.sort((a, b) => a.total - b.total);
+
+  const points = {};
+  let lastTotal = null;
+  let currentPoints = 0;
+
+  rows.forEach((row, index) => {
+    if (row.total !== lastTotal) {
+      currentPoints = index + 1;
+      lastTotal = row.total;
+    }
+
+    points[row.id] = currentPoints;
+  });
+
+  return points;
+}
+
+function getGamePoints(game, playerId) {
+  if (game === "Dubito" || game === "Fr0c10") {
+    return calcTwoTurnFinalPoints(game)[playerId] || 0;
+  }
+
+  return parseInt(document.getElementById(game + "_" + playerId)?.value) || 0;
+}  
 
 function updateLiveRanking() {
   const totals = {};
   selected.forEach(p => totals[p.name] = 0);
+
   GAME_LIST.forEach(g => {
     selected.forEach(p => {
-      totals[p.name] += parseInt(document.getElementById(g+"_"+p.id)?.value) || 0;
+      totals[p.name] += getGamePoints(g, p.id);
     });
   });
+
   const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
   let html = `<h3>🔥 Classifica Live</h3>`;
+
   sorted.forEach(([name, pts], i) => {
     const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
     html += `<div class="box" style="margin-bottom:8px;">
@@ -2112,6 +2325,7 @@ function updateLiveRanking() {
       <span class="box-pts">${pts} pt</span>
     </div>`;
   });
+
   document.getElementById("liveRanking").innerHTML = html;
 }
 
@@ -2154,7 +2368,7 @@ async function finish() {
   for (const g of GAME_LIST) {
     const gameRow = { game: g, icon: GAME_ICONS[g]||"🎮", scores: [] };
     for (const p of selected) {
-      const val = parseInt(document.getElementById(g+"_"+p.id).value) || 0;
+      const val = getGamePoints(g, p.id);
       totals[p.name] += val;
       await db.collection("gameRanking").add({ game: g, player: p.name, playerId: p.id, points: val, tournament: tournamentId });
       gameRow.scores.push({ name: p.name, playerId: p.id, points: val });
