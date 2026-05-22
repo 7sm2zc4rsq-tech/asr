@@ -1437,6 +1437,11 @@ input:focus { border-color: var(--gold); }
       <div id="loginStatus"></div>
     </div>
     <div class="homeGrid">
+      <div class="homeCard" id="liveHomeCard" style="display:none;" onclick="showLiveTournament()">
+  <span class="homeCard-icon">📡</span>
+  <h2>Segui Live</h2>
+  <p>Guarda il torneo in corso</p>
+</div>
       <div class="homeCard" onclick="show('tournament')">
         <span class="homeCard-icon">🎮</span>
         <h2>Nuovo Torneo</h2>
@@ -1539,8 +1544,22 @@ input:focus { border-color: var(--gold); }
       </div>
     </div>
   </div>
+</div> 
+  
+<!-- ══════════ LIVE TORNEO ══════════ -->
+<div id="liveTournament" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">Live Torneo</span>
+    <button class="back-btn" onclick="show('home')">← Home</button>
+  </div>
+  <div class="page">
+    <div class="section-header">
+      <div class="section-title">Torneo <span>live</span></div>
+    </div>
+    <div id="liveTournamentContent"></div>
+  </div>
 </div>
-
+  
 <!-- ══════════ PALMARES ══════════ -->
 <div id="palmares" class="screen">
   <div class="topbar">
@@ -1794,6 +1813,8 @@ let currentGame       = "";
 let unoScores         = {};
 let lifeScores        = {};
 let eliminationOrders = {};
+let liveTournamentStarted = false;
+let liveTournamentUnsub = null;  
 
 // state for player page
 let _currentPlayerId   = null;
@@ -1813,6 +1834,7 @@ function show(id) {
   if (id === "games")      loadGames();
   if (id === "tournament") loadSelect();
   if (id === "history")    loadHistory();
+  if (id === "liveTournament") listenLiveTournament();
 }
 
 /* ════════════════════════════════════════
@@ -2174,7 +2196,7 @@ function toggle(e) {
 
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
-
+liveTournamentStarted = true;
   unoScores = {};
   lifeScores = {};
   eliminationOrders = {};
@@ -2221,6 +2243,7 @@ function startGames() {
   updateAutoGameScores("31");
   updateAutoGameScores("Saltacavallo");
   updateLiveRanking();
+  publishLiveTournament("active");
 }
 function createAutoScoreRows(game) {
   let html = "";
@@ -2470,8 +2493,151 @@ function updateLiveRanking() {
   });
 
   document.getElementById("liveRanking").innerHTML = html;
+  publishLiveTournament("active");
+}
+function getLiveTotals() {
+  const totals = {};
+  selected.forEach(p => totals[p.name] = 0);
+
+  GAME_LIST.forEach(g => {
+    selected.forEach(p => {
+      totals[p.name] += getGamePoints(g, p.id);
+    });
+  });
+
+  return Object.entries(totals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, points], i) => ({
+      name,
+      points,
+      rank: i + 1
+    }));
 }
 
+function getLiveGames() {
+  return GAME_LIST.map(g => {
+    const scores = selected.map(p => ({
+      name: p.name,
+      points: getGamePoints(g, p.id)
+    })).sort((a, b) => b.points - a.points);
+
+    return {
+      game: g,
+      icon: GAME_ICONS[g] || "🎮",
+      final: isGameFinal(g),
+      scores
+    };
+  });
+}
+
+async function publishLiveTournament(status = "active") {
+  if (!liveTournamentStarted) return;
+  if (!isAdmin()) return;
+
+  await db.collection("liveTournament").doc("current").set({
+    status,
+    updatedAt: Date.now(),
+    players: selected.map(p => ({ id: p.id, name: p.name })),
+    ranking: getLiveTotals(),
+    games: getLiveGames()
+  });
+}
+
+function listenLiveButton() {
+  db.collection("liveTournament").doc("current").onSnapshot(doc => {
+    const card = document.getElementById("liveHomeCard");
+    if (!card) return;
+
+    if (!doc.exists) {
+      card.style.display = "none";
+      return;
+    }
+
+    const data = doc.data();
+    card.style.display = data.status === "active" || data.status === "finished" ? "block" : "none";
+  });
+}
+
+function showLiveTournament() {
+  show("liveTournament");
+}
+
+function listenLiveTournament() {
+  const container = document.getElementById("liveTournamentContent");
+  if (!container) return;
+
+  if (liveTournamentUnsub) liveTournamentUnsub();
+
+  liveTournamentUnsub = db.collection("liveTournament").doc("current").onSnapshot(doc => {
+    if (!doc.exists) {
+      container.innerHTML = '<p style="color:var(--muted);font-size:13px;">Nessun torneo live al momento.</p>';
+      return;
+    }
+
+    renderLiveTournament(doc.data());
+  });
+}
+
+function renderLiveTournament(data) {
+  const container = document.getElementById("liveTournamentContent");
+  if (!container) return;
+
+  const statusText = data.status === "finished" ? "Concluso" : "In corso";
+
+  let html = `
+    <div class="stat-card">
+      <span class="stat-card-icon">📡</span>
+      <div>
+        <div class="stat-card-label">Stato torneo</div>
+        <div class="stat-card-val">${statusText}</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="font-size:24px;margin:22px 0 14px;">
+      Classifica <span>live</span>
+    </div>
+  `;
+
+  (data.ranking || []).forEach((p, i) => {
+    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    html += `
+      <div class="box">
+        <div class="rank-badge ${badge}">${p.rank}</div>
+        <span class="box-name">${p.name}</span>
+        <span class="box-pts">${p.points} pt</span>
+      </div>
+    `;
+  });
+
+  html += `<div class="divider"></div>`;
+
+  (data.games || []).forEach(g => {
+    html += `
+      <div class="td-game-block">
+        <div class="td-game-header">
+          <span style="font-size:18px;">${g.icon || "🎮"}</span>
+          <span class="td-game-header-name">${g.game}</span>
+          <span style="font-size:11px;color:var(--muted);">
+            ${g.final ? "Finale" : "In corso"}
+          </span>
+        </div>
+        <div class="td-game-body">
+    `;
+
+    (g.scores || []).forEach(s => {
+      html += `
+        <div class="td-game-row">
+          <span class="td-game-row-name">${s.name}</span>
+          <span class="td-game-row-pts">${s.points} pt</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+}
 function createUnoExtra() {
   eliminationOrders["UNO"] = [];
 
@@ -2651,6 +2817,7 @@ async function finish() {
   });
   html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
   document.getElementById("gamesArea").innerHTML = html;
+  publishLiveTournament("finished");
 }
 
 /* ════════════════════════════════════════
@@ -3144,6 +3311,7 @@ function closeEfficiencyInfoOnBg(e) {
     closeEfficiencyInfo();
   }
 }
+  listenLiveButton();
 /* ════════════════════════════════════════
    LOGIN
 ════════════════════════════════════════ */
