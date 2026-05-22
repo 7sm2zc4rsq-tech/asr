@@ -1384,13 +1384,22 @@ input:focus { border-color: var(--gold); }
   <div class="page">
     <div class="section-header">
       <div class="section-title">Punti <span>totali</span></div>
+      <div class="divider"></div>
+
+<div class="section-title">Efficienza <span>giocatori</span></div>
+<div id="efficiencyRanking"></div>
     </div>
     <div id="rankingList"></div>
+    <div class="divider"></div>
+
+<div class="section-title">Efficienza <span>giocatori</span></div>
+<div id="efficiencyRanking"></div>
     <div style="margin-top:16px;">
       <button class="btn-ghost" onclick="openPopup('ranking')">+ Aggiungi punteggio</button>
     </div>
   </div>
 </div>
+  
 
 <!-- ══════════ PER GIOCO ══════════ -->
 <div id="games" class="screen">
@@ -1713,6 +1722,23 @@ histSnap.forEach(d => {
 let performance = efficiencyWeight > 0
   ? efficiencySum / efficiencyWeight
   : 0;
+  // 👉 fallback se non ci sono dati reali (tipo Diego ecc.)
+if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[name]) {
+  let fakeSum = 0;
+  let fakeWeight = 0;
+
+  PLAYER_TOURNAMENTS[name].forEach(p => {
+    // simuliamo prestazione media neutra
+    let eff = 0.5; // medio
+
+    let weight = p / 7;
+
+    fakeSum += eff * weight;
+    fakeWeight += weight;
+  });
+
+  performance = fakeSum / fakeWeight;
+}
 
 // tornei extra (quelli che hai scritto a mano)
 const extraTournaments = PLAYER_TOURNAMENTS[name]?.length || 0;
@@ -2115,6 +2141,86 @@ async function loadRanking() {
   });
   document.getElementById("rankingList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
 }
+  async function loadEfficiencyRanking() {
+  const snap = await db.collection("players").get();
+  const histSnap = await db.collection("tournamentHistory").get();
+
+  let players = [];
+
+  snap.forEach(doc => {
+    players.push({ name: doc.data().name });
+  });
+
+  players = players.map(p => {
+    let efficiencySum = 0;
+    let efficiencyWeight = 0;
+
+    histSnap.forEach(d => {
+      const games = d.data().games || [];
+      const playersCount = (d.data().scores || []).length;
+
+      games.forEach(g => {
+        (g.scores || []).forEach(s => {
+          if (s.name === p.name) {
+
+            let eff = g.name === "Las Vegas"
+              ? (s.points || 0) / 4
+              : (s.points || 0) / playersCount;
+
+            let weight = playersCount / 7;
+
+            efficiencySum += eff * weight;
+            efficiencyWeight += weight;
+          }
+        });
+      });
+    });
+
+    let performance = efficiencyWeight > 0
+      ? efficiencySum / efficiencyWeight
+      : 0;
+
+    if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[p.name]) {
+      performance = 0.5;
+    }
+
+    let totalTournaments =
+      (PLAYER_TOURNAMENTS[p.name]?.length || 0);
+
+    let experienceFactor = Math.log(1 + totalTournaments) / Math.log(10);
+
+    let efficiency = performance * experienceFactor * 100;
+
+    return {
+      name: p.name,
+      efficiency: efficiency
+    };
+  });
+
+  players.sort((a,b) => b.efficiency - a.efficiency);
+
+  let html = "";
+
+  players.forEach((p, i) => {
+    let label = getEfficiencyLabel(p.efficiency);
+
+    html += `
+    <div class="box">
+      <span class="box-name">${i+1}. ${p.name} — ${label}</span>
+      <span class="box-pts">${p.efficiency.toFixed(1)}%</span>
+    </div>`;
+  });
+
+  document.getElementById("efficiencyRanking").innerHTML = html;
+}
+ function getEfficiencyLabel(e) {
+  if (e < 30) return "💀 Scarso";
+  if (e < 50) return "⚠️ Debole";
+  if (e < 65) return "👍 Medio";
+  if (e < 80) return "🔥 Forte";
+  return "👑 Dominante";
+}
+  loadEfficiencyRanking();
 
 async function editRanking(name, pts) {
   if (!(await checkAdmin())) return;
