@@ -2208,7 +2208,18 @@ players = players.map(p => {
     performance = efficiencySum / efficiencyWeight;
   }
 
-  let totalTournaments = (PLAYER_TOURNAMENTS[p.name]?.length || 0);
+  let tournamentsPlayed = 0;
+
+histSnap.forEach(d => {
+  const scores = d.data().scores || [];
+  if (scores.some(s => s.name === p.name)) {
+    tournamentsPlayed++;
+  }
+});
+
+let extraTournaments = (PLAYER_TOURNAMENTS[p.name]?.length || 0);
+
+let totalTournaments = tournamentsPlayed + extraTournaments;
 
   let experienceFactor = Math.log(1 + totalTournaments) / Math.log(6);
 
