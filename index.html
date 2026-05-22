@@ -1575,8 +1575,8 @@ input:focus { border-color: var(--gold); }
     <div class="divider"></div>
 
 <div class="efficiency-title-row">
-  <div class="section-title">Efficienza <span>giocatori</span></div>
-  <button class="info-btn" onclick="openEfficiencyInfo()" aria-label="Come viene calcolata l'efficienza">?</button>
+  <div class="section-title">Indice <span>generale</span></div>
+<button class="info-btn" onclick="openEfficiencyInfo()" aria-label="Come viene calcolato l'indice generale">?</button>
 </div>
 
 <div id="efficiencyRanking"></div>
@@ -1631,43 +1631,47 @@ input:focus { border-color: var(--gold); }
 <!-- ══════════ INFO EFFICIENZA ══════════ -->
 <div id="efficiencyInfoPopup" onclick="closeEfficiencyInfoOnBg(event)">
   <div class="efficiency-info-inner">
-    <div class="efficiency-info-title">Come funziona l'efficienza?</div>
+   <div class="efficiency-info-title">Come funziona l'Indice Generale?</div>
 
-   <div class="efficiency-info-text">
+  <div class="efficiency-info-text">
   <p>
-    L'efficienza misura quanto un giocatore rende davvero nei tornei, non solo quanti punti totali ha fatto.
+    L'Indice Generale prova a decretare il giocatore più completo, non solo quello con più punti totali.
   </p>
 
   <p>
-    Per calcolarla, il sistema guarda <strong>ogni gioco giocato in ogni torneo</strong> e controlla quanto bene si è piazzato il giocatore.
-  </p>
-
-  <ul class="efficiency-info-list">
-    <li><strong>Risultato nel gioco:</strong> più punti fai in un gioco, più sale la tua efficienza.</li>
-    <li><strong>Numero di avversari:</strong> fare bene contro tanti giocatori vale più che farlo contro pochi.</li>
-    <li><strong>Peso del gioco:</strong> alcuni giochi contano un po' di più, altri un po' di meno.</li>
-    <li><strong>Esperienza:</strong> chi ha giocato pochi tornei viene valutato con più prudenza.</li>
-  </ul>
-
-  <p>
-    L'esperienza non può spingere oltre il 100%: serve solo a rendere il valore più affidabile.
-  </p>
-
-  <p>
-    Le etichette accanto ai nomi non dipendono solo dalla percentuale: guardano anche la posizione del giocatore nella classifica efficienza.
+    Il calcolo unisce due cose: <strong>rendimento puro</strong> e <strong>affidabilità</strong>.
   </p>
 
   <ul class="efficiency-info-list">
-    <li><strong>👑 Dominante / 💎 Leader:</strong> primo posto o rendimento da alta classifica.</li>
-    <li><strong>🛡️ Molto solido / Affidabile:</strong> buon valore e posizione forte o centrale.</li>
-    <li><strong>⚔️ In corsa / Competitivo:</strong> rendimento discreto, ma non ancora da vertice.</li>
-    <li><strong>🧭 Da consolidare / Incostante:</strong> valore medio-basso o posizione da migliorare.</li>
-    <li><strong>🌱 In sviluppo:</strong> giocatore ancora da valutare meglio o in bassa classifica.</li>
-    <li><strong>🔻 In difficoltà:</strong> rendimento basso e fondo classifica.</li>
+    <li><strong>Rendimento puro:</strong> guarda quanto bene ti piazzi nei singoli giochi.</li>
+    <li><strong>Numero di avversari:</strong> fare bene contro tanti giocatori pesa di più.</li>
+    <li><strong>Peso del gioco:</strong> alcuni giochi contano leggermente più di altri.</li>
+    <li><strong>Affidabilità:</strong> più tornei giochi, più il tuo valore diventa credibile.</li>
   </ul>
 
   <p>
-    In breve: la percentuale dice quanto rendi, mentre l'etichetta spiega anche dove sei rispetto agli altri.
+    L'affidabilità non dà bonus extra: serve solo a non premiare troppo chi ha giocato pochissimo.
+  </p>
+
+  <p>
+    Dopo circa <strong>5 tornei</strong>, il dato viene considerato abbastanza stabile.
+  </p>
+
+  <p>
+    Le etichette accanto ai nomi guardano sia il valore dell'indice sia la posizione in classifica.
+  </p>
+
+  <ul class="efficiency-info-list">
+    <li><strong>👑 Dominante / 💎 Leader:</strong> profilo da vertice della classifica.</li>
+    <li><strong>🛡️ Solido / Affidabile:</strong> rendimento buono e abbastanza stabile.</li>
+    <li><strong>⚔️ Competitivo:</strong> buoni segnali, ma non ancora da primo gruppo.</li>
+    <li><strong>🧭 Da consolidare:</strong> rendimento o continuità ancora da migliorare.</li>
+    <li><strong>🌱 In crescita:</strong> pochi dati o rendimento ancora basso.</li>
+    <li><strong>🔻 In difficoltà:</strong> indice basso e fondo classifica.</li>
+  </ul>
+
+  <p>
+    In breve: l'indice premia chi rende bene, contro più persone, in più giochi, e con abbastanza tornei da dimostrarlo.
   </p>
 </div>
 
@@ -1931,7 +1935,7 @@ async function renderPlayerStats(editMode) {
   } catch (e) {}
   const tournamentsPlayed = Math.max(0, tournamentsAuto + tournamentsOffset);
   const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
-  const efficiency = calcEfficiency(name, histSnap, tournamentsPlayed);
+  const generalIndex = calcGeneralIndex(name, histSnap, tournamentsPlayed);
 
   if (!editMode) {
     // ── READ MODE ──
@@ -1944,8 +1948,8 @@ async function renderPlayerStats(editMode) {
  <div class="stat-card">
     <span class="stat-card-icon">⚡</span>
     <div>
-      <div class="stat-card-label">Efficienza</div>
-      <div class="stat-card-val">${efficiency.toFixed(1)}%</div>
+      <div class="stat-card-label">Indice generale</div>
+      <div class="stat-card-val">${generalIndex.toFixed(1)}%</div>
     </div>
   </div>
 `;
@@ -2014,9 +2018,9 @@ async function renderPlayerStats(editMode) {
     );
   }
 }
-function calcEfficiency(name, histSnap, tournamentsPlayed = 0) {
-  let efficiencySum = 0;
-  let efficiencyWeight = 0;
+function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
+  let performanceSum = 0;
+  let performanceWeight = 0;
 
   histSnap.forEach(d => {
     const games = d.data().games || [];
@@ -2032,43 +2036,37 @@ function calcEfficiency(name, histSnap, tournamentsPlayed = 0) {
         const points = s.points || 0;
         const maxPoints = gameName === "Las Vegas" ? 4 : playersCount;
 
-        let eff;
+        let gamePerformance;
+
         if (gameName === "Las Vegas") {
-          eff = points / 4;
+          gamePerformance = points / 4;
         } else {
           if (maxPoints <= 1) return;
-          eff = (points - 1) / (maxPoints - 1);
+          gamePerformance = (points - 1) / (maxPoints - 1);
         }
 
-        const weight = playersCount / 7;
+        const playerCountWeight = playersCount / 7;
         const gameWeight = GAME_WEIGHTS[gameName] || 1;
 
-        efficiencySum += eff * weight * gameWeight;
-        efficiencyWeight += weight * gameWeight;
+        performanceSum += gamePerformance * playerCountWeight * gameWeight;
+        performanceWeight += playerCountWeight * gameWeight;
       });
     });
   });
 
-  let performance = efficiencyWeight > 0 ? efficiencySum / efficiencyWeight : 0;
+  let purePerformance = performanceWeight > 0 ? performanceSum / performanceWeight : 0;
 
-  if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[name]) {
-    let fakeSum = 0;
-    let fakeWeight = 0;
-
-    PLAYER_TOURNAMENTS[name].forEach(playersCount => {
-      const weight = playersCount / 7;
-      fakeSum += 0.5 * weight;
-      fakeWeight += weight;
-    });
-
-    performance = fakeWeight > 0 ? fakeSum / fakeWeight : 0;
+  if (performanceWeight === 0 && PLAYER_TOURNAMENTS[name]) {
+    purePerformance = 0.5;
   }
 
   const extraTournaments = PLAYER_TOURNAMENTS[name]?.length || 0;
   const totalTournaments = tournamentsPlayed + extraTournaments;
-  const experienceFactor = Math.min(Math.log(1 + totalTournaments) / Math.log(6), 1);
 
-return performance * experienceFactor * 100;
+  const reliability = Math.min(totalTournaments / 5, 1);
+  const reliabilityFactor = 0.7 + (0.3 * reliability);
+
+  return purePerformance * reliabilityFactor * 100;
 }
 async function togglePlayerEdit() {
   if (!(await checkAdmin())) return;
@@ -2750,7 +2748,7 @@ async function loadRanking() {
 
     players.push({
       name,
-      efficiency: calcEfficiency(name, histSnap, tournamentsPlayed)
+      efficiency: calcGeneralIndex(name, histSnap, tournamentsPlayed)
     });
   });
 
@@ -2773,33 +2771,33 @@ function getEfficiencyLabel(e, rank, total) {
   const position = total <= 1 ? 1 : 1 - ((rank - 1) / (total - 1));
 
   if (rank === 1) {
-    if (e >= 85) return "👑 Dominante · riferimento assoluto";
-    if (e >= 70) return "💎 Leader · rendimento alto";
-    if (e >= 55) return "🛡️ Leader · solido";
+    if (e >= 85) return "👑 Dominante · migliore generale";
+    if (e >= 70) return "💎 Leader · profilo completo";
+    if (e >= 55) return "🛡️ Primo · solido e affidabile";
     return "⭐ Primo · classifica aperta";
   }
 
   if (position >= 0.75) {
-    if (e >= 75) return "💎 Elite · alta classifica";
+    if (e >= 75) return "💎 Elite · alta affidabilità";
     if (e >= 60) return "🛡️ Molto solido · alta classifica";
-    return "⚔️ In corsa · alta classifica";
+    return "⚔️ In corsa · buon potenziale";
   }
 
   if (position >= 0.45) {
-    if (e >= 65) return "🛡️ Affidabile · zona centrale";
+    if (e >= 65) return "🛡️ Affidabile · rendimento stabile";
     if (e >= 50) return "⚔️ Competitivo · zona centrale";
-    return "🧭 Da consolidare · zona centrale";
+    return "🧭 Da consolidare · manca continuità";
   }
 
   if (position >= 0.20) {
-    if (e >= 55) return "⚔️ Buoni numeri · deve risalire";
-    if (e >= 40) return "🧭 Incostante · bassa classifica";
-    return "🌱 In sviluppo · bassa classifica";
+    if (e >= 55) return "⚔️ Buoni segnali · deve risalire";
+    if (e >= 40) return "🧭 Incostante · affidabilità bassa";
+    return "🌱 In crescita · dati deboli";
   }
 
   if (e >= 50) return "🧭 Penalizzato · fondo classifica";
-  if (e >= 35) return "🌱 Da confermare · fondo classifica";
-  return "🔻 In difficoltà · fondo classifica";
+  if (e >= 35) return "🌱 Da confermare · poco stabile";
+  return "🔻 In difficoltà · rendimento basso";
 }
  
 
