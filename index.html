@@ -2299,7 +2299,7 @@ async function loadRanking() {
 
   let html = "";
   players.forEach((p, i) => {
-    const label = getEfficiencyLabel(p.efficiency);
+    const label = getEfficiencyLabel(p.efficiency, i + 1, players.length);
 
     html += `
       <div class="box">
@@ -2310,13 +2310,37 @@ async function loadRanking() {
 
   document.getElementById("efficiencyRanking").innerHTML = html;
 }
-function getEfficiencyLabel(e) {
-  if (e < 25) return "🌱 Base · rendimento basso";
-  if (e < 40) return "🧭 In sviluppo · dati limitati";
-  if (e < 55) return "⚔️ Competitivo · rendimento medio";
-  if (e < 70) return "🛡️ Affidabile · buon rendimento";
-  if (e < 85) return "💎 Elite · rendimento alto";
-  return "👑 Dominante · rendimento massimo";
+function getEfficiencyLabel(e, rank, total) {
+  const position = total <= 1 ? 1 : 1 - ((rank - 1) / (total - 1));
+
+  if (rank === 1) {
+    if (e >= 85) return "👑 Dominante · riferimento assoluto";
+    if (e >= 70) return "💎 Leader · rendimento alto";
+    if (e >= 55) return "🛡️ Leader · solido";
+    return "⭐ Primo · classifica aperta";
+  }
+
+  if (position >= 0.75) {
+    if (e >= 75) return "💎 Elite · alta classifica";
+    if (e >= 60) return "🛡️ Molto solido · alta classifica";
+    return "⚔️ In corsa · alta classifica";
+  }
+
+  if (position >= 0.45) {
+    if (e >= 65) return "🛡️ Affidabile · zona centrale";
+    if (e >= 50) return "⚔️ Competitivo · zona centrale";
+    return "🧭 Da consolidare · zona centrale";
+  }
+
+  if (position >= 0.20) {
+    if (e >= 55) return "⚔️ Buoni numeri · deve risalire";
+    if (e >= 40) return "🧭 Incostante · bassa classifica";
+    return "🌱 In sviluppo · bassa classifica";
+  }
+
+  if (e >= 50) return "🧭 Penalizzato · fondo classifica";
+  if (e >= 35) return "🌱 Da confermare · fondo classifica";
+  return "🔻 In difficoltà · fondo classifica";
 }
  
 
