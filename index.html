@@ -1689,8 +1689,8 @@ histSnap.forEach(d => {
     const scores = g.scores || [];
 
     scores.forEach(s => {
-      if (s.name !== name) return;
-
+      if (!s.name || s.name.trim().toLowerCase() !== name.trim().toLowerCase()) return;
+      console.log("Confronto:", s.name, "|", name);
       let eff = 0;
 
       // 🎰 Las Vegas
