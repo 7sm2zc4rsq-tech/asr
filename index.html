@@ -2230,12 +2230,12 @@ function createAutoScoreRows(game) {
   selected.forEach(p => {
     html += `<div class="score-row">
       <span>${p.name}</span>
-      <input type="number" id="${game}_${p.id}" value="${selected.length}" readonly>
+      <input type="number" id="${game}_${p.id}" value="0" readonly>
     </div>`;
   });
 
   return html;
-}  
+}
 function createLifePanel(game) {
   eliminationOrders[game] = [];
 
@@ -2355,8 +2355,8 @@ function createTwoTurnGame(game) {
   selected.forEach(p => {
     html += `<div class="twoturn-row">
       <span>${p.name}</span>
-      <input type="number" id="${game}_turn1_${p.id}" value="0" placeholder="T1" oninput="updateTwoTurnGame('${game}')">
-      <input type="number" id="${game}_turn2_${p.id}" value="0" placeholder="T2" oninput="updateTwoTurnGame('${game}')">
+      <input type="number" id="${game}_turn1_${p.id}" placeholder="T1" oninput="updateTwoTurnGame('${game}')">
+      <input type="number" id="${game}_turn2_${p.id}" placeholder="T2" oninput="updateTwoTurnGame('${game}')">
       <div class="twoturn-final" id="${game}_final_${p.id}">0</div>
     </div>`;
   });
@@ -2377,6 +2377,12 @@ function updateTwoTurnGame(game) {
 }
 
 function calcTwoTurnFinalPoints(game) {
+  if (!isTwoTurnGameComplete(game)) {
+    const emptyPoints = {};
+    selected.forEach(p => emptyPoints[p.id] = 0);
+    return emptyPoints;
+  }
+
   const rows = selected.map(p => {
     const t1 = parseInt(document.getElementById(`${game}_turn1_${p.id}`)?.value) || 0;
     const t2 = parseInt(document.getElementById(`${game}_turn2_${p.id}`)?.value) || 0;
@@ -2405,14 +2411,43 @@ function calcTwoTurnFinalPoints(game) {
 
   return points;
 }
+function isTwoTurnGameComplete(game) {
+  return selected.every(p => {
+    const t1 = document.getElementById(`${game}_turn1_${p.id}`)?.value;
+    const t2 = document.getElementById(`${game}_turn2_${p.id}`)?.value;
+
+    return t1 !== "" && t2 !== "";
+  });
+}
+
+function isEliminationGameComplete(game) {
+  const eliminated = eliminationOrders[game] || [];
+  return selected.length > 1 && eliminated.length >= selected.length - 1;
+}
+
+function isGameFinal(game) {
+  if (game === "Dubito" || game === "Fr0c10") {
+    return isTwoTurnGameComplete(game);
+  }
+
+  if (game === "UNO" || game === "31" || game === "Saltacavallo") {
+    return isEliminationGameComplete(game);
+  }
+
+  return true;
+}  
 
 function getGamePoints(game, playerId) {
+  if (!isGameFinal(game)) {
+    return 0;
+  }
+
   if (game === "Dubito" || game === "Fr0c10") {
     return calcTwoTurnFinalPoints(game)[playerId] || 0;
   }
 
   return parseInt(document.getElementById(game + "_" + playerId)?.value) || 0;
-} 
+}
 
 function updateLiveRanking() {
   const totals = {};
@@ -2536,6 +2571,14 @@ function calcEliminationGamePoints(game) {
   const eliminated = eliminationOrders[game] || [];
   const points = {};
 
+  if (eliminated.length === 0) {
+    selected.forEach(p => {
+      points[p.id] = 0;
+    });
+
+    return points;
+  }
+
   eliminated.forEach(item => {
     points[item.playerId] = item.order;
   });
@@ -2548,7 +2591,7 @@ function calcEliminationGamePoints(game) {
   });
 
   return points;
-}  
+}
 
 async function finish() {
   const tournamentId = Date.now();
