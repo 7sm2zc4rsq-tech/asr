@@ -1677,45 +1677,52 @@ async function renderPlayerStats(editMode) {
   } catch (e) {}
   const tournamentsPlayed = Math.max(0, tournamentsAuto + tournamentsOffset);
   const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
-  // 🔥 EFFICIENZA
+// 🔥 NUOVA EFFICIENZA (CORRETTA)
 let efficiencySum = 0;
-let efficiencyCount = 0;
+let efficiencyWeight = 0;
 
 histSnap.forEach(d => {
   const games = d.data().games || [];
+  const playersCount = (d.data().scores || []).length;
 
   games.forEach(g => {
-  const scores = g.scores || [];
-  if (scores.length === 0) return;
+    const scores = g.scores || [];
 
-  const pts = scores.map(x => x.points || 0);
-  const max = Math.max(...pts);
-  const min = Math.min(...pts);
-
-  scores.forEach(s => {
-    if (!s.name) return;
-
-    if (s.name.trim().toLowerCase() === name.trim().toLowerCase()) {
+    scores.forEach(s => {
+      if (s.name !== name) return;
 
       let eff = 0;
-      if (max !== min) {
-        eff = ((s.points || 0) - min) / (max - min);
+
+      // 🎰 Las Vegas
+      if (g.name === "Las Vegas") {
+        eff = (s.points || 0) / 4;
+      } else {
+        const maxPoints = playersCount;
+        eff = (s.points || 0) / maxPoints;
       }
 
-      efficiencySum += eff;
-      efficiencyCount++;
-    }
-  });
-  });
-}); // chiude histSnap.forEach
+      const weight = playersCount / 7;
 
-console.log("DEBUG EFFICIENZA:");
-console.log("Nome player:", name);
-console.log("Conteggio:", efficiencyCount);
-console.log("Somma:", efficiencySum);
-const efficiency = efficiencyCount > 0
-  ? (efficiencySum / efficiencyCount * 100)
+      efficiencySum += eff * weight;
+      efficiencyWeight += weight;
+    });
+  });
+});
+
+// media pesata
+let performance = efficiencyWeight > 0
+  ? efficiencySum / efficiencyWeight
   : 0;
+
+// tornei extra (quelli che hai scritto a mano)
+const extraTournaments = PLAYER_TOURNAMENTS[name]?.length || 0;
+const totalTournaments = tournamentsPlayed + extraTournaments;
+
+// fattore esperienza
+const experienceFactor = Math.log(1 + totalTournaments) / Math.log(10);
+
+// efficienza finale
+const efficiency = performance * experienceFactor * 100;
 
   if (!editMode) {
     // ── READ MODE ──
