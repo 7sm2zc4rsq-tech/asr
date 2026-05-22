@@ -2159,63 +2159,66 @@ async function loadRanking() {
     players.push({ name: doc.data().name });
   });
 
-  players = players.map(p => {
-    let efficiencySum = 0;
-    let efficiencyWeight = 0;
+players = players.map(p => {
+  let efficiencySum = 0;
+  let efficiencyWeight = 0;
 
-    histSnap.forEach(d => {
-      const games = d.data().games || [];
-      const playersCount = (d.data().scores || []).length;
-const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
+  histSnap.forEach(d => {
+    const games = d.data().games || [];
 
-let eff;
+    games.forEach(g => {
+      const scores = g.scores || [];
+      const playersCount = scores.length;
 
-if (g.name === "Las Vegas") {
-  eff = (s.points || 0) / 4;
-} else {
-  eff = ((s.points || 0) - 1) / (maxPoints - 1);
-}
+      scores.forEach(s => {
+        if (s.name !== p.name) return;
 
-let weight = playersCount / 7;
-let gameWeight = GAME_WEIGHTS[g.name] || 1;
+        const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
 
-efficiencySum += eff * weight * gameWeight;
-efficiencyWeight += weight * gameWeight;
-});
-});
-});
+        let eff;
 
-    let performance = efficiencyWeight > 0
-      ? efficiencySum / efficiencyWeight
-      : 0;
+        if (g.name === "Las Vegas") {
+          eff = (s.points || 0) / 4;
+        } else {
+          eff = ((s.points || 0) - 1) / (maxPoints - 1);
+        }
 
-    if (PLAYER_TOURNAMENTS[name]) {
-  PLAYER_TOURNAMENTS[name].forEach(p => {
-    // p = numero partecipanti (4,5,6,7)
+        let weight = playersCount / 7;
+        let gameWeight = GAME_WEIGHTS[g.name] || 1;
 
-    // simuliamo una performance realistica leggermente sopra media
-    let eff = 0.6;
-
-    let weight = p / 7;
-
-    efficiencySum += eff * weight;
-    efficiencyWeight += weight;
-  });
-}
-
-    let totalTournaments =
-      (PLAYER_TOURNAMENTS[p.name]?.length || 0);
-
-    let experienceFactor = Math.log(1 + totalTournaments) / Math.log(6);
-
-    let efficiency = performance * experienceFactor * 100;
-
-    return {
-      name: p.name,
-      efficiency: efficiency
-    };
+        efficiencySum += eff * weight * gameWeight;
+        efficiencyWeight += weight * gameWeight;
+      });
+    });
   });
 
+  let performance = efficiencyWeight > 0
+    ? efficiencySum / efficiencyWeight
+    : 0;
+
+  if (efficiencyWeight === 0 && PLAYER_TOURNAMENTS[p.name]) {
+    PLAYER_TOURNAMENTS[p.name].forEach(num => {
+      let eff = 0.5;
+      let weight = num / 7;
+
+      efficiencySum += eff * weight;
+      efficiencyWeight += weight;
+    });
+
+    performance = efficiencySum / efficiencyWeight;
+  }
+
+  let totalTournaments = (PLAYER_TOURNAMENTS[p.name]?.length || 0);
+
+  let experienceFactor = Math.log(1 + totalTournaments) / Math.log(6);
+
+  let efficiency = performance * experienceFactor * 100;
+
+  return {
+    name: p.name,
+    efficiency: efficiency
+  };
+});
   players.sort((a,b) => b.efficiency - a.efficiency);
 
   let html = "";
