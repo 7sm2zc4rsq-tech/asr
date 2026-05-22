@@ -2532,11 +2532,11 @@ function getLiveGames() {
 
 async function publishLiveTournament(status = "active") {
   if (!liveTournamentStarted) return;
-  if (!isAdmin()) return;
 
   await db.collection("liveTournament").doc("current").set({
     status,
     updatedAt: Date.now(),
+    startedBy: currentUser?.email || "anonimo",
     players: selected.map(p => ({ id: p.id, name: p.name })),
     ranking: getLiveTotals(),
     games: getLiveGames()
