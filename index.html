@@ -519,6 +519,16 @@ input:focus { border-color: var(--gold); }
   padding: 10px 0;
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
+.life-row input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+}
+
+.life-batch-btn {
+  width: 100%;
+  margin-top: 12px;
+}  
 
 .life-row:last-child {
   border-bottom: none;
@@ -1774,11 +1784,12 @@ const GAME_WEIGHTS = {
   "Las Vegas": 0.8
 };  
 
-let selected    = [];
-let currentType = "";
-let currentGame = "";
-let unoScores   = {};
-let lifeScores  = {};
+let selected          = [];
+let currentType       = "";
+let currentGame       = "";
+let unoScores         = {};
+let lifeScores        = {};
+let eliminationOrders = {};
 
 // state for player page
 let _currentPlayerId   = null;
@@ -2168,6 +2179,7 @@ function startGames() {
 
   unoScores = {};
   lifeScores = {};
+  eliminationOrders = {};
 
   let html = "";
 
@@ -2179,20 +2191,24 @@ function startGames() {
       return;
     }
 
+    if (g === "UNO") {
+      html += createAutoScoreRows(g);
+      html += `<div id="unoExtra"></div>`;
+      return;
+    }
+
+    if (g === "31" || g === "Saltacavallo") {
+      html += createAutoScoreRows(g);
+      html += createLifePanel(g);
+      return;
+    }
+
     selected.forEach(p => {
       html += `<div class="score-row">
         <span>${p.name}</span>
         <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
       </div>`;
     });
-
-    if (g === "UNO") {
-      html += `<div id="unoExtra"></div>`;
-    }
-
-    if (g === "31" || g === "Saltacavallo") {
-      html += createLifePanel(g);
-    }
   });
 
   html += `<div id="liveRanking"></div>
@@ -2203,9 +2219,26 @@ function startGames() {
   document.getElementById("gamesArea").innerHTML = html;
 
   createUnoExtra();
+  updateAutoGameScores("UNO");
+  updateAutoGameScores("31");
+  updateAutoGameScores("Saltacavallo");
   updateLiveRanking();
 }
+function createAutoScoreRows(game) {
+  let html = "";
+
+  selected.forEach(p => {
+    html += `<div class="score-row">
+      <span>${p.name}</span>
+      <input type="number" id="${game}_${p.id}" value="${selected.length}" readonly>
+    </div>`;
+  });
+
+  return html;
+}  
 function createLifePanel(game) {
+  eliminationOrders[game] = [];
+
   let html = `<div class="life-panel">
     <div class="life-panel-title">Vite ${game}</div>`;
 
@@ -2213,13 +2246,23 @@ function createLifePanel(game) {
     const key = game + "_" + p.id;
     lifeScores[key] = 2;
 
-    html += `<div class="life-row" id="lifeRow_${key}">
+    html += `<div class="life-row" id="lifeRow_${key}">`;
+
+    if (game === "Saltacavallo") {
+      html += `<input type="checkbox" class="saltacavallo-elim-check" value="${p.id}">`;
+    }
+
+    html += `
       <span class="life-name">${p.name}</span>
       <button class="btn-icon" onclick="changeLife('${game}','${p.id}',-1)">−</button>
       <span class="life-hearts" id="lifeHearts_${key}">❤❤</span>
       <button class="btn-icon" onclick="changeLife('${game}','${p.id}',1)">+</button>
     </div>`;
   });
+
+  if (game === "Saltacavallo") {
+    html += `<button class="btn-ghost life-batch-btn" onclick="eliminateSaltacavalloTogether()">Elimina selezionati insieme</button>`;
+  }
 
   html += `</div>`;
   return html;
@@ -2229,14 +2272,81 @@ function changeLife(game, playerId, delta) {
   const key = game + "_" + playerId;
 
   if (lifeScores[key] === undefined) lifeScores[key] = 2;
+
+  const wasAlive = lifeScores[key] > 0;
   lifeScores[key] = Math.max(0, Math.min(2, lifeScores[key] + delta));
+  const isAlive = lifeScores[key] > 0;
 
   const hearts = "❤".repeat(lifeScores[key]) || "0";
   document.getElementById("lifeHearts_" + key).innerText = hearts;
 
   const row = document.getElementById("lifeRow_" + key);
-  row.classList.toggle("eliminated", lifeScores[key] <= 0);
+  row.classList.toggle("eliminated", !isAlive);
+
+  if (wasAlive && !isAlive) {
+    markEliminated(game, playerId);
+  }
+
+  if (!wasAlive && isAlive) {
+    unmarkEliminated(game, playerId);
+  }
+
+  updateAutoGameScores(game);
+  updateLiveRanking();
 }
+ function eliminateSaltacavalloTogether() {
+  const checked = Array.from(document.querySelectorAll(".saltacavallo-elim-check:checked"));
+  const playerIds = checked.map(c => c.value);
+
+  if (!playerIds.length) {
+    alert("Seleziona almeno un giocatore da eliminare.");
+    return;
+  }
+
+  const validIds = playerIds.filter(playerId => {
+    const key = "Saltacavallo_" + playerId;
+    return lifeScores[key] > 0;
+  });
+
+  if (!validIds.length) return;
+
+  validIds.forEach(playerId => {
+    const key = "Saltacavallo_" + playerId;
+    lifeScores[key] = 0;
+
+    const hearts = document.getElementById("lifeHearts_" + key);
+    if (hearts) hearts.innerText = "0";
+
+    const row = document.getElementById("lifeRow_" + key);
+    if (row) row.classList.add("eliminated");
+  });
+
+  markEliminatedBatch("Saltacavallo", validIds);
+
+  checked.forEach(c => c.checked = false);
+
+  updateAutoGameScores("Saltacavallo");
+  updateLiveRanking();
+}
+
+function markEliminatedBatch(game, playerIds) {
+  if (!eliminationOrders[game]) eliminationOrders[game] = [];
+
+  const newIds = playerIds.filter(playerId =>
+    !eliminationOrders[game].some(x => x.playerId === playerId)
+  );
+
+  if (!newIds.length) return;
+
+  const sharedOrder = eliminationOrders[game].length + 1;
+
+  newIds.forEach(playerId => {
+    eliminationOrders[game].push({
+      playerId,
+      order: sharedOrder
+    });
+  });
+} 
 
 function createTwoTurnGame(game) {
   let html = `<div class="twoturn-panel">
@@ -2302,7 +2412,7 @@ function getGamePoints(game, playerId) {
   }
 
   return parseInt(document.getElementById(game + "_" + playerId)?.value) || 0;
-}  
+} 
 
 function updateLiveRanking() {
   const totals = {};
@@ -2330,33 +2440,115 @@ function updateLiveRanking() {
 }
 
 function createUnoExtra() {
+  eliminationOrders["UNO"] = [];
+
   let html = `<div class="uno-title">🃏 UNO — Eliminazione (51)</div>`;
+
   selected.forEach(p => {
     html += `<div class="uno-box" id="unoBox_${p.id}">
       <span class="uno-name">${p.name}</span>
       <input type="number" id="unoInput_${p.id}" placeholder="pt" style="width:70px;">
       <button class="btn-icon" onclick="setUno('${p.id}')">OK</button>
+      <button class="btn-icon" onclick="undoUno('${p.id}')">↩</button>
       <span class="uno-score"><span id="unoScore_${p.id}">0</span>/51</span>
     </div>`;
   });
+
   document.getElementById("unoExtra").innerHTML = html;
 }
 
 function setUno(id) {
-  const input = document.getElementById("unoInput_"+id);
-  const val   = parseInt(input.value);
+  const input = document.getElementById("unoInput_" + id);
+  const val = parseInt(input.value);
+
   if (isNaN(val) || val <= 0) return;
+
   if (!unoScores[id]) unoScores[id] = 0;
   unoScores[id] += val;
-  document.getElementById("unoScore_"+id).innerText = unoScores[id];
+
+  document.getElementById("unoScore_" + id).innerText = unoScores[id];
   input.value = "";
+
+  const box = document.getElementById("unoBox_" + id);
+
   if (unoScores[id] >= 51) {
-    const box = document.getElementById("unoBox_"+id);
     box.classList.add("uno-eliminated");
-    if (!box.innerHTML.includes("ELIMINATO"))
-      box.innerHTML += " <span style='color:#e74c3c;font-size:12px;font-weight:700;letter-spacing:1px;'>ELIMINATO</span>";
+
+    if (!box.innerHTML.includes("ELIMINATO")) {
+      box.insertAdjacentHTML("beforeend", " <span class='uno-eliminated-label' style='color:#e74c3c;font-size:12px;font-weight:700;letter-spacing:1px;'>ELIMINATO</span>");
+    }
+
+    markEliminated("UNO", id);
   }
+
+  updateAutoGameScores("UNO");
+  updateLiveRanking();
 }
+function undoUno(id) {
+  unoScores[id] = 0;
+
+  const scoreEl = document.getElementById("unoScore_" + id);
+  if (scoreEl) scoreEl.innerText = "0";
+
+  const box = document.getElementById("unoBox_" + id);
+  if (box) {
+    box.classList.remove("uno-eliminated");
+
+    const eliminatedText = box.querySelector(".uno-eliminated-label");
+    if (eliminatedText) eliminatedText.remove();
+  }
+
+  unmarkEliminated("UNO", id);
+  updateAutoGameScores("UNO");
+  updateLiveRanking();
+}
+
+function markEliminated(game, playerId) {
+  if (!eliminationOrders[game]) eliminationOrders[game] = [];
+
+  const alreadyMarked = eliminationOrders[game].some(x => x.playerId === playerId);
+  if (alreadyMarked) return;
+
+  eliminationOrders[game].push({
+    playerId,
+    order: eliminationOrders[game].length + 1
+  });
+}
+
+function unmarkEliminated(game, playerId) {
+  if (!eliminationOrders[game]) return;
+
+  eliminationOrders[game] = eliminationOrders[game]
+    .filter(x => x.playerId !== playerId)
+    .map((x, index) => ({ ...x, order: index + 1 }));
+}
+
+function updateAutoGameScores(game) {
+  const points = calcEliminationGamePoints(game);
+
+  selected.forEach(p => {
+    const el = document.getElementById(game + "_" + p.id);
+    if (el) el.value = points[p.id] || selected.length;
+  });
+}
+
+function calcEliminationGamePoints(game) {
+  const eliminated = eliminationOrders[game] || [];
+  const points = {};
+
+  eliminated.forEach(item => {
+    points[item.playerId] = item.order;
+  });
+
+  const remaining = selected.filter(p => !points[p.id]);
+  const remainingPoints = eliminated.length + 1;
+
+  remaining.forEach(p => {
+    points[p.id] = remainingPoints;
+  });
+
+  return points;
+}  
 
 async function finish() {
   const tournamentId = Date.now();
