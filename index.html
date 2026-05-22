@@ -1393,7 +1393,6 @@ input:focus { border-color: var(--gold); }
     <div class="divider"></div>
 
 <div class="section-title">Efficienza <span>giocatori</span></div>
-<div id="efficiencyRanking"></div>
     <div style="margin-top:16px;">
       <button class="btn-ghost" onclick="openPopup('ranking')">+ Aggiungi punteggio</button>
     </div>
@@ -1700,7 +1699,32 @@ let efficiencyWeight = 0;
 
 histSnap.forEach(d => {
   const games = d.data().games || [];
-  const playersCount = scores.length;
+
+  games.forEach(g => {
+    const scores = g.scores || [];
+    const playersCount = scores.length;
+
+    scores.forEach(s => {
+      if (s.name !== name) return;
+
+      const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
+
+      let eff;
+
+      if (g.name === "Las Vegas") {
+        eff = (s.points || 0) / 4;
+      } else {
+        eff = ((s.points || 0) - 1) / (maxPoints - 1);
+      }
+
+      let weight = playersCount / 7;
+      let gameWeight = GAME_WEIGHTS[g.name] || 1;
+
+      efficiencySum += eff * weight * gameWeight;
+      efficiencyWeight += weight * gameWeight;
+    });
+  });
+});
 const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
 
 let eff;
