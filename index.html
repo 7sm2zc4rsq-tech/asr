@@ -692,6 +692,88 @@ input:focus { border-color: var(--gold); }
   background: rgba(255,255,255,0.05);
   margin: 24px 0;
 }
+.efficiency-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.efficiency-title-row .section-title {
+  margin: 0;
+}
+
+.info-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  color: var(--gold);
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.info-btn:hover {
+  background: var(--goldDim);
+  border-color: var(--gold);
+}
+
+#efficiencyInfoPopup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.efficiency-info-inner {
+  width: 100%;
+  max-width: 430px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: 20px;
+  padding: 30px 26px;
+}
+
+.efficiency-info-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.efficiency-info-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.efficiency-info-text p {
+  margin-bottom: 12px;
+}
+
+.efficiency-info-text strong {
+  color: var(--gold);
+}
+
+.efficiency-info-list {
+  margin: 14px 0 18px;
+  padding-left: 18px;
+}
+
+.efficiency-info-list li {
+  margin-bottom: 8px;
+  color: var(--text);
+}  
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1390,8 +1472,13 @@ input:focus { border-color: var(--gold); }
     <div id="rankingList"></div>
 
     <div class="divider"></div>
-    <div class="section-title">Efficienza <span>giocatori</span></div>
-    <div id="efficiencyRanking"></div>
+
+<div class="efficiency-title-row">
+  <div class="section-title">Efficienza <span>giocatori</span></div>
+  <button class="info-btn" onclick="openEfficiencyInfo()" aria-label="Come viene calcolata l'efficienza">?</button>
+</div>
+
+<div id="efficiencyRanking"></div>
 
     <div style="margin-top:16px;">
       <button class="btn-ghost" onclick="openPopup('ranking')">+ Aggiungi punteggio</button>
@@ -1440,7 +1527,41 @@ input:focus { border-color: var(--gold); }
     <div id="tdContent"></div>
   </div>
 </div>
+<!-- ══════════ INFO EFFICIENZA ══════════ -->
+<div id="efficiencyInfoPopup" onclick="closeEfficiencyInfoOnBg(event)">
+  <div class="efficiency-info-inner">
+    <div class="efficiency-info-title">Come funziona l'efficienza?</div>
 
+    <div class="efficiency-info-text">
+      <p>
+        L'efficienza prova a capire quanto un giocatore rende davvero, non solo quanti punti totali ha fatto.
+      </p>
+
+      <p>
+        In pratica guarda <strong>come si piazza nei singoli giochi</strong>, torneo dopo torneo.
+      </p>
+
+      <ul class="efficiency-info-list">
+        <li>Se fai tanti punti in un gioco, la tua efficienza sale.</li>
+        <li>Se giochi contro più persone, quel risultato vale di più.</li>
+        <li>Alcuni giochi pesano più di altri perché sono considerati più importanti.</li>
+        <li>Chi ha giocato più tornei viene valutato in modo più stabile.</li>
+      </ul>
+
+      <p>
+        Quindi un giocatore con pochi tornei può avere buoni punti, ma un'efficienza più bassa perché ha meno storico.
+      </p>
+
+      <p>
+        In breve: <strong>premia chi gioca bene spesso, contro più avversari, nei giochi che contano di più.</strong>
+      </p>
+    </div>
+
+    <div style="margin-top:20px;text-align:center;">
+      <button class="btn-gold" onclick="closeEfficiencyInfo()">Ho capito</button>
+    </div>
+  </div>
+</div>
 <!-- ══════════ POPUP ══════════ -->
 <div id="popup" style="display:none;">
   <div class="popup-inner">
@@ -2524,7 +2645,19 @@ function startSlotPro(winner) {
     document.getElementById("slotContainer").style.display = "none";
   }, 3500);
 }
+function openEfficiencyInfo() {
+  document.getElementById("efficiencyInfoPopup").style.display = "flex";
+}
 
+function closeEfficiencyInfo() {
+  document.getElementById("efficiencyInfoPopup").style.display = "none";
+}
+
+function closeEfficiencyInfoOnBg(e) {
+  if (e.target === document.getElementById("efficiencyInfoPopup")) {
+    closeEfficiencyInfo();
+  }
+}
 /* ════════════════════════════════════════
    LOGIN
 ════════════════════════════════════════ */
