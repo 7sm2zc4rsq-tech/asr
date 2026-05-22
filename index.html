@@ -1725,24 +1725,6 @@ histSnap.forEach(d => {
     });
   });
 });
-const maxPoints = g.name === "Las Vegas" ? 4 : playersCount;
-
-let eff;
-
-if (g.name === "Las Vegas") {
-  eff = (s.points || 0) / 4;
-} else {
-  eff = ((s.points || 0) - 1) / (maxPoints - 1);
-}
-
-let weight = playersCount / 7;
-let gameWeight = GAME_WEIGHTS[g.name] || 1;
-
-efficiencySum += eff * weight * gameWeight;
-efficiencyWeight += weight * gameWeight;
-    });
-  });
-});
 
 // media pesata
 let performance = efficiencyWeight > 0
