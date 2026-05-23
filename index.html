@@ -1887,7 +1887,7 @@ let lifeScores        = {};
 let eliminationOrders = {};
 let liveTournamentStarted = false;
 let liveTournamentUnsub = null;  
-
+let pendingTournamentResult = null;
 // state for player page
 let _currentPlayerId   = null;
 let _currentPlayerName = null;
@@ -2306,7 +2306,18 @@ liveTournamentStarted = true;
 
   html += `<div id="liveRanking"></div>
     <div style="margin:28px 0;text-align:center;">
-      <button class="btn-gold finish-btn" onclick="finish()">🏁 Fine Torneo</button>
+      <button class="btn-gold finish-btn" onclick="showFinishConfirm()">🏁 Fine Torneo</button>
+
+<div id="finishConfirm" class="restart-confirm" style="display:none;">
+  <div class="restart-confirm-title">Conferma fine torneo</div>
+  <div class="restart-confirm-text">
+    Stai per chiudere il torneo. Dopo la conferma verrà mostrata la classifica finale, ma i dati verranno salvati solo quando premi Nuovo Torneo.
+  </div>
+  <div class="restart-confirm-actions">
+    <button class="btn-hard-danger" onclick="confirmFinishTournament()">Sì, chiudi torneo</button>
+    <button class="btn-ghost" onclick="hideFinishConfirm()">Annulla</button>
+  </div>
+</div>
     </div>`;
 
   document.getElementById("gamesArea").innerHTML = html;
@@ -2830,69 +2841,156 @@ function calcEliminationGamePoints(game) {
   return points;
 }
 
-async function finish() {
+function finish() {
   const tournamentId = Date.now();
   const totals = {};
   selected.forEach(p => totals[p.name] = 0);
 
-  // Per-game scores to save in gameRanking AND history
   const gameBreakdown = [];
+
   for (const g of GAME_LIST) {
-    const gameRow = { game: g, icon: GAME_ICONS[g]||"🎮", scores: [] };
+    const gameRow = { game: g, icon: GAME_ICONS[g] || "🎮", scores: [] };
+
     for (const p of selected) {
       const val = getGamePoints(g, p.id);
       totals[p.name] += val;
-      await db.collection("gameRanking").add({ game: g, player: p.name, playerId: p.id, points: val, tournament: tournamentId });
       gameRow.scores.push({ name: p.name, playerId: p.id, points: val });
     }
+
     gameBreakdown.push(gameRow);
   }
 
-  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
   const winner = sorted[0][0];
 
-  // ── Save tournament history document ──
+  pendingTournamentResult = {
+    tournamentId,
+    sorted,
+    winner,
+    gameBreakdown
+  };
+
+  renderFinalAnimation(sorted, winner);
+}
+function renderFinalAnimation(sorted, winner) {
+  const reversed = [...sorted].reverse();
+
+  let html = `
+    <div class="final-winner" style="display:none;" id="animatedWinner">
+      <div class="final-winner-crown">👑</div>
+      <div class="final-winner-name">${winner}</div>
+      <div class="final-winner-label">Vincitore del torneo</div>
+    </div>
+
+    <div class="divider"></div>
+    <div id="animatedRanking"></div>
+
+    <div id="afterAnimationActions" style="display:none;margin:24px 0;text-align:center;">
+      <button class="btn-ghost" onclick="savePendingTournamentAndRestart()">Nuovo Torneo</button>
+    </div>
+  `;
+
+  document.getElementById("gamesArea").innerHTML = html;
+
+  const container = document.getElementById("animatedRanking");
+
+  reversed.forEach(([name, pts], index) => {
+    setTimeout(() => {
+      const originalIndex = sorted.findIndex(([n]) => n === name);
+      const rank = originalIndex + 1;
+      const badge = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
+
+      container.insertAdjacentHTML("afterbegin", `
+        <div class="box" style="margin-bottom:8px; animation: fadeUp 0.35s ease forwards;">
+          <div class="rank-badge ${badge}">${rank}</div>
+          <span class="box-name">${name}</span>
+          <span class="box-pts">${pts} pt</span>
+        </div>
+      `);
+    }, index * 800);
+  });
+
+  const totalTime = reversed.length * 800 + 500;
+
+  setTimeout(() => {
+    document.getElementById("animatedWinner").style.display = "block";
+  }, totalTime);
+
+  setTimeout(() => {
+    document.getElementById("afterAnimationActions").style.display = "block";
+  }, totalTime + 700);
+}
+async function savePendingTournamentAndRestart() {
+  if (!pendingTournamentResult) return;
+
+  const { tournamentId, sorted, winner, gameBreakdown } = pendingTournamentResult;
+
+  for (const g of gameBreakdown) {
+    for (const s of g.scores) {
+      await db.collection("gameRanking").add({
+        game: g.game,
+        player: s.name,
+        playerId: s.playerId,
+        points: s.points,
+        tournament: tournamentId
+      });
+    }
+  }
+
   const historyDoc = {
     timestamp: tournamentId,
     winner,
     winnerPlayerId: selected.find(x => x.name === winner)?.id || "",
     players: selected.map(p => p.name),
     scores: sorted.map(([name, pts], i) => ({
-      name, pts,
+      name,
+      pts,
       playerId: selected.find(x => x.name === name)?.id || "",
       rank: i + 1
     })),
     games: gameBreakdown
   };
+
   await db.collection("tournamentHistory").add(historyDoc);
 
-  // ── Update global ranking & palmares ──
   for (const [name, pts] of sorted) {
     const playerObj = selected.find(x => x.name === name);
-    await db.collection("ranking").add({ name, playerId: playerObj?.id, points: pts });
+    await db.collection("ranking").add({
+      name,
+      playerId: playerObj?.id,
+      points: pts
+    });
   }
-  const winnerObj = selected.find(x => x.name === winner);
-  await db.collection("palmares").add({ name: winner, playerId: winnerObj?.id });
 
-  // ── Show result screen ──
-  let html = `<div class="final-winner">
-    <div class="final-winner-crown">👑</div>
-    <div class="final-winner-name">${winner}</div>
-    <div class="final-winner-label">Vincitore del torneo</div>
-  </div><div class="divider"></div>`;
-  sorted.forEach(([name, pts], i) => {
-    const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    html += `<div class="box" style="margin-bottom:8px;">
-      <div class="rank-badge ${badge}">${i+1}</div>
-      <span class="box-name">${name}</span>
-      <span class="box-pts">${pts} pt</span>
-    </div>`;
+  const winnerObj = selected.find(x => x.name === winner);
+  await db.collection("palmares").add({
+    name: winner,
+    playerId: winnerObj?.id
   });
-  html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="restartTournament()">Nuovo Torneo</button></div>`;
-  document.getElementById("gamesArea").innerHTML = html;
-  db.collection("liveTournament").doc("current").delete();
-liveTournamentStarted = false;
+
+  try {
+    await db.collection("liveTournament").doc("current").delete();
+  } catch (e) {
+    console.error("Errore cancellazione live:", e);
+  }
+
+  pendingTournamentResult = null;
+  resetTorneo();
+}  
+function showFinishConfirm() {
+  const box = document.getElementById("finishConfirm");
+  if (box) box.style.display = "block";
 }
+
+function hideFinishConfirm() {
+  const box = document.getElementById("finishConfirm");
+  if (box) box.style.display = "none";
+}
+
+function confirmFinishTournament() {
+  hideFinishConfirm();
+  finish();
+}  
 
 /* ════════════════════════════════════════
    PALMARES
