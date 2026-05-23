@@ -349,7 +349,7 @@ button {
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 13px;
-}
+}  
 .btn-danger:hover { background: rgba(192,57,43,0.15); box-shadow: none; }
 
 .field {
@@ -358,6 +358,23 @@ button {
   gap: 6px;
   margin-bottom: 16px;
 }
+.delete-tournament-btn {
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.45);
+  color: #e74c3c;
+  border-radius: 30px;
+  padding: 12px 22px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.delete-tournament-btn:hover {
+  background: rgba(192,57,43,0.22);
+  border-color: #e74c3c;
+  color: #fff;
+}  
 .field label {
   font-size: 10px;
   font-weight: 600;
@@ -1584,16 +1601,16 @@ input:focus { border-color: var(--gold); }
     <div id="selectPlayers"></div>
     <div style="margin:20px 0; display:flex; gap:10px; flex-wrap:wrap;">
   <button class="btn-gold" onclick="startGames()">Inizia il torneo →</button>
-  <button class="btn-ghost" id="restartTournamentBtn" onclick="showRestartConfirm()" style="display:none;">Ricomincia torneo</button>
+  <button class="delete-tournament-btn" id="restartTournamentBtn" onclick="showRestartConfirm()" style="display:none;">🗑 Elimina torneo</button>
 </div>
 
 <div id="restartConfirm" class="restart-confirm">
-  <div class="restart-confirm-title">Conferma richiesta</div>
-  <div class="restart-confirm-text">
-    Stai per cancellare il torneo in corso e rimuovere il live per tutti i dispositivi. Questa azione non può essere annullata.
-  </div>
+  <div class="restart-confirm-title">Eliminare torneo?</div>
+<div class="restart-confirm-text">
+  Stai per eliminare il torneo in corso e rimuovere il live per tutti i dispositivi. Questa azione non può essere annullata.
+</div>
   <div class="restart-confirm-actions">
-    <button class="btn-hard-danger" onclick="restartTournament()">Sì, ricomincia</button>
+    <button class="btn-hard-danger" onclick="restartTournament()">Sì, elimina</button>
     <button class="btn-ghost" onclick="hideRestartConfirm()">Annulla</button>
   </div>
 </div>
