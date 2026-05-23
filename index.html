@@ -875,6 +875,66 @@ input:focus { border-color: var(--gold); }
   margin-bottom: 8px;
   color: var(--text);
 }  
+.finish-btn {
+  width: 100%;
+  max-width: 360px;
+  padding: 18px 34px;
+  font-size: 14px;
+  border-radius: 40px;
+  box-shadow: 0 6px 28px rgba(201,168,76,0.28);
+}
+
+.restart-confirm {
+  display: none;
+  margin: 14px 0 22px;
+  padding: 18px;
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.45);
+  border-radius: var(--radius);
+}
+
+.restart-confirm-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e74c3c;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.restart-confirm-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.restart-confirm-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.restart-confirm-actions button {
+  flex: 1;
+  min-width: 130px;
+}
+
+.btn-hard-danger {
+  background: #c0392b;
+  color: #fff;
+  border: 1px solid #e74c3c;
+  border-radius: 30px;
+  padding: 11px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-hard-danger:hover {
+  background: #e74c3c;
+}  
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1522,11 +1582,23 @@ input:focus { border-color: var(--gold); }
       <div class="section-title">Seleziona <span>giocatori</span></div>
     </div>
     <div id="selectPlayers"></div>
-    <div style="margin:20px 0;">
-      <button class="btn-gold" onclick="startGames()">Inizia il torneo →</button>
-    </div>
-    <div id="gamesArea"></div>
+    <div style="margin:20px 0; display:flex; gap:10px; flex-wrap:wrap;">
+  <button class="btn-gold" onclick="startGames()">Inizia il torneo →</button>
+  <button class="btn-ghost" id="restartTournamentBtn" onclick="showRestartConfirm()" style="display:none;">Ricomincia torneo</button>
+</div>
 
+<div id="restartConfirm" class="restart-confirm">
+  <div class="restart-confirm-title">Conferma richiesta</div>
+  <div class="restart-confirm-text">
+    Stai per cancellare il torneo in corso e rimuovere il live per tutti i dispositivi. Questa azione non può essere annullata.
+  </div>
+  <div class="restart-confirm-actions">
+    <button class="btn-hard-danger" onclick="restartTournament()">Sì, ricomincia</button>
+    <button class="btn-ghost" onclick="hideRestartConfirm()">Annulla</button>
+  </div>
+</div>
+
+<div id="gamesArea"></div>
     <div class="slot-section">
       <h3>🎰 Slot Game</h3>
       <div id="slot">?</div>
@@ -2197,6 +2269,7 @@ function toggle(e) {
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
 liveTournamentStarted = true;
+  document.getElementById("restartTournamentBtn").style.display = "inline-block";
   unoScores = {};
   lifeScores = {};
   eliminationOrders = {};
@@ -2233,7 +2306,7 @@ liveTournamentStarted = true;
 
   html += `<div id="liveRanking"></div>
     <div style="margin:28px 0;text-align:center;">
-      <button class="btn-gold" onclick="finish()">🏁 Fine Torneo</button>
+      <button class="btn-gold finish-btn" onclick="finish()">🏁 Fine Torneo</button>
     </div>`;
 
   document.getElementById("gamesArea").innerHTML = html;
@@ -2815,9 +2888,10 @@ async function finish() {
       <span class="box-pts">${pts} pt</span>
     </div>`;
   });
-  html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="resetTorneo()">Nuovo Torneo</button></div>`;
+  html += `<div style="margin:24px 0;text-align:center;"><button class="btn-ghost" onclick="restartTournament()">Nuovo Torneo</button></div>`;
   document.getElementById("gamesArea").innerHTML = html;
-  publishLiveTournament("finished");
+  db.collection("liveTournament").doc("current").delete();
+liveTournamentStarted = false;
 }
 
 /* ════════════════════════════════════════
@@ -2863,10 +2937,37 @@ async function editPalmares(name, count) {
 
 function resetTorneo() {
   document.getElementById("gamesArea").innerHTML = "";
+
   selected = [];
-  loadSelect();
   unoScores = {};
+  lifeScores = {};
+  eliminationOrders = {};
+  liveTournamentStarted = false;
+
+  const restartBtn = document.getElementById("restartTournamentBtn");
+  if (restartBtn) restartBtn.style.display = "none";
+  hideRestartConfirm();
+  loadSelect();
 }
+async function restartTournament() {
+  try {
+    await db.collection("liveTournament").doc("current").delete();
+  } catch (e) {
+    console.error("Errore cancellazione live:", e);
+  }
+
+  hideRestartConfirm();
+  resetTorneo();
+}
+function showRestartConfirm() {
+  const box = document.getElementById("restartConfirm");
+  if (box) box.style.display = "block";
+}
+
+function hideRestartConfirm() {
+  const box = document.getElementById("restartConfirm");
+  if (box) box.style.display = "none";
+}  
 
 /* ════════════════════════════════════════
    CLASSIFICA
