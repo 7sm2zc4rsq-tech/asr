@@ -2840,7 +2840,35 @@ function calcEliminationGamePoints(game) {
 
   return points;
 }
+function calcTournamentDifficultyScore(playerName, gameBreakdown) {
+  let score = 0;
 
+  gameBreakdown.forEach(g => {
+    const gameName = g.game;
+    const gameWeight = GAME_WEIGHTS[gameName] || 1;
+    const playerScore = (g.scores || []).find(s => s.name === playerName);
+
+    if (!playerScore) return;
+
+    score += (playerScore.points || 0) * gameWeight;
+  });
+
+  return score;
+}
+
+function sortFinalStandings(totals, gameBreakdown) {
+  return Object.entries(totals).sort((a, b) => {
+    const totalDiff = b[1] - a[1];
+    if (totalDiff !== 0) return totalDiff;
+
+    const difficultyA = calcTournamentDifficultyScore(a[0], gameBreakdown);
+    const difficultyB = calcTournamentDifficultyScore(b[0], gameBreakdown);
+    const difficultyDiff = difficultyB - difficultyA;
+    if (difficultyDiff !== 0) return difficultyDiff;
+
+    return a[0].localeCompare(b[0]);
+  });
+}
 function finish() {
   const tournamentId = Date.now();
   const totals = {};
@@ -2860,7 +2888,7 @@ function finish() {
     gameBreakdown.push(gameRow);
   }
 
-  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  const sorted = sortFinalStandings(totals, gameBreakdown);
   const winner = sorted[0][0];
 
   pendingTournamentResult = {
