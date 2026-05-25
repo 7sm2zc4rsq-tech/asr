@@ -2188,7 +2188,10 @@ try {
 
   // Compute current stats
   let wins = 0;
-  palSnap.forEach(d => { if (d.data().playerId === id || d.data().name === name) wins++; });
+palSnap.forEach(d => {
+  const palName = d.data().name || d.data().player;
+  if (d.data().playerId === id || palName === name) wins++;
+});
 
   let totalPoints = 0;
   const rankingDocs = [];
@@ -2330,7 +2333,10 @@ if (!editMode) {
     document.getElementById("playerStats").dataset.wins          = wins;
     document.getElementById("playerStats").dataset.tournamentsAuto = tournamentsAuto;
     document.getElementById("playerStats").dataset.palSnapIds    = JSON.stringify(
-      palSnap.docs.filter(d => d.data().playerId === id || d.data().name === name).map(d => d.id)
+     palSnap.docs.filter(d => {
+  const palName = d.data().name || d.data().player;
+  return d.data().playerId === id || palName === name;
+}).map(d => d.id)
     );
   }
 }
@@ -3398,8 +3404,16 @@ function confirmFinishTournament() {
 async function loadPalmares() {
   const snap = await db.collection("palmares").get();
   const data = {};
-  snap.forEach(d => { data[d.data().name] = (data[d.data().name]||0)+1; });
-  let html = ""; let i = 0;
+
+  snap.forEach(d => {
+    const name = d.data().name || d.data().player;
+    if (!name) return;
+    data[name] = (data[name] || 0) + 1;
+  });
+
+  let html = ""; 
+  let i = 0;
+
   Object.entries(data).sort((a,b) => b[1]-a[1]).forEach(([name, count]) => {
     const badge = i===0?'gold':i===1?'silver':i===2?'bronze':'';
     html += `<div class="palmares-item">
@@ -3413,9 +3427,9 @@ async function loadPalmares() {
     </div>`;
     i++;
   });
+
   document.getElementById("palmaresList").innerHTML = html || '<p style="color:var(--muted);font-size:13px;">Nessun dato ancora.</p>';
 }
-
 async function editPalmares(name, count) {
   if (!(await checkAdmin())) return;
   const n = prompt("Titoli", count);
@@ -3685,7 +3699,8 @@ async function deleteByName(col, name) {
   const snap = await db.collection(col).get();
   let found = false;
   for (const d of snap.docs) {
-    if (d.data().name === name && !found) { await db.collection(col).doc(d.id).delete(); found = true; }
+    const docName = d.data().name || d.data().player;
+if (docName === name && !found) { await db.collection(col).doc(d.id).delete(); found = true; }
   }
   show(col);
 }
