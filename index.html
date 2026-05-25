@@ -1976,8 +1976,7 @@ input:focus { border-color: var(--gold); }
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>  
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
@@ -1986,8 +1985,7 @@ firebase.initializeApp({
   storageBucket:"torneo-74c5b.firebasestorage.app"
 });
 const db   = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();  
+const auth = firebase.auth();  
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 let currentUser = null;
   function login() {
@@ -2268,20 +2266,23 @@ if (!editMode) {
       <button class="save-edit-btn" onclick="savePlayerEdit()">💾 Salva tutto</button>
     </div>
 
-   <div class="avatar-upload">
-  <div class="stat-card-label">Foto profilo</div>
+  <div class="avatar-upload">
+  <div class="stat-card-label">Avatar giocatore</div>
 
-  <input type="file" accept="image/*" id="avatarFile" onchange="previewPlayerAvatar()">
+  <input id="avatarUrlInput" type="text" value="${playerAvatarUrl}" placeholder="avatars/Francesco.png" oninput="previewAvatarUrl()">
 
-  <div id="avatarPreviewWrap" style="display:none;margin-top:14px;text-align:center;">
-    <img id="avatarPreview" class="player-avatar big" style="margin-top:0;">
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
-      <button class="btn-gold" onclick="uploadPlayerAvatar()">Conferma foto</button>
-      <button class="btn-ghost" onclick="clearAvatarPreview()">Annulla</button>
-    </div>
+  <div id="avatarPreviewWrap" style="display:${playerAvatarUrl ? 'block' : 'none'};margin-top:14px;text-align:center;">
+    <img id="avatarPreview" class="player-avatar big" style="margin-top:0;" src="${playerAvatarUrl}">
   </div>
 
-  <div id="avatarUploadStatus" style="margin-top:10px;color:var(--muted);font-size:12px;"></div>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+    <button class="btn-gold" onclick="savePlayerAvatarUrl()">Salva avatar</button>
+    <button class="btn-ghost" onclick="clearPlayerAvatarUrl()">Rimuovi avatar</button>
+  </div>
+
+  <div style="margin-top:10px;color:var(--muted);font-size:12px;">
+    Inserisci il percorso dell'immagine caricata su GitHub, esempio: avatars/Francesco.png
+  </div>
 </div>
 
     <div class="stat-card editable">
@@ -2340,64 +2341,48 @@ if (!editMode) {
     );
   }
 }
-function previewPlayerAvatar() {
-  const file = document.getElementById("avatarFile")?.files?.[0];
+function previewAvatarUrl() {
+  const input = document.getElementById("avatarUrlInput");
   const previewWrap = document.getElementById("avatarPreviewWrap");
   const preview = document.getElementById("avatarPreview");
-  const status = document.getElementById("avatarUploadStatus");
 
-  if (!file || !previewWrap || !preview) return;
+  if (!input || !previewWrap || !preview) return;
 
-  preview.src = URL.createObjectURL(file);
-  previewWrap.style.display = "block";
+  const url = input.value.trim();
 
-  if (status) status.innerText = "Anteprima pronta. Premi Conferma foto per salvarla.";
-}
-
-function clearAvatarPreview() {
-  const input = document.getElementById("avatarFile");
-  const previewWrap = document.getElementById("avatarPreviewWrap");
-  const preview = document.getElementById("avatarPreview");
-  const status = document.getElementById("avatarUploadStatus");
-
-  if (input) input.value = "";
-  if (preview) preview.removeAttribute("src");
-  if (previewWrap) previewWrap.style.display = "none";
-  if (status) status.innerText = "";
-}
-
-async function uploadPlayerAvatar() {
-  if (!(await checkAdmin())) return;
-
-  const file = document.getElementById("avatarFile")?.files?.[0];
-  const status = document.getElementById("avatarUploadStatus");
-
-  if (!file) {
-    if (status) status.innerText = "Seleziona prima un'immagine.";
+  if (!url) {
+    preview.removeAttribute("src");
+    previewWrap.style.display = "none";
     return;
   }
 
-  try {
-    if (status) status.innerText = "Caricamento in corso...";
+  preview.src = url;
+  previewWrap.style.display = "block";
+}
 
-    const id = _currentPlayerId;
-    const ext = file.type.includes("png") ? "png" : "jpg";
-    const ref = storage.ref().child(`player-avatars/${id}.${ext}`);
+async function savePlayerAvatarUrl() {
+  if (!(await checkAdmin())) return;
 
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
+  const input = document.getElementById("avatarUrlInput");
+  const url = input.value.trim();
 
-    await db.collection("players").doc(id).set({ avatarUrl: url }, { merge: true });
+  await db.collection("players").doc(_currentPlayerId).set({
+    avatarUrl: url
+  }, { merge: true });
 
-    if (status) status.innerText = "Foto profilo aggiornata.";
-    clearAvatarPreview();
+  alert("Avatar aggiornato!");
+  renderPlayerStats(_playerEditMode);
+}
 
-    await renderPlayerStats(_playerEditMode);
-  } catch (e) {
-    console.error("Avatar upload error:", e);
-    if (status) status.innerText = "Errore durante il caricamento. Controlla Firebase Storage.";
-    alert("Errore caricamento immagine. Probabile problema con Firebase Storage o permessi.");
-  }
+async function clearPlayerAvatarUrl() {
+  if (!(await checkAdmin())) return;
+
+  await db.collection("players").doc(_currentPlayerId).set({
+    avatarUrl: ""
+  }, { merge: true });
+
+  alert("Avatar rimosso.");
+  renderPlayerStats(_playerEditMode);
 }
 function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
   let performanceSum = 0;
