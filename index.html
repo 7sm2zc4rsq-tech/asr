@@ -2265,11 +2265,21 @@ if (!editMode) {
       <button class="save-edit-btn" onclick="savePlayerEdit()">💾 Salva tutto</button>
     </div>
 
-    <div class="avatar-upload">
-      <div class="stat-card-label">Foto profilo</div>
-      <input type="file" accept="image/*" id="avatarFile">
-      <button class="btn-ghost" style="margin-top:10px;" onclick="uploadPlayerAvatar()">Carica immagine</button>
+   <div class="avatar-upload">
+  <div class="stat-card-label">Foto profilo</div>
+
+  <input type="file" accept="image/*" id="avatarFile" onchange="previewPlayerAvatar()">
+
+  <div id="avatarPreviewWrap" style="display:none;margin-top:14px;text-align:center;">
+    <img id="avatarPreview" class="player-avatar big" style="margin-top:0;">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+      <button class="btn-gold" onclick="uploadPlayerAvatar()">Conferma foto</button>
+      <button class="btn-ghost" onclick="clearAvatarPreview()">Annulla</button>
     </div>
+  </div>
+
+  <div id="avatarUploadStatus" style="margin-top:10px;color:var(--muted);font-size:12px;"></div>
+</div>
 
     <div class="stat-card editable">
       <span class="stat-card-icon">🏆</span>
@@ -2324,26 +2334,65 @@ if (!editMode) {
     );
   }
 }
+function previewPlayerAvatar() {
+  const file = document.getElementById("avatarFile")?.files?.[0];
+  const previewWrap = document.getElementById("avatarPreviewWrap");
+  const preview = document.getElementById("avatarPreview");
+  const status = document.getElementById("avatarUploadStatus");
+
+  if (!file || !previewWrap || !preview) return;
+
+  preview.src = URL.createObjectURL(file);
+  previewWrap.style.display = "block";
+
+  if (status) status.innerText = "Anteprima pronta. Premi Conferma foto per salvarla.";
+}
+
+function clearAvatarPreview() {
+  const input = document.getElementById("avatarFile");
+  const previewWrap = document.getElementById("avatarPreviewWrap");
+  const preview = document.getElementById("avatarPreview");
+  const status = document.getElementById("avatarUploadStatus");
+
+  if (input) input.value = "";
+  if (preview) preview.removeAttribute("src");
+  if (previewWrap) previewWrap.style.display = "none";
+  if (status) status.innerText = "";
+}
+
 async function uploadPlayerAvatar() {
   if (!(await checkAdmin())) return;
 
   const file = document.getElementById("avatarFile")?.files?.[0];
+  const status = document.getElementById("avatarUploadStatus");
+
   if (!file) {
-    alert("Seleziona prima un'immagine.");
+    if (status) status.innerText = "Seleziona prima un'immagine.";
     return;
   }
 
-  const id = _currentPlayerId;
-  const ref = storage.ref().child(`player-avatars/${id}.jpg`);
+  try {
+    if (status) status.innerText = "Caricamento in corso...";
 
-  await ref.put(file);
-  const url = await ref.getDownloadURL();
+    const id = _currentPlayerId;
+    const ext = file.type.includes("png") ? "png" : "jpg";
+    const ref = storage.ref().child(`player-avatars/${id}.${ext}`);
 
-  await db.collection("players").doc(id).set({ avatarUrl: url }, { merge: true });
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
 
-  alert("Foto profilo aggiornata!");
-  renderPlayerStats(_playerEditMode);
-}  
+    await db.collection("players").doc(id).set({ avatarUrl: url }, { merge: true });
+
+    if (status) status.innerText = "Foto profilo aggiornata.";
+    clearAvatarPreview();
+
+    await renderPlayerStats(_playerEditMode);
+  } catch (e) {
+    console.error("Avatar upload error:", e);
+    if (status) status.innerText = "Errore durante il caricamento. Controlla Firebase Storage.";
+    alert("Errore caricamento immagine. Probabile problema con Firebase Storage o permessi.");
+  }
+}
 function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
   let performanceSum = 0;
   let performanceWeight = 0;
