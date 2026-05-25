@@ -840,6 +840,24 @@ input:focus { border-color: var(--gold); }
   margin: 22px auto 14px;
   border: 2px solid var(--goldBorder);
 }
+.avatar-position-controls {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.avatar-position-controls label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.avatar-position-controls input[type=range] {
+  width: 100%;
+  accent-color: var(--gold);
+}  
 
 .avatar-upload {
   margin: 16px 0 22px;
@@ -2110,8 +2128,10 @@ async function loadPlayers() {
   let html = "";
   snap.forEach(d => {
     const avatar = d.data().avatarUrl || "";
+    const avatarPosX = d.data().avatarPosX ?? 50;
+const avatarPosY = d.data().avatarPosY ?? 50;
 const avatarHtml = avatar
-  ? `<img class="player-avatar" src="${avatar}">`
+  ? `<img class="player-avatar" src="${avatar}" style="object-position:${avatarPosX}% ${avatarPosY}%;">`
   : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;">${d.data().name.charAt(0).toUpperCase()}</div>`;
 
 html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
@@ -2171,11 +2191,21 @@ async function renderPlayerStats(editMode) {
   const id   = _currentPlayerId;
   const name = _currentPlayerName;
   let playerAvatarUrl = "";
+let avatarPosX = 50;
+let avatarPosY = 50;
+
 try {
   const pDoc = await db.collection("players").doc(id).get();
-  if (pDoc.exists) playerAvatarUrl = pDoc.data().avatarUrl || "";
-} catch (e) {}
+  if (pDoc.exists) {
+    const pdata = pDoc.data();
+    playerAvatarUrl = pdata.avatarUrl || "";
+    avatarPosX = parseInt(pdata.avatarPosX);
+    avatarPosY = parseInt(pdata.avatarPosY);
 
+    if (!isFinite(avatarPosX)) avatarPosX = 50;
+    if (!isFinite(avatarPosY)) avatarPosY = 50;
+  }
+} catch (e) {}
   const [palSnap, rankSnap, gameSnap, histSnap] = await Promise.all([
     db.collection("palmares").get(),
     db.collection("ranking").get(),
@@ -2231,7 +2261,7 @@ palSnap.forEach(d => {
 
 if (!editMode) {
   const avatarBlock = playerAvatarUrl
-    ? `<img class="player-avatar big" src="${playerAvatarUrl}">`
+    ? `<img class="player-avatar big" src="${playerAvatarUrl}" style="object-position:${avatarPosX}% ${avatarPosY}%;">`
     : `<div class="player-avatar big" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;font-weight:700;">${name.charAt(0).toUpperCase()}</div>`;
 
   let html = `
@@ -2272,9 +2302,16 @@ if (!editMode) {
   <input id="avatarUrlInput" type="text" value="${playerAvatarUrl}" placeholder="avatars/Francesco.png" oninput="previewAvatarUrl()">
 
   <div id="avatarPreviewWrap" style="display:${playerAvatarUrl ? 'block' : 'none'};margin-top:14px;text-align:center;">
-    <img id="avatarPreview" class="player-avatar big" style="margin-top:0;" src="${playerAvatarUrl}">
-  </div>
+  <img id="avatarPreview" class="player-avatar big" style="margin-top:0;object-position:${avatarPosX}% ${avatarPosY}%;" src="${playerAvatarUrl}">
 
+  <div class="avatar-position-controls">
+    <label>Posizione orizzontale</label>
+    <input type="range" id="avatarPosX" min="0" max="100" value="${avatarPosX}" oninput="updateAvatarPreviewPosition()">
+
+    <label>Posizione verticale</label>
+    <input type="range" id="avatarPosY" min="0" max="100" value="${avatarPosY}" oninput="updateAvatarPreviewPosition()">
+  </div>
+</div>
   <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
     <button class="btn-gold" onclick="savePlayerAvatarUrl()">Salva avatar</button>
     <button class="btn-ghost" onclick="clearPlayerAvatarUrl()">Rimuovi avatar</button>
@@ -2358,7 +2395,17 @@ function previewAvatarUrl() {
 
   preview.src = url;
   previewWrap.style.display = "block";
+  updateAvatarPreviewPosition();
 }
+function updateAvatarPreviewPosition() {
+  const preview = document.getElementById("avatarPreview");
+  const x = document.getElementById("avatarPosX")?.value || 50;
+  const y = document.getElementById("avatarPosY")?.value || 50;
+
+  if (preview) {
+    preview.style.objectPosition = `${x}% ${y}%`;
+  }
+}  
 
 async function savePlayerAvatarUrl() {
   if (!(await checkAdmin())) return;
@@ -2366,9 +2413,14 @@ async function savePlayerAvatarUrl() {
   const input = document.getElementById("avatarUrlInput");
   const url = input.value.trim();
 
-  await db.collection("players").doc(_currentPlayerId).set({
-    avatarUrl: url
-  }, { merge: true });
+  const avatarPosX = parseInt(document.getElementById("avatarPosX")?.value) || 50;
+const avatarPosY = parseInt(document.getElementById("avatarPosY")?.value) || 50;
+
+await db.collection("players").doc(_currentPlayerId).set({
+  avatarUrl: url,
+  avatarPosX,
+  avatarPosY
+}, { merge: true });
 
   alert("Avatar aggiornato!");
   renderPlayerStats(_playerEditMode);
@@ -2528,7 +2580,9 @@ async function loadSelect() {
     players.push({
       id: d.id,
       name: d.data().name,
-      avatarUrl: d.data().avatarUrl || ""
+      avatarUrl: d.data().avatarUrl || "",
+avatarPosX: d.data().avatarPosX ?? 50,
+avatarPosY: d.data().avatarPosY ?? 50
     });
   });
 
@@ -2539,7 +2593,7 @@ async function loadSelect() {
 
   players.forEach((p, index) => {
     const face = p.avatarUrl
-      ? `<img class="roster-face" src="${p.avatarUrl}">`
+      ? `<img class="roster-face" src="${p.avatarUrl}" style="object-position:${p.avatarPosX}% ${p.avatarPosY}%;">`
       : `<div class="roster-face-placeholder">${p.name.charAt(0).toUpperCase()}</div>`;
 
     html += `
