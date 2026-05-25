@@ -2228,85 +2228,90 @@ try {
   const avg = tournamentsPlayed > 0 ? (totalPoints / tournamentsPlayed) : 0;
   const generalIndex = calcGeneralIndex(name, histSnap, tournamentsPlayed);
 
-  if (!editMode) {
-    // ── READ MODE ──
-   let html = `${avatarBlock} 
+if (!editMode) {
   const avatarBlock = playerAvatarUrl
-  ? `<img class="player-avatar big" src="${playerAvatarUrl}">`
-  : `<div class="player-avatar big" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;font-weight:700;">${name.charAt(0).toUpperCase()}</div>`;   `
-  <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
-  <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>
+    ? `<img class="player-avatar big" src="${playerAvatarUrl}">`
+    : `<div class="player-avatar big" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;font-weight:700;">${name.charAt(0).toUpperCase()}</div>`;
 
- <div class="stat-card">
-    <span class="stat-card-icon">⚡</span>
-    <div>
-      <div class="stat-card-label">Indice generale</div>
-      <div class="stat-card-val">${generalIndex.toFixed(1)}%</div>
+  let html = `
+    ${avatarBlock}
+
+    <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
+    <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
+    <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
+    <div class="stat-card"><span class="stat-card-icon">📊</span><div><div class="stat-card-label">Media per torneo</div><div class="stat-card-val">${fmtAvg(avg)}</div></div></div>
+
+    <div class="stat-card">
+      <span class="stat-card-icon">⚡</span>
+      <div>
+        <div class="stat-card-label">Indice generale</div>
+        <div class="stat-card-val">${generalIndex.toFixed(1)}%</div>
+      </div>
     </div>
-  </div>
-`;
-    if (Object.keys(gameStats).length) {
-      html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
-      Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
-        html += `<div class="box"><span class="box-name">${GAME_ICONS[g]||"🎮"} ${g}</span><span class="box-pts">${p} pt</span></div>`;
-      });
-    }
-    document.getElementById("playerStats").innerHTML = html;
+  `;
 
-  } else {
-    // ── EDIT MODE ──
-    let html = `<div class="edit-mode-banner">✏️ Modalità modifica attiva
-    html += `
-  <div class="avatar-upload">
-    <div class="stat-card-label">Foto profilo</div>
-    <input type="file" accept="image/*" id="avatarFile">
-    <button class="btn-ghost" style="margin-top:10px;" onclick="uploadPlayerAvatar()">Carica immagine</button>
-  </div>
-`;
+  if (Object.keys(gameStats).length) {
+    html += `<div class="divider"></div><div class="section-title" style="font-size:22px;margin-bottom:14px;">Per <span>gioco</span></div>`;
+    Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
+      html += `<div class="box"><span class="box-name">${GAME_ICONS[g]||"🎮"} ${g}</span><span class="box-pts">${p} pt</span></div>`;
+    });
+  }
+
+  document.getElementById("playerStats").innerHTML = html;
+
+} else {
+  let html = `
+    <div class="edit-mode-banner">✏️ Modalità modifica attiva
       <button class="save-edit-btn" onclick="savePlayerEdit()">💾 Salva tutto</button>
-    </div>`;
+    </div>
 
-    // Editable summary stats
-    html += `
-      <div class="stat-card editable">
-        <span class="stat-card-icon">🏆</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Titoli vinti</div>
-          <input class="stat-card-edit-input" id="edit_wins" type="number" value="${wins}" min="0">
-        </div>
+    <div class="avatar-upload">
+      <div class="stat-card-label">Foto profilo</div>
+      <input type="file" accept="image/*" id="avatarFile">
+      <button class="btn-ghost" style="margin-top:10px;" onclick="uploadPlayerAvatar()">Carica immagine</button>
+    </div>
+
+    <div class="stat-card editable">
+      <span class="stat-card-icon">🏆</span>
+      <div style="flex:1">
+        <div class="stat-card-label">Titoli vinti</div>
+        <input class="stat-card-edit-input" id="edit_wins" type="number" value="${wins}" min="0">
       </div>
-      <div class="stat-card editable">
-        <span class="stat-card-icon">⭐</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Punti totali (classifica globale)</div>
-          <input class="stat-card-edit-input" id="edit_totalPoints" type="number" value="${totalPoints}" min="0">
-        </div>
+    </div>
+
+    <div class="stat-card editable">
+      <span class="stat-card-icon">⭐</span>
+      <div style="flex:1">
+        <div class="stat-card-label">Punti totali (classifica globale)</div>
+        <input class="stat-card-edit-input" id="edit_totalPoints" type="number" value="${totalPoints}" min="0">
       </div>
-      <div class="stat-card editable">
-        <span class="stat-card-icon">🎯</span>
-        <div style="flex:1">
-          <div class="stat-card-label">Tornei giocati (presenze)</div>
-          <input class="stat-card-edit-input" id="edit_tournaments" type="number" value="${tournamentsPlayed}" min="0">
-        </div>
+    </div>
+
+    <div class="stat-card editable">
+      <span class="stat-card-icon">🎯</span>
+      <div style="flex:1">
+        <div class="stat-card-label">Tornei giocati (presenze)</div>
+        <input class="stat-card-edit-input" id="edit_tournaments" type="number" value="${tournamentsPlayed}" min="0">
+      </div>
+    </div>
+  `;
+
+  if (Object.keys(gameStats).length) {
+    html += `<div class="divider"></div><div class="section-title" style="font-size:20px;margin-bottom:12px;">Punti per <span>gioco</span></div>`;
+    Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
+      html += `<div class="game-edit-row">
+        <span class="game-edit-row-name">${GAME_ICONS[g]||"🎮"} ${g}</span>
+        <input class="game-edit-input" id="edit_game_${g.replace(/\s/g,'_')}" type="number" value="${p}" min="0">
       </div>`;
+    });
+  }
 
-    // Per-game edit
-    if (Object.keys(gameStats).length) {
-      html += `<div class="divider"></div><div class="section-title" style="font-size:20px;margin-bottom:12px;">Punti per <span>gioco</span></div>`;
-      Object.entries(gameStats).sort((a,b) => b[1]-a[1]).forEach(([g, p]) => {
-        html += `<div class="game-edit-row">
-          <span class="game-edit-row-name">${GAME_ICONS[g]||"🎮"} ${g}</span>
-          <input class="game-edit-input" id="edit_game_${g.replace(/\s/g,'_')}" type="number" value="${p}" min="0">
-        </div>`;
-      });
-    }
+  html += `<div style="margin-top:20px; display:flex; gap:10px;">
+    <button class="btn-gold" onclick="savePlayerEdit()">💾 Salva tutto</button>
+    <button class="btn-ghost" onclick="cancelPlayerEdit()">Annulla</button>
+  </div>`;
 
-    html += `<div style="margin-top:20px; display:flex; gap:10px;">
-      <button class="btn-gold" onclick="savePlayerEdit()">💾 Salva tutto</button>
-      <button class="btn-ghost" onclick="cancelPlayerEdit()">Annulla</button>
-    </div>`;
+  document.getElementById("playerStats").innerHTML = html;
 
     // Store metadata for save
     document.getElementById("playerStats").innerHTML = html;
@@ -3216,16 +3221,14 @@ function finish() {
 function renderFinalAnimation(sorted, winner) {
   const reversed = [...sorted].reverse();
   const winnerObj = selected.find(p => p.name === winner);
-  const winnerAvatar = winnerObj?.avatarUrl || "";  
-  const winnerObj = selected.find(p => p.name === winner);
-const winnerAvatarHtml = winnerObj?.avatarUrl
-  ? `<img class="player-avatar big" src="${winnerObj.avatarUrl}">`
-  : `<div class="final-winner-crown">👑</div>`;
-  let html = 
-    ${winnerAvatarHtml}
-<div class="final-winner-name">${winner}</div>`
+
+  const winnerAvatarHtml = winnerObj?.avatarUrl
+    ? `<img class="player-avatar big" src="${winnerObj.avatarUrl}">`
+    : `<div class="final-winner-crown">👑</div>`;
+
+  let html = `
     <div class="final-winner" style="display:none;" id="animatedWinner">
-      <div class="final-winner-crown">👑</div>
+      ${winnerAvatarHtml}
       <div class="final-winner-name">${winner}</div>
       <div class="final-winner-label">Vincitore del torneo</div>
     </div>
