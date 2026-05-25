@@ -2534,8 +2534,8 @@ function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
         let gamePerformance;
 
         if (gameName === "Las Vegas") {
-          gamePerformance = points / 4;
-        } else {
+  gamePerformance = points <= 1 ? 0.4 : points / 4;
+} else {
           if (maxPoints <= 1) return;
           gamePerformance = (points - 1) / (maxPoints - 1);
         }
@@ -2850,13 +2850,8 @@ function createLifePanel(game) {
     const key = game + "_" + p.id;
     lifeScores[key] = 2;
 
-    html += `<div class="life-row" id="lifeRow_${key}">`;
-
-    if (game === "Saltacavallo") {
-      html += `<input type="checkbox" class="saltacavallo-elim-check" value="${p.id}">`;
-    }
-
-    html += `
+    html += `<div class="life-row" id="lifeRow_${key}">
+      <input type="checkbox" class="elim-check elim-check-${game}" value="${p.id}">
       <span class="life-name">${p.name}</span>
       <button class="btn-icon" onclick="changeLife('${game}','${p.id}',-1)">−</button>
       <span class="life-hearts" id="lifeHearts_${key}">❤❤</span>
@@ -2864,9 +2859,7 @@ function createLifePanel(game) {
     </div>`;
   });
 
-  if (game === "Saltacavallo") {
-    html += `<button class="btn-ghost life-batch-btn" onclick="eliminateSaltacavalloTogether()">Elimina selezionati insieme</button>`;
-  }
+  html += `<button class="btn-ghost life-batch-btn" onclick="eliminateTogether('${game}')">Elimina selezionati insieme</button>`;
 
   html += `</div>`;
   return html;
@@ -2898,8 +2891,8 @@ function changeLife(game, playerId, delta) {
   updateAutoGameScores(game);
   updateLiveRanking();
 }
- function eliminateSaltacavalloTogether() {
-  const checked = Array.from(document.querySelectorAll(".saltacavallo-elim-check:checked"));
+ function eliminateTogether(game) {
+  const checked = Array.from(document.querySelectorAll(`.elim-check-${game}:checked`));
   const playerIds = checked.map(c => c.value);
 
   if (!playerIds.length) {
@@ -2907,29 +2900,54 @@ function changeLife(game, playerId, delta) {
     return;
   }
 
-  const validIds = playerIds.filter(playerId => {
-    const key = "Saltacavallo_" + playerId;
-    return lifeScores[key] > 0;
-  });
+  let validIds = [];
+
+  if (game === "UNO") {
+    validIds = playerIds.filter(playerId =>
+      !eliminationOrders["UNO"]?.some(x => x.playerId === playerId)
+    );
+
+    validIds.forEach(playerId => {
+      unoScores[playerId] = 51;
+
+      const scoreEl = document.getElementById("unoScore_" + playerId);
+      if (scoreEl) scoreEl.innerText = "51";
+
+      const box = document.getElementById("unoBox_" + playerId);
+      if (box) {
+        box.classList.add("uno-eliminated");
+
+        if (!box.querySelector(".uno-eliminated-label")) {
+          box.insertAdjacentHTML("beforeend", " <span class='uno-eliminated-label' style='color:#e74c3c;font-size:12px;font-weight:700;letter-spacing:1px;'>ELIMINATO</span>");
+        }
+      }
+    });
+
+  } else {
+    validIds = playerIds.filter(playerId => {
+      const key = game + "_" + playerId;
+      return lifeScores[key] > 0;
+    });
+
+    validIds.forEach(playerId => {
+      const key = game + "_" + playerId;
+      lifeScores[key] = 0;
+
+      const hearts = document.getElementById("lifeHearts_" + key);
+      if (hearts) hearts.innerText = "0";
+
+      const row = document.getElementById("lifeRow_" + key);
+      if (row) row.classList.add("eliminated");
+    });
+  }
 
   if (!validIds.length) return;
 
-  validIds.forEach(playerId => {
-    const key = "Saltacavallo_" + playerId;
-    lifeScores[key] = 0;
-
-    const hearts = document.getElementById("lifeHearts_" + key);
-    if (hearts) hearts.innerText = "0";
-
-    const row = document.getElementById("lifeRow_" + key);
-    if (row) row.classList.add("eliminated");
-  });
-
-  markEliminatedBatch("Saltacavallo", validIds);
+  markEliminatedBatch(game, validIds);
 
   checked.forEach(c => c.checked = false);
 
-  updateAutoGameScores("Saltacavallo");
+  updateAutoGameScores(game);
   updateLiveRanking();
 }
 
@@ -3228,6 +3246,7 @@ function createUnoExtra() {
 
   selected.forEach(p => {
     html += `<div class="uno-box" id="unoBox_${p.id}">
+      <input type="checkbox" class="elim-check elim-check-UNO" value="${p.id}">
       <span class="uno-name">${p.name}</span>
       <input type="number" id="unoInput_${p.id}" placeholder="pt" style="width:70px;">
       <button class="btn-icon" onclick="setUno('${p.id}')">OK</button>
@@ -3235,6 +3254,8 @@ function createUnoExtra() {
       <span class="uno-score"><span id="unoScore_${p.id}">0</span>/51</span>
     </div>`;
   });
+
+  html += `<button class="btn-ghost life-batch-btn" onclick="eliminateTogether('UNO')">Elimina selezionati insieme</button>`;
 
   document.getElementById("unoExtra").innerHTML = html;
 }
@@ -3354,7 +3375,51 @@ function calcTournamentDifficultyScore(playerName, gameBreakdown) {
 
   return score;
 }
+function getTieBreakNote(playerName, sorted, totals, gameBreakdown) {
+  const playerTotal = totals[playerName];
 
+  const tiedBehind = sorted
+    .map(([name]) => name)
+    .filter(name => name !== playerName && totals[name] === playerTotal);
+
+  if (!tiedBehind.length) return "";
+
+  for (const otherName of tiedBehind) {
+    const decisive = getDecisiveTieBreak(playerName, otherName, gameBreakdown);
+
+    if (decisive) {
+      return `Avanti a pari punti grazie a ${decisive.game}: ${playerName} ${decisive.playerPoints} pt, ${otherName} ${decisive.otherPoints} pt.`;
+    }
+  }
+
+  return "";
+}
+function getDecisiveTieBreak(playerName, otherName, gameBreakdown) {
+  const gamesByDifficulty = [...gameBreakdown].sort((a, b) => {
+    const weightA = GAME_WEIGHTS[a.game] || 1;
+    const weightB = GAME_WEIGHTS[b.game] || 1;
+    return weightB - weightA;
+  });
+
+  for (const g of gamesByDifficulty) {
+    const playerScore = (g.scores || []).find(s => s.name === playerName)?.points || 0;
+    const otherScore = (g.scores || []).find(s => s.name === otherName)?.points || 0;
+
+    if (playerScore > otherScore) {
+      return {
+        game: g.game,
+        playerPoints: playerScore,
+        otherPoints: otherScore
+      };
+    }
+
+    if (playerScore < otherScore) {
+      return null;
+    }
+  }
+
+  return null;
+}  
 function sortFinalStandings(totals, gameBreakdown) {
   return Object.entries(totals).sort((a, b) => {
     const totalDiff = b[1] - a[1];
@@ -3391,11 +3456,12 @@ function finish() {
   const winner = sorted[0][0];
 
   pendingTournamentResult = {
-    tournamentId,
-    sorted,
-    winner,
-    gameBreakdown
-  };
+  tournamentId,
+  sorted,
+  winner,
+  totals,
+  gameBreakdown
+};
 
   renderFinalAnimation(sorted, winner);
 }
@@ -3434,13 +3500,20 @@ function renderFinalAnimation(sorted, winner) {
       const rank = originalIndex + 1;
       const badge = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
 
-      container.insertAdjacentHTML("afterbegin", `
-        <div class="box" style="margin-bottom:8px; animation: fadeUp 0.35s ease forwards;">
-          <div class="rank-badge ${badge}">${rank}</div>
-          <span class="box-name">${name}</span>
-          <span class="box-pts">${pts} pt</span>
-        </div>
-      `);
+     const totals = pendingTournamentResult?.totals || {};
+const gameBreakdown = pendingTournamentResult?.gameBreakdown || [];
+const tieNote = getTieBreakNote(name, sorted, totals, gameBreakdown);
+
+container.insertAdjacentHTML("afterbegin", `
+  <div style="animation: fadeUp 0.35s ease forwards;">
+    <div class="box" style="margin-bottom:${tieNote ? '4px' : '8px'};">
+      <div class="rank-badge ${badge}">${rank}</div>
+      <span class="box-name">${name}</span>
+      <span class="box-pts">${pts} pt</span>
+    </div>
+    ${tieNote ? `<div style="font-size:10px;color:var(--muted);margin:0 0 8px 54px;line-height:1.4;">${tieNote}</div>` : ""}
+  </div>
+`);
     }, index * 800);
   });
 
@@ -3456,6 +3529,12 @@ function renderFinalAnimation(sorted, winner) {
 }
 async function savePendingTournamentAndRestart() {
   if (!pendingTournamentResult) return;
+
+  const btn = document.querySelector("#afterAnimationActions button");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Salvataggio...";
+  }
 
   const { tournamentId, sorted, winner, gameBreakdown } = pendingTournamentResult;
 
@@ -3508,9 +3587,21 @@ async function savePendingTournamentAndRestart() {
     console.error("Errore cancellazione live:", e);
   }
 
+  const actions = document.getElementById("afterAnimationActions");
+  if (actions) {
+    actions.innerHTML = `
+      <div style="padding:14px 18px;border:1px solid var(--goldBorder);border-radius:var(--radius);color:var(--gold);font-size:13px;font-weight:700;letter-spacing:1px;">
+        ✅ Dati salvati
+      </div>
+    `;
+  }
+
   pendingTournamentResult = null;
-  resetTorneo();
-}  
+
+  setTimeout(() => {
+    resetTorneo();
+  }, 1200);
+}
 function showFinishConfirm() {
   const box = document.getElementById("finishConfirm");
   if (box) box.style.display = "block";
