@@ -832,7 +832,70 @@ input:focus { border-color: var(--gold); }
   background: var(--surface2);
   flex-shrink: 0;
 }
+.avatar-frame {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--goldBorder);
+  background: var(--surface2);
+  flex-shrink: 0;
+  position: relative;
+}
 
+.avatar-frame.big {
+  width: 190px;
+  height: 230px;
+  border-radius: 18px;
+  margin: 22px auto 20px;
+  border: 2px solid var(--goldBorder);
+  background: var(--bg);
+}
+
+.avatar-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  transform-origin: center;
+  display: block;
+}
+
+.avatar-frame.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+}
+
+.avatar-frame.big.placeholder {
+  font-size: 64px;
+}
+
+.avatar-frame:not(.big).placeholder {
+  font-size: 20px;
+}
+
+.avatar-position-controls {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.avatar-position-controls label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.avatar-position-controls input[type=range] {
+  width: 100%;
+  accent-color: var(--gold);
+}
 .player-avatar.big {
   width: 118px;
   height: 118px;
@@ -2130,10 +2193,12 @@ async function loadPlayers() {
     const avatar = d.data().avatarUrl || "";
     const avatarPosX = d.data().avatarPosX ?? 50;
 const avatarPosY = d.data().avatarPosY ?? 50;
+    const avatarZoom = d.data().avatarZoom ?? 100;
 const avatarHtml = avatar
-  ? `<img class="player-avatar" src="${avatar}" style="object-position:${avatarPosX}% ${avatarPosY}%;">`
-  : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;">${d.data().name.charAt(0).toUpperCase()}</div>`;
-
+  ? `<div class="avatar-frame">
+      <img src="${avatar}" style="object-position:${avatarPosX}% ${avatarPosY}%; transform:scale(${avatarZoom / 100});">
+    </div>`
+  : `<div class="avatar-frame placeholder">${d.data().name.charAt(0).toUpperCase()}</div>`;
 html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
   ${avatarHtml}
   <span class="box-name">${d.data().name}</span>
@@ -2190,9 +2255,10 @@ async function openPlayer(id, name) {
 async function renderPlayerStats(editMode) {
   const id   = _currentPlayerId;
   const name = _currentPlayerName;
-  let playerAvatarUrl = "";
+ let playerAvatarUrl = "";
 let avatarPosX = 50;
 let avatarPosY = 50;
+let avatarZoom = 100;
 
 try {
   const pDoc = await db.collection("players").doc(id).get();
@@ -2201,9 +2267,11 @@ try {
     playerAvatarUrl = pdata.avatarUrl || "";
     avatarPosX = parseInt(pdata.avatarPosX);
     avatarPosY = parseInt(pdata.avatarPosY);
+    avatarZoom = parseInt(pdata.avatarZoom);
 
     if (!isFinite(avatarPosX)) avatarPosX = 50;
     if (!isFinite(avatarPosY)) avatarPosY = 50;
+    if (!isFinite(avatarZoom)) avatarZoom = 100;
   }
 } catch (e) {}
   const [palSnap, rankSnap, gameSnap, histSnap] = await Promise.all([
@@ -2261,9 +2329,10 @@ palSnap.forEach(d => {
 
 if (!editMode) {
   const avatarBlock = playerAvatarUrl
-    ? `<img class="player-avatar big" src="${playerAvatarUrl}" style="object-position:${avatarPosX}% ${avatarPosY}%;">`
-    : `<div class="player-avatar big" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;font-weight:700;">${name.charAt(0).toUpperCase()}</div>`;
-
+  ? `<div class="avatar-frame big">
+      <img src="${playerAvatarUrl}" style="object-position:${avatarPosX}% ${avatarPosY}%; transform:scale(${avatarZoom / 100});">
+    </div>`
+  : `<div class="avatar-frame big placeholder">${name.charAt(0).toUpperCase()}</div>`;
   let html = `
     ${avatarBlock}
 
@@ -2299,10 +2368,12 @@ if (!editMode) {
   <div class="avatar-upload">
   <div class="stat-card-label">Avatar giocatore</div>
 
-  <input id="avatarUrlInput" type="text" value="${playerAvatarUrl}" placeholder="avatars/Francesco.png" oninput="previewAvatarUrl()">
+  <input id="avatarUrlInput" type="text" value="${playerAvatarUrl}" placeholder="Francesco.png" oninput="previewAvatarUrl()">
 
   <div id="avatarPreviewWrap" style="display:${playerAvatarUrl ? 'block' : 'none'};margin-top:14px;text-align:center;">
-  <img id="avatarPreview" class="player-avatar big" style="margin-top:0;object-position:${avatarPosX}% ${avatarPosY}%;" src="${playerAvatarUrl}">
+  <div class="avatar-frame big" style="margin-top:0;">
+    <img id="avatarPreview" src="${playerAvatarUrl}" style="object-position:${avatarPosX}% ${avatarPosY}%; transform:scale(${avatarZoom / 100});">
+  </div>
 
   <div class="avatar-position-controls">
     <label>Posizione orizzontale</label>
@@ -2310,6 +2381,9 @@ if (!editMode) {
 
     <label>Posizione verticale</label>
     <input type="range" id="avatarPosY" min="0" max="100" value="${avatarPosY}" oninput="updateAvatarPreviewPosition()">
+
+    <label>Zoom immagine</label>
+    <input type="range" id="avatarZoom" min="70" max="180" value="${avatarZoom}" oninput="updateAvatarPreviewPosition()">
   </div>
 </div>
   <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
@@ -2318,7 +2392,7 @@ if (!editMode) {
   </div>
 
   <div style="margin-top:10px;color:var(--muted);font-size:12px;">
-    Inserisci il percorso dell'immagine caricata su GitHub, esempio: avatars/Francesco.png
+    Inserisci il nome esatto del file caricato su GitHub, esempio: Francesco.png
   </div>
 </div>
 
@@ -2401,11 +2475,13 @@ function updateAvatarPreviewPosition() {
   const preview = document.getElementById("avatarPreview");
   const x = document.getElementById("avatarPosX")?.value || 50;
   const y = document.getElementById("avatarPosY")?.value || 50;
+  const zoom = document.getElementById("avatarZoom")?.value || 100;
 
   if (preview) {
     preview.style.objectPosition = `${x}% ${y}%`;
+    preview.style.transform = `scale(${zoom / 100})`;
   }
-}  
+}
 
 async function savePlayerAvatarUrl() {
   if (!(await checkAdmin())) return;
@@ -2415,13 +2491,14 @@ async function savePlayerAvatarUrl() {
 
   const avatarPosX = parseInt(document.getElementById("avatarPosX")?.value) || 50;
 const avatarPosY = parseInt(document.getElementById("avatarPosY")?.value) || 50;
+const avatarZoom = parseInt(document.getElementById("avatarZoom")?.value) || 100;
 
 await db.collection("players").doc(_currentPlayerId).set({
   avatarUrl: url,
   avatarPosX,
-  avatarPosY
+  avatarPosY,
+  avatarZoom
 }, { merge: true });
-
   alert("Avatar aggiornato!");
   renderPlayerStats(_playerEditMode);
 }
@@ -2578,12 +2655,13 @@ async function loadSelect() {
 
   snap.forEach(d => {
     players.push({
-      id: d.id,
-      name: d.data().name,
-      avatarUrl: d.data().avatarUrl || "",
-avatarPosX: d.data().avatarPosX ?? 50,
-avatarPosY: d.data().avatarPosY ?? 50
-    });
+  id: d.id,
+  name: d.data().name,
+  avatarUrl: d.data().avatarUrl || "",
+  avatarPosX: d.data().avatarPosX ?? 50,
+  avatarPosY: d.data().avatarPosY ?? 50,
+  avatarZoom: d.data().avatarZoom ?? 100
+});
   });
 
   let html = `
@@ -2593,15 +2671,20 @@ avatarPosY: d.data().avatarPosY ?? 50
 
   players.forEach((p, index) => {
     const face = p.avatarUrl
-      ? `<img class="roster-face" src="${p.avatarUrl}" style="object-position:${p.avatarPosX}% ${p.avatarPosY}%;">`
+      ? `<div class="avatar-frame" style="border-radius:10px;width:46px;height:46px;">
+    <img src="${p.avatarUrl}" style="object-position:${p.avatarPosX}% ${p.avatarPosY}%; transform:scale(${p.avatarZoom / 100});">
+  </div>`
       : `<div class="roster-face-placeholder">${p.name.charAt(0).toUpperCase()}</div>`;
 
-    html += `
+  html += `
   <div class="roster-card" 
     id="roster_${p.id}"
     data-id="${p.id}"
     data-name="${escapeHtml(p.name)}"
     data-avatar="${p.avatarUrl}"
+    data-avatar-pos-x="${p.avatarPosX}"
+    data-avatar-pos-y="${p.avatarPosY}"
+    data-avatar-zoom="${p.avatarZoom}"
     onclick="toggleRosterPlayerFromCard(this)">
     ${face}
     <div>
@@ -2626,15 +2709,19 @@ avatarPosY: d.data().avatarPosY ?? 50
   document.getElementById("selectPlayers").innerHTML = html;
 }
 function toggleRosterPlayerFromCard(card) {
-  toggleRosterPlayer(
-    card.dataset.id,
-    card.dataset.name,
-    card.dataset.avatar || ""
-  );
-}  
+  toggleRosterPlayer({
+    id: card.dataset.id,
+    name: card.dataset.name,
+    avatarUrl: card.dataset.avatar || "",
+    avatarPosX: parseInt(card.dataset.avatarPosX) || 50,
+    avatarPosY: parseInt(card.dataset.avatarPosY) || 50,
+    avatarZoom: parseInt(card.dataset.avatarZoom) || 100
+  });
+}
 
 
-function toggleRosterPlayer(id, name, avatarUrl) {
+function toggleRosterPlayer(player) {
+  const { id, name, avatarUrl, avatarPosX, avatarPosY, avatarZoom } = player;
   const alreadySelected = selected.some(p => p.id === id);
   const card = document.getElementById("roster_" + id);
 
@@ -2642,7 +2729,7 @@ function toggleRosterPlayer(id, name, avatarUrl) {
     selected = selected.filter(p => p.id !== id);
     if (card) card.classList.remove("selected");
   } else {
-    selected.push({ id, name, avatarUrl: avatarUrl || "" });
+    selected.push({ id, name, avatarUrl: avatarUrl || "", avatarPosX, avatarPosY, avatarZoom });
     if (card) card.classList.add("selected");
   }
 
@@ -3317,7 +3404,9 @@ function renderFinalAnimation(sorted, winner) {
   const winnerObj = selected.find(p => p.name === winner);
 
   const winnerAvatarHtml = winnerObj?.avatarUrl
-    ? `<img class="player-avatar big" src="${winnerObj.avatarUrl}">`
+    ? `<div class="avatar-frame big">
+    <img src="${winnerObj.avatarUrl}" style="object-position:${winnerObj.avatarPosX || 50}% ${winnerObj.avatarPosY || 50}%; transform:scale(${(winnerObj.avatarZoom || 100) / 100});">
+  </div>`
     : `<div class="final-winner-crown">👑</div>`;
 
   let html = `
