@@ -431,7 +431,149 @@ input:focus { border-color: var(--gold); }
   font-weight: 500;
   color: var(--text);
 }
+.roster-layout {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 16px;
+  align-items: start;
+}
 
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.roster-card {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 70px;
+}
+
+.roster-card:hover {
+  border-color: var(--goldBorder);
+  background: var(--surface2);
+}
+
+.roster-card.selected {
+  border-color: var(--gold);
+  background: var(--goldDim);
+}
+
+.roster-face {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--goldBorder);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+.roster-face-placeholder {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--goldBorder);
+  background: var(--surface2);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.roster-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.roster-picked {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  display: none;
+}
+
+.roster-card.selected .roster-picked {
+  display: block;
+}
+
+.roster-preview {
+  position: sticky;
+  top: 92px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  min-height: 260px;
+}
+
+.roster-preview-img {
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--goldBorder);
+  background: var(--bg);
+  margin-bottom: 12px;
+}
+
+.roster-preview-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  border-radius: 12px;
+  border: 1px solid var(--goldBorder);
+  background: var(--bg);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+
+.roster-preview-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  color: var(--gold);
+}
+
+.roster-preview-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .roster-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .roster-preview {
+    position: relative;
+    top: auto;
+    order: -1;
+  }
+}
 .score-game-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 26px;
@@ -681,6 +823,31 @@ input:focus { border-color: var(--gold); }
   font-size: 22px;
   color: var(--gold);
 }
+.player-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--goldBorder);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+.player-avatar.big {
+  width: 118px;
+  height: 118px;
+  display: block;
+  margin: 22px auto 14px;
+  border: 2px solid var(--goldBorder);
+}
+
+.avatar-upload {
+  margin: 16px 0 22px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+}  
 
 /* ── OLD game-block kept for tournament usage ── */
 .game-block {
@@ -1810,6 +1977,7 @@ input:focus { border-color: var(--gold); }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>  
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyBAEAkkHZl7C5oZ0kg7aTYmRwfefo2CP2c",
@@ -1819,6 +1987,7 @@ firebase.initializeApp({
 
 const db   = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();  
 const ADMIN_EMAIL = "fspagnoli02@gmail.com";
 let currentUser = null;
   function login() {
@@ -1933,7 +2102,7 @@ async function addPlayer() {
   if (!(await checkAdmin())) return;
   const n = document.getElementById("playerName").value.trim();
   if (!n) return;
-  await db.collection("players").add({ name: n });
+  await db.collection("players").add({ name: n, avatarUrl: "" });
   document.getElementById("playerName").value = "";
   loadPlayers();
 }
@@ -1942,8 +2111,14 @@ async function loadPlayers() {
   const snap = await db.collection("players").get();
   let html = "";
   snap.forEach(d => {
-    html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
-      <span class="box-name">${d.data().name}</span>
+    const avatar = d.data().avatarUrl || "";
+const avatarHtml = avatar
+  ? `<img class="player-avatar" src="${avatar}">`
+  : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;">${d.data().name.charAt(0).toUpperCase()}</div>`;
+
+html += `<div class="box playerBox" onclick="openPlayer('${d.id}','${d.data().name}')">
+  ${avatarHtml}
+  <span class="box-name">${d.data().name}</span>
       <div class="box-actions admin-only">
         <button class="btn-icon" onclick="event.stopPropagation();editPlayer('${d.id}','${d.data().name}')">✏️</button>
         <button class="btn-danger" onclick="event.stopPropagation();deleteDoc('players','${d.id}')">✕</button>
@@ -1997,6 +2172,11 @@ async function openPlayer(id, name) {
 async function renderPlayerStats(editMode) {
   const id   = _currentPlayerId;
   const name = _currentPlayerName;
+  let playerAvatarUrl = "";
+try {
+  const pDoc = await db.collection("players").doc(id).get();
+  if (pDoc.exists) playerAvatarUrl = pDoc.data().avatarUrl || "";
+} catch (e) {}
 
   const [palSnap, rankSnap, gameSnap, histSnap] = await Promise.all([
     db.collection("palmares").get(),
@@ -2050,7 +2230,10 @@ async function renderPlayerStats(editMode) {
 
   if (!editMode) {
     // ── READ MODE ──
-   let html = `
+   let html = `${avatarBlock} 
+  const avatarBlock = playerAvatarUrl
+  ? `<img class="player-avatar big" src="${playerAvatarUrl}">`
+  : `<div class="player-avatar big" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;font-weight:700;">${name.charAt(0).toUpperCase()}</div>`;   `
   <div class="stat-card"><span class="stat-card-icon">🏆</span><div><div class="stat-card-label">Titoli vinti</div><div class="stat-card-val">${wins}</div></div></div>
   <div class="stat-card"><span class="stat-card-icon">⭐</span><div><div class="stat-card-label">Punti totali</div><div class="stat-card-val">${totalPoints}</div></div></div>
   <div class="stat-card"><span class="stat-card-icon">🎯</span><div><div class="stat-card-label">Tornei giocati</div><div class="stat-card-val">${tournamentsPlayed}</div></div></div>
@@ -2075,6 +2258,13 @@ async function renderPlayerStats(editMode) {
   } else {
     // ── EDIT MODE ──
     let html = `<div class="edit-mode-banner">✏️ Modalità modifica attiva
+    html += `
+  <div class="avatar-upload">
+    <div class="stat-card-label">Foto profilo</div>
+    <input type="file" accept="image/*" id="avatarFile">
+    <button class="btn-ghost" style="margin-top:10px;" onclick="uploadPlayerAvatar()">Carica immagine</button>
+  </div>
+`;
       <button class="save-edit-btn" onclick="savePlayerEdit()">💾 Salva tutto</button>
     </div>`;
 
@@ -2129,6 +2319,26 @@ async function renderPlayerStats(editMode) {
     );
   }
 }
+async function uploadPlayerAvatar() {
+  if (!(await checkAdmin())) return;
+
+  const file = document.getElementById("avatarFile")?.files?.[0];
+  if (!file) {
+    alert("Seleziona prima un'immagine.");
+    return;
+  }
+
+  const id = _currentPlayerId;
+  const ref = storage.ref().child(`player-avatars/${id}.jpg`);
+
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+
+  await db.collection("players").doc(id).set({ avatarUrl: url }, { merge: true });
+
+  alert("Foto profilo aggiornata!");
+  renderPlayerStats(_playerEditMode);
+}  
 function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
   let performanceSum = 0;
   let performanceWeight = 0;
@@ -2265,22 +2475,108 @@ async function deleteDoc(col, id) {
 ════════════════════════════════════════ */
 async function loadSelect() {
   selected = [];
+
   const snap = await db.collection("players").get();
-  let html = "";
+  let players = [];
+
   snap.forEach(d => {
-    html += `<label class="check-item">
-      <input type="checkbox" value="${d.id}" 
-        data-name="${d.data().name}" onchange="toggle(this)">
-      <span>${d.data().name}</span>
-    </label>`;
+    players.push({
+      id: d.id,
+      name: d.data().name,
+      avatarUrl: d.data().avatarUrl || ""
+    });
   });
+
+  let html = `
+    <div class="roster-layout">
+      <div class="roster-grid">
+  `;
+
+  players.forEach((p, index) => {
+    const face = p.avatarUrl
+      ? `<img class="roster-face" src="${p.avatarUrl}">`
+      : `<div class="roster-face-placeholder">${p.name.charAt(0).toUpperCase()}</div>`;
+
+    html += `
+  <div class="roster-card" 
+    id="roster_${p.id}"
+    data-id="${p.id}"
+    data-name="${escapeHtml(p.name)}"
+    data-avatar="${p.avatarUrl}"
+    onclick="toggleRosterPlayerFromCard(this)">
+    ${face}
+    <div>
+      <div class="roster-name">${p.name}</div>
+      <div class="roster-picked">Selezionato</div>
+    </div>
+  </div>
+`;
+  });
+
+  html += `
+      </div>
+
+      <div class="roster-preview" id="rosterPreview">
+        <div class="roster-preview-placeholder">?</div>
+        <div class="roster-preview-name">Seleziona</div>
+        <div class="roster-preview-sub">Roster giocatori</div>
+      </div>
+    </div>
+  `;
+
   document.getElementById("selectPlayers").innerHTML = html;
 }
+function toggleRosterPlayerFromCard(card) {
+  toggleRosterPlayer(
+    card.dataset.id,
+    card.dataset.name,
+    card.dataset.avatar || ""
+  );
+}  
 
 
-function toggle(e) {
-  if (e.checked) selected.push({ id: e.value, name: e.dataset.name });
-  else selected = selected.filter(p => p.id !== e.value);
+function toggleRosterPlayer(id, name, avatarUrl) {
+  const alreadySelected = selected.some(p => p.id === id);
+  const card = document.getElementById("roster_" + id);
+
+  if (alreadySelected) {
+    selected = selected.filter(p => p.id !== id);
+    if (card) card.classList.remove("selected");
+  } else {
+    selected.push({ id, name, avatarUrl: avatarUrl || "" });
+    if (card) card.classList.add("selected");
+  }
+
+  showRosterPreview({ id, name, avatarUrl: avatarUrl || "" });
+}
+
+function showRosterPreview(player) {
+  const preview = document.getElementById("rosterPreview");
+  if (!preview) return;
+
+  const image = player.avatarUrl
+    ? `<img class="roster-preview-img" src="${player.avatarUrl}">`
+    : `<div class="roster-preview-placeholder">${player.name.charAt(0).toUpperCase()}</div>`;
+
+  const selectedText = selected.some(p => p.id === player.id)
+    ? "Selezionato per il torneo"
+    : "Non selezionato";
+
+  preview.innerHTML = `
+    ${image}
+    <div class="roster-preview-name">${player.name}</div>
+    <div class="roster-preview-sub">${selectedText}</div>
+  `;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[m]));
 }
 
 function startGames() {
@@ -2919,8 +3215,15 @@ function finish() {
 }
 function renderFinalAnimation(sorted, winner) {
   const reversed = [...sorted].reverse();
-
-  let html = `
+  const winnerObj = selected.find(p => p.name === winner);
+  const winnerAvatar = winnerObj?.avatarUrl || "";  
+  const winnerObj = selected.find(p => p.name === winner);
+const winnerAvatarHtml = winnerObj?.avatarUrl
+  ? `<img class="player-avatar big" src="${winnerObj.avatarUrl}">`
+  : `<div class="final-winner-crown">👑</div>`;
+  let html = 
+    ${winnerAvatarHtml}
+<div class="final-winner-name">${winner}</div>`
     <div class="final-winner" style="display:none;" id="animatedWinner">
       <div class="final-winner-crown">👑</div>
       <div class="final-winner-name">${winner}</div>
