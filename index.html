@@ -1200,6 +1200,46 @@ input:focus { border-color: var(--gold); }
 .btn-hard-danger:hover {
   background: #e74c3c;
 }  
+.finish-confirm {
+  display: none;
+  margin: 14px 0 22px;
+  padding: 18px;
+  background: rgba(46, 204, 113, 0.10);
+  border: 1px solid rgba(46, 204, 113, 0.45);
+  border-radius: var(--radius);
+}
+
+.finish-confirm-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.finish-confirm-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: #06130b;
+  border: 1px solid #58d68d;
+  border-radius: 30px;
+  padding: 11px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-success:hover {
+  background: #58d68d;
+}  
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -2807,14 +2847,14 @@ liveTournamentStarted = true;
     <div style="margin:28px 0;text-align:center;">
       <button class="btn-gold finish-btn" onclick="showFinishConfirm()">🏁 Fine Torneo</button>
 
-<div id="finishConfirm" class="restart-confirm" style="display:none;">
-  <div class="restart-confirm-title">Conferma fine torneo</div>
-  <div class="restart-confirm-text">
-    Stai per chiudere il torneo. Dopo la conferma verrà mostrata la classifica finale, ma i dati verranno salvati solo quando premi Nuovo Torneo.
+<div id="finishConfirm" class="finish-confirm" style="display:none;">
+  <div class="finish-confirm-title">Concludere torneo?</div>
+  <div class="finish-confirm-text">
+    Verrà mostrata la classifica finale. I dati verranno salvati solo quando premi Nuovo Torneo.
   </div>
   <div class="restart-confirm-actions">
-    <button class="btn-hard-danger" onclick="confirmFinishTournament()">Sì, chiudi torneo</button>
-    <button class="btn-ghost" onclick="hideFinishConfirm()">Annulla</button>
+    <button class="btn-success" onclick="confirmFinishTournament()">Sì, concludi</button>
+    <button class="btn-ghost" onclick="hideFinishConfirm()">No, non chiudere</button>
   </div>
 </div>
     </div>`;
