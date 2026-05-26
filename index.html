@@ -675,7 +675,7 @@ input:focus { border-color: var(--gold); }
 
 .uno-box {
   display: grid;
-  grid-template-columns: 1fr 74px 44px 44px 72px;
+  grid-template-columns: 22px 1fr 74px 44px 44px 72px;
   align-items: center;
   gap: 8px;
 }
@@ -698,7 +698,7 @@ input:focus { border-color: var(--gold); }
 }  
 @media (max-width: 520px) {
   .uno-box {
-    grid-template-columns: 1fr 64px 38px 38px 62px;
+    grid-template-columns: 20px 1fr 64px 38px 38px 62px;
     gap: 6px;
     padding: 10px;
   }
@@ -2873,8 +2873,10 @@ function escapeHtml(str) {
 
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
-liveTournamentStarted = true;
+
+  liveTournamentStarted = true;
   document.getElementById("restartTournamentBtn").style.display = "inline-block";
+
   unoScores = {};
   lifeScores = {};
   eliminationOrders = {};
@@ -2902,36 +2904,37 @@ liveTournamentStarted = true;
     }
 
     selected.forEach(p => {
-  if (g === "Las Vegas") {
-    html += `<div class="score-row">
-      <span>${p.name}</span>
-      <div class="score-actions">
-        <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
-        <button class="plus-one-btn" onclick="addPoint('${g}','${p.id}')">+1</button>
-      </div>
-    </div>`;
-  } else {
-    html += `<div class="score-row">
-      <span>${p.name}</span>
-      <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
-    </div>`;
-  }
-});
+      if (g === "Las Vegas") {
+        html += `<div class="score-row">
+          <span>${p.name}</span>
+          <div class="score-actions">
+            <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
+            <button class="plus-one-btn" onclick="addPoint('${g}','${p.id}')">+1</button>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="score-row">
+          <span>${p.name}</span>
+          <input type="number" id="${g}_${p.id}" value="0" oninput="updateLiveRanking()">
+        </div>`;
+      }
+    });
+  });
 
   html += `<div id="liveRanking"></div>
     <div style="margin:28px 0;text-align:center;">
       <button class="btn-gold finish-btn" onclick="showFinishConfirm()">🏁 Fine Torneo</button>
 
-<div id="finishConfirm" class="finish-confirm" style="display:none;">
-  <div class="finish-confirm-title">Concludere torneo?</div>
-  <div class="finish-confirm-text">
-    Verrà mostrata la classifica finale. I dati verranno salvati solo quando premi Nuovo Torneo.
-  </div>
-  <div class="restart-confirm-actions">
-    <button class="btn-success" onclick="confirmFinishTournament()">Sì, concludi</button>
-    <button class="btn-ghost" onclick="hideFinishConfirm()">No, non chiudere</button>
-  </div>
-</div>
+      <div id="finishConfirm" class="finish-confirm" style="display:none;">
+        <div class="finish-confirm-title">Concludere torneo?</div>
+        <div class="finish-confirm-text">
+          Verrà mostrata la classifica finale. I dati verranno salvati solo quando premi Nuovo Torneo.
+        </div>
+        <div class="restart-confirm-actions">
+          <button class="btn-success" onclick="confirmFinishTournament()">Sì, concludi</button>
+          <button class="btn-ghost" onclick="hideFinishConfirm()">No, non chiudere</button>
+        </div>
+      </div>
     </div>`;
 
   document.getElementById("gamesArea").innerHTML = html;
@@ -3455,7 +3458,7 @@ function updateAutoGameScores(game) {
 
   selected.forEach(p => {
     const el = document.getElementById(game + "_" + p.id);
-    if (el) el.value = points[p.id] || selected.length;
+    if (el) el.value = points[p.id] ?? 0;
   });
 }
 
