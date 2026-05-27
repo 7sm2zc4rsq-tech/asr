@@ -1150,6 +1150,69 @@ input:focus { border-color: var(--gold); }
   background: var(--goldDim);
   border-color: var(--gold);
 }
+.info-mini-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--goldBorder);
+  background: var(--surface2);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.index-plan-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(10px);
+  z-index: 1200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.index-plan-inner {
+  width: 100%;
+  max-width: 460px;
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: 20px;
+  padding: 26px;
+}
+
+.index-plan-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  color: var(--gold);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.index-plan-row {
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: var(--surface2);
+}
+
+.index-plan-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.index-plan-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin-top: 4px;
+}  
 
 #efficiencyInfoPopup {
   display: none;
@@ -2142,6 +2205,15 @@ input:focus { border-color: var(--gold); }
     </div>
   </div>
 </div>
+<div id="indexPlanPopup" class="index-plan-popup" onclick="closeIndexPlanOnBg(event)">
+  <div class="index-plan-inner">
+    <div class="index-plan-title" id="indexPlanTitle">Scenario indice</div>
+    <div id="indexPlanContent"></div>
+    <div style="margin-top:18px;text-align:center;">
+      <button class="btn-gold" onclick="closeIndexPlan()">Chiudi</button>
+    </div>
+  </div>
+</div>  
 <!-- ══════════ POPUP ══════════ -->
 <div id="popup" style="display:none;">
   <div class="popup-inner">
@@ -2669,6 +2741,200 @@ function calcGeneralIndex(name, histSnap, tournamentsPlayed = 0) {
 
   return purePerformance * reliabilityFactor * 100;
 }
+let latestLiveTournamentData = null;
+
+function openIndexPlanFromRoster(card) {
+  const id = card.dataset.id;
+  const player = selected.find(p => p.id === id);
+
+  if (!player) {
+    alert("Seleziona prima questo giocatore nel torneo.");
+    return;
+  }
+
+  openIndexPlan(player.name, selected.map(p => ({ id: p.id, name: p.name })));
+}
+
+function openIndexPlanFromLive(playerName) {
+  if (!latestLiveTournamentData || !latestLiveTournamentData.players?.length) {
+    alert("Dati live non disponibili.");
+    return;
+  }
+
+  openIndexPlan(playerName, latestLiveTournamentData.players);
+}
+
+async function openIndexPlan(playerName, tournamentPlayers) {
+  if (!tournamentPlayers || tournamentPlayers.length < 2) {
+    alert("Servono almeno 2 giocatori.");
+    return;
+  }
+
+  document.getElementById("indexPlanPopup").style.display = "flex";
+  document.getElementById("indexPlanTitle").innerText = "Scenario ideale per " + playerName;
+  document.getElementById("indexPlanContent").innerHTML =
+    '<p style="color:var(--muted);font-size:13px;">Calcolo scenario...</p>';
+
+  const [playersSnap, histSnap] = await Promise.all([
+    db.collection("players").get(),
+    db.collection("tournamentHistory").get()
+  ]);
+
+  const n = tournamentPlayers.length;
+  const maxTargetTotal = (n * 5) + 4;
+
+  const targetTournaments = getTournamentCountForIndex(playerName, playersSnap, histSnap);
+  const perfectGames = buildIndexScenarioGames(playerName, tournamentPlayers, null, 0);
+  const targetAfter = calcGeneralIndexWithExtra(playerName, histSnap, targetTournaments + 1, perfectGames);
+
+  const rivals = tournamentPlayers
+    .filter(p => p.name !== playerName)
+    .map(p => {
+      const tournaments = getTournamentCountForIndex(p.name, playersSnap, histSnap);
+      const current = calcGeneralIndex(p.name, histSnap, tournaments);
+      const safeTotal = findSafeRivalTotal(playerName, p.name, tournamentPlayers, histSnap, playersSnap, targetAfter);
+
+      return {
+        name: p.name,
+        current,
+        safeTotal
+      };
+    })
+    .sort((a, b) => b.current - a.current);
+
+  let html = `
+    <div class="index-plan-row">
+      <div class="index-plan-name">1. ${playerName}</div>
+      <div class="index-plan-sub">
+        Scenario migliore: primo con circa ${maxTargetTotal} punti totali.
+        Indice stimato dopo il torneo: ${targetAfter.toFixed(1)}%.
+      </div>
+    </div>
+  `;
+
+  rivals.forEach((r, i) => {
+    html += `
+      <div class="index-plan-row">
+        <div class="index-plan-name">${i + 2}. ${r.name}</div>
+        <div class="index-plan-sub">
+          Per favorire il salto di ${playerName}, idealmente non dovrebbe superare circa ${r.safeTotal} punti totali.
+          Indice attuale: ${r.current.toFixed(1)}%.
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div style="margin-top:12px;color:var(--muted);font-size:11px;line-height:1.5;">
+      Il calcolo simula ${playerName} con rendimento massimo nei giochi del torneo e stima il limite ideale degli avversari usando i pesi dell'Indice Generale.
+    </div>
+  `;
+
+  document.getElementById("indexPlanContent").innerHTML = html;
+}
+
+function getTournamentCountForIndex(name, playersSnap, histSnap) {
+  let tournamentsAuto = 0;
+
+  histSnap.forEach(d => {
+    const scores = d.data().scores || [];
+    if (scores.some(s => s.name === name)) tournamentsAuto++;
+  });
+
+  let offset = 0;
+  playersSnap.forEach(d => {
+    if (d.data().name === name) offset = parseInt(d.data().tournamentsOffset) || 0;
+  });
+
+  return Math.max(0, tournamentsAuto + offset);
+}
+
+function calcGeneralIndexWithExtra(name, histSnap, tournamentsPlayed, extraGames) {
+  const fakeSnap = {
+    forEach(cb) {
+      histSnap.forEach(cb);
+      cb({ data: () => ({ games: extraGames }) });
+    }
+  };
+
+  return calcGeneralIndex(name, fakeSnap, tournamentsPlayed);
+}
+
+function buildIndexScenarioGames(targetName, tournamentPlayers, rivalName, rivalTotal) {
+  const n = tournamentPlayers.length;
+  const rivalPoints = rivalName ? distributeRivalPoints(rivalTotal, n) : {};
+
+  return GAME_LIST.map(game => {
+    const max = game === "Las Vegas" ? 4 : n;
+
+    return {
+      game,
+      icon: GAME_ICONS[game] || "🎮",
+      scores: tournamentPlayers.map(p => {
+        let points = game === "Las Vegas" ? 0 : 1;
+
+        if (p.name === targetName) points = max;
+        if (p.name === rivalName) points = rivalPoints[game] ?? points;
+
+        return { name: p.name, playerId: p.id || "", points };
+      })
+    };
+  });
+}
+
+function distributeRivalPoints(total, playersCount) {
+  const base = {
+    "Dubito": 1,
+    "UNO": 1,
+    "31": 1,
+    "Saltacavallo": 1,
+    "Fr0c10": 1,
+    "Las Vegas": 0
+  };
+
+  let remaining = Math.max(0, total - 5);
+
+  const order = ["Dubito", "UNO", "31", "Saltacavallo", "Fr0c10", "Las Vegas"];
+
+  order.forEach(game => {
+    const max = game === "Las Vegas" ? 4 : playersCount;
+    const room = max - base[game];
+    const add = Math.min(room, remaining);
+
+    base[game] += add;
+    remaining -= add;
+  });
+
+  return base;
+}
+
+function findSafeRivalTotal(targetName, rivalName, tournamentPlayers, histSnap, playersSnap, targetAfter) {
+  const n = tournamentPlayers.length;
+  const minTotal = 5;
+  const maxTotal = (n * 5) + 4;
+  const rivalTournaments = getTournamentCountForIndex(rivalName, playersSnap, histSnap);
+
+  let safe = minTotal;
+
+  for (let total = minTotal; total <= maxTotal; total++) {
+    const games = buildIndexScenarioGames(targetName, tournamentPlayers, rivalName, total);
+    const rivalAfter = calcGeneralIndexWithExtra(rivalName, histSnap, rivalTournaments + 1, games);
+
+    if (rivalAfter <= targetAfter) safe = total;
+  }
+
+  return safe;
+}
+
+function closeIndexPlan() {
+  document.getElementById("indexPlanPopup").style.display = "none";
+}
+
+function closeIndexPlanOnBg(e) {
+  if (e.target === document.getElementById("indexPlanPopup")) {
+    closeIndexPlan();
+  }
+}  
 async function togglePlayerEdit() {
   if (!(await checkAdmin())) return;
   _playerEditMode = !_playerEditMode;
@@ -2794,7 +3060,10 @@ async function loadSelect() {
     onclick="toggleRosterPlayerFromCard(this)">
     ${face}
     <div>
-      <div class="roster-name">${p.name}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+  <div class="roster-name">${p.name}</div>
+  <button class="info-mini-btn" onclick="event.stopPropagation();openIndexPlanFromRoster(this.closest('.roster-card'))">?</button>
+</div>
       <div class="roster-picked">Selezionato</div>
     </div>
   </div>
@@ -2870,6 +3139,12 @@ function escapeHtml(str) {
     "'": "&#039;"
   }[m]));
 }
+function escapeJs(str) {
+  return String(str)
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, " ");
+}  
 
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
@@ -3307,6 +3582,7 @@ function listenLiveTournament() {
 }
 
 function renderLiveTournament(data) {
+  latestLiveTournamentData = data;
   const container = document.getElementById("liveTournamentContent");
   if (!container) return;
 
@@ -3331,7 +3607,10 @@ function renderLiveTournament(data) {
     html += `
       <div class="box">
         <div class="rank-badge ${badge}">${p.rank}</div>
-        <span class="box-name">${p.name}</span>
+        <span class="box-name" style="display:flex;align-items:center;gap:8px;">
+  ${p.name}
+  <button class="info-mini-btn" onclick="openIndexPlanFromLive('${escapeJs(p.name)}')">?</button>
+</span>
         <span class="box-pts">${p.points} pt</span>
       </div>
     `;
