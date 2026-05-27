@@ -3519,14 +3519,33 @@ function getTieBreakNote(playerName, sorted, totals, gameBreakdown) {
 
   return tiedBelow.map(otherName => {
     const otherWeighted = calcTournamentDifficultyScore(otherName, gameBreakdown);
+    const breakdown = getWeightedTieBreakBreakdown(playerName, otherName, gameBreakdown);
 
     if (Math.abs(playerWeighted - otherWeighted) > 0.001) {
-      return `Avanti rispetto a ${otherName} perché, a pari punti totali, ha un punteggio pesato più alto nei giochi: ${fmtTieScore(playerWeighted)} contro ${fmtTieScore(otherWeighted)}.`;
+      return `Avanti rispetto a ${otherName} perché, a pari punti totali, il punteggio pesato dei giochi è più alto: ${fmtTieScore(playerWeighted)} contro ${fmtTieScore(otherWeighted)}. Dettaglio: ${breakdown}.`;
     }
 
-    return `Avanti rispetto a ${otherName} perché anche il punteggio pesato è pari (${fmtTieScore(playerWeighted)}), quindi decide l'ordine alfabetico.`;
+    return `Avanti rispetto a ${otherName} perché anche il punteggio pesato è pari (${fmtTieScore(playerWeighted)}), quindi decide l'ordine alfabetico. Dettaglio: ${breakdown}.`;
   }).join(" ");
 }
+function getWeightedTieBreakBreakdown(playerName, otherName, gameBreakdown) {
+  return gameBreakdown.map(g => {
+    const weight = GAME_WEIGHTS[g.game] || 1;
+
+    const playerPoints = (g.scores || []).find(s => s.name === playerName)?.points || 0;
+    const otherPoints = (g.scores || []).find(s => s.name === otherName)?.points || 0;
+
+    const playerWeighted = playerPoints * weight;
+    const otherWeighted = otherPoints * weight;
+
+    return `${g.game} ${fmtTieScore(playerWeighted)}-${fmtTieScore(otherWeighted)}`;
+  }).join(", ");
+}
+
+function fmtTieScore(n) {
+  const rounded = Math.round(n * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
+}  
 function fmtTieScore(n) {
   const rounded = Math.round(n * 100) / 100;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
