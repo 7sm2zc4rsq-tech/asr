@@ -3503,49 +3503,33 @@ function calcTournamentDifficultyScore(playerName, gameBreakdown) {
   return score;
 }
 function getTieBreakNote(playerName, sorted, totals, gameBreakdown) {
+  const playerIndex = sorted.findIndex(([name]) => name === playerName);
+  if (playerIndex === -1) return "";
+
   const playerTotal = totals[playerName];
 
-  const tiedBehind = sorted
+  const tiedBelow = sorted
+    .slice(playerIndex + 1)
     .map(([name]) => name)
-    .filter(name => name !== playerName && totals[name] === playerTotal);
+    .filter(name => totals[name] === playerTotal);
 
-  if (!tiedBehind.length) return "";
+  if (!tiedBelow.length) return "";
 
-  for (const otherName of tiedBehind) {
-    const decisive = getDecisiveTieBreak(playerName, otherName, gameBreakdown);
+  const playerWeighted = calcTournamentDifficultyScore(playerName, gameBreakdown);
 
-    if (decisive) {
-      return `Avanti a pari punti grazie a ${decisive.game}: ${playerName} ${decisive.playerPoints} pt, ${otherName} ${decisive.otherPoints} pt.`;
+  return tiedBelow.map(otherName => {
+    const otherWeighted = calcTournamentDifficultyScore(otherName, gameBreakdown);
+
+    if (Math.abs(playerWeighted - otherWeighted) > 0.001) {
+      return `Avanti rispetto a ${otherName} perché, a pari punti totali, ha un punteggio pesato più alto nei giochi: ${fmtTieScore(playerWeighted)} contro ${fmtTieScore(otherWeighted)}.`;
     }
-  }
 
-  return "";
+    return `Avanti rispetto a ${otherName} perché anche il punteggio pesato è pari (${fmtTieScore(playerWeighted)}), quindi decide l'ordine alfabetico.`;
+  }).join(" ");
 }
-function getDecisiveTieBreak(playerName, otherName, gameBreakdown) {
-  const gamesByDifficulty = [...gameBreakdown].sort((a, b) => {
-    const weightA = GAME_WEIGHTS[a.game] || 1;
-    const weightB = GAME_WEIGHTS[b.game] || 1;
-    return weightB - weightA;
-  });
-
-  for (const g of gamesByDifficulty) {
-    const playerScore = (g.scores || []).find(s => s.name === playerName)?.points || 0;
-    const otherScore = (g.scores || []).find(s => s.name === otherName)?.points || 0;
-
-    if (playerScore > otherScore) {
-      return {
-        game: g.game,
-        playerPoints: playerScore,
-        otherPoints: otherScore
-      };
-    }
-
-    if (playerScore < otherScore) {
-      return null;
-    }
-  }
-
-  return null;
+function fmtTieScore(n) {
+  const rounded = Math.round(n * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
 }  
 function sortFinalStandings(totals, gameBreakdown) {
   return Object.entries(totals).sort((a, b) => {
