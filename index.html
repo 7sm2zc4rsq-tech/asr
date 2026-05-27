@@ -2843,6 +2843,9 @@ html += `
   </div>
 `;
 
+document.getElementById("indexPlanContent").innerHTML = html;
+}
+
 function getTournamentCountForIndex(name, playersSnap, histSnap) {
   let tournamentsAuto = 0;
 
@@ -3830,11 +3833,6 @@ function getWeightedTieBreakBreakdown(playerName, otherName, gameBreakdown) {
     return `${g.game} ${fmtTieScore(playerWeighted)}-${fmtTieScore(otherWeighted)}`;
   }).join(", ");
 }
-
-function fmtTieScore(n) {
-  const rounded = Math.round(n * 100) / 100;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
-}  
 function fmtTieScore(n) {
   const rounded = Math.round(n * 100) / 100;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
