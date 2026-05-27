@@ -2802,36 +2802,46 @@ async function openIndexPlan(playerName, tournamentPlayers) {
     })
     .sort((a, b) => b.current - a.current);
 
-  let html = `
-    <div class="index-plan-row">
-      <div class="index-plan-name">1. ${playerName}</div>
-      <div class="index-plan-sub">
-        Scenario migliore: primo con circa ${maxTargetTotal} punti totali.
-        Indice stimato dopo il torneo: ${targetAfter.toFixed(1)}%.
-      </div>
-    </div>
-  `;
+ const idealRows = [
+  {
+    name: playerName,
+    total: maxTargetTotal,
+    note: `Vincitore ideale: rendimento massimo stimato. Indice dopo il torneo: ${targetAfter.toFixed(1)}%.`
+  },
+  ...rivals.map(r => ({
+    name: r.name,
+    total: r.safeTotal,
+    note: `Soglia consigliata per non superare il salto indice di ${playerName}. Indice attuale: ${r.current.toFixed(1)}%.`
+  }))
+];
 
-  rivals.forEach((r, i) => {
-    html += `
-      <div class="index-plan-row">
-        <div class="index-plan-name">${i + 2}. ${r.name}</div>
-        <div class="index-plan-sub">
-          Per favorire il salto di ${playerName}, idealmente non dovrebbe superare circa ${r.safeTotal} punti totali.
-          Indice attuale: ${r.current.toFixed(1)}%.
-        </div>
-      </div>
-    `;
-  });
+let html = `
+  <div style="margin-bottom:14px;color:var(--muted);font-size:12px;line-height:1.5;">
+    Classifica ideale del torneo per massimizzare il balzo di <strong style="color:var(--gold);">${playerName}</strong>
+    nell'Indice Generale.
+  </div>
+`;
+
+idealRows.forEach((row, i) => {
+  const badge = i===0 ? "gold" : i===1 ? "silver" : i===2 ? "bronze" : "";
 
   html += `
-    <div style="margin-top:12px;color:var(--muted);font-size:11px;line-height:1.5;">
-      Il calcolo simula ${playerName} con rendimento massimo nei giochi del torneo e stima il limite ideale degli avversari usando i pesi dell'Indice Generale.
+    <div class="box" style="margin-bottom:6px;">
+      <div class="rank-badge ${badge}">${i + 1}</div>
+      <span class="box-name">${row.name}</span>
+      <span class="box-pts">${row.total} pt</span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin:0 0 10px 54px;line-height:1.4;">
+      ${row.note}
     </div>
   `;
+});
 
-  document.getElementById("indexPlanContent").innerHTML = html;
-}
+html += `
+  <div style="margin-top:12px;color:var(--muted);font-size:11px;line-height:1.5;">
+    I punti sono una stima sul totale finale del torneo, calcolata usando i giochi presenti, i pesi dell'Indice Generale e solo i giocatori selezionati.
+  </div>
+`;
 
 function getTournamentCountForIndex(name, playersSnap, histSnap) {
   let tournamentsAuto = 0;
