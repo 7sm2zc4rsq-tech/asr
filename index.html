@@ -2357,8 +2357,8 @@ function fmtAvg(n) {
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
-const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Merda","Las Vegas"];
-const GAME_ICONS = { "UNO":"🃏","31":"🎴","Saltacavallo":"🐴","Fr0c10":"🐸","Dubito":"🤥","Las Vegas":"🎰","Merda":"💩" };
+const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Merda","Rubamazzo","Las Vegas"];
+const GAME_ICONS = { "UNO":"🃏","31":"🎴","Saltacavallo":"🐴","Fr0c10":"🐸","Dubito":"🤥","Las Vegas":"🎰","Merda":"💩","Rubamazzo":"🂠" };
 const PLAYER_TOURNAMENTS = {
   "Francesco": [4,4,5,5,6,7,7,7],
   "Don Sisto": [4,4,5,5,6,7,7,7],
@@ -2375,6 +2375,7 @@ const GAME_WEIGHTS = {
   "Dubito": 1.3,
   "UNO": 1.2,
   "31": 1.1,
+  "Rubamazzo": 1.05,
   "Saltacavallo": 1.0,
   "Fr0c10": 0.9,
   "Merda": 0.92,
@@ -2383,7 +2384,7 @@ const GAME_WEIGHTS = {
 
 let selected          = [];
 let selectedGames      = [...GAME_LIST];
-let gameTurnModes      = { "Dubito": 2, "Merda": 2, "Fr0c10": 2 };
+let gameTurnModes      = { "Dubito": 2, "Merda": 2, "Fr0c10": 2, "Rubamazzo": 2 };
 let currentType       = "";
 let currentGame       = "";
 let unoScores         = {};
@@ -2842,7 +2843,8 @@ async function openIndexPlan(playerName, tournamentPlayers) {
   ]);
 
   const n = tournamentPlayers.length;
-  const maxTargetTotal = (n * 5) + 4;
+  const rankedGamesCount = GAME_LIST.filter(game => game !== "Las Vegas").length;
+  const maxTargetTotal = (n * rankedGamesCount) + 4;
 
   const targetTournaments = getTournamentCountForIndex(playerName, playersSnap, histSnap);
   const perfectGames = buildIndexScenarioGames(playerName, tournamentPlayers, null, 0);
@@ -2961,14 +2963,16 @@ function distributeRivalPoints(total, playersCount) {
     "Dubito": 1,
     "UNO": 1,
     "31": 1,
+    "Rubamazzo": 1,
     "Saltacavallo": 1,
     "Fr0c10": 1,
+    "Merda": 1,
     "Las Vegas": 0
   };
 
-  let remaining = Math.max(0, total - 5);
+  let remaining = Math.max(0, total - 7);
 
-  const order = ["Dubito", "UNO", "31", "Saltacavallo", "Fr0c10", "Las Vegas"];
+  const order = ["Dubito", "UNO", "31", "Rubamazzo", "Saltacavallo", "Merda", "Fr0c10", "Las Vegas"];
 
   order.forEach(game => {
     const max = game === "Las Vegas" ? 4 : playersCount;
@@ -2984,8 +2988,9 @@ function distributeRivalPoints(total, playersCount) {
 
 function findSafeRivalTotal(targetName, rivalName, tournamentPlayers, histSnap, playersSnap, targetAfter) {
   const n = tournamentPlayers.length;
-  const minTotal = 5;
-  const maxTotal = (n * 5) + 4;
+  const rankedGamesCount = GAME_LIST.filter(game => game !== "Las Vegas").length;
+  const minTotal = rankedGamesCount;
+  const maxTotal = (n * rankedGamesCount) + 4;
   const rivalTournaments = getTournamentCountForIndex(rivalName, playersSnap, histSnap);
 
   let safe = minTotal;
@@ -3160,7 +3165,7 @@ async function loadSelect() {
 }
 
 function isTurnSelectableGame(game) {
-  return game === "Dubito" || game === "Merda" || game === "Fr0c10";
+  return game === "Dubito" || game === "Merda" || game === "Fr0c10" || game === "Rubamazzo";
 }
 
 function buildGameSelectionHtml() {
