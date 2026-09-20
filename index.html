@@ -1913,6 +1913,64 @@ input:focus { border-color: var(--gold); }
   outline: none;
 }
 .game-edit-input:focus { border-color: var(--gold2); }
+.game-selection-panel {
+  margin: 26px 0 10px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--goldBorder);
+  border-radius: var(--radius);
+}
+.game-selection-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 25px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.game-selection-sub {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+.game-selection-list { display: grid; gap: 8px; }
+.game-selection-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+}
+.game-selection-row input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+  flex-shrink: 0;
+}
+.game-selection-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.turn-selector {
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--goldBorder);
+  border-radius: 8px;
+  color: var(--gold);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  outline: none;
+}
+.turn-selector:disabled { opacity: 0.35; }
+
+@media (max-width: 420px) {
+  .game-selection-row { flex-wrap: wrap; }
+  .turn-selector { width: 100%; margin-left: 28px; }
+}
 </style>
 </head>
 <body>
@@ -2299,7 +2357,7 @@ function fmtAvg(n) {
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
-const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Las Vegas"];
+const GAME_LIST  = ["UNO","31","Saltacavallo","Fr0c10","Dubito","Merda","Las Vegas"];
 const GAME_ICONS = { "UNO":"🃏","31":"🎴","Saltacavallo":"🐴","Fr0c10":"🐸","Dubito":"🤥","Las Vegas":"🎰","Merda":"💩" };
 const PLAYER_TOURNAMENTS = {
   "Francesco": [4,4,5,5,6,7,7,7],
@@ -2319,10 +2377,13 @@ const GAME_WEIGHTS = {
   "31": 1.1,
   "Saltacavallo": 1.0,
   "Fr0c10": 0.9,
+  "Merda": 0.92,
   "Las Vegas": 0.8
 };  
 
 let selected          = [];
+let selectedGames      = [...GAME_LIST];
+let gameTurnModes      = { "Dubito": 2, "Merda": 2, "Fr0c10": 2 };
 let currentType       = "";
 let currentGame       = "";
 let unoScores         = {};
@@ -3094,8 +3155,59 @@ async function loadSelect() {
     </div>
   `;
 
+  html += buildGameSelectionHtml();
   document.getElementById("selectPlayers").innerHTML = html;
 }
+
+function isTurnSelectableGame(game) {
+  return game === "Dubito" || game === "Merda" || game === "Fr0c10";
+}
+
+function buildGameSelectionHtml() {
+  let html = `
+    <div class="game-selection-panel">
+      <div class="game-selection-title">Seleziona giochi</div>
+      <div class="game-selection-sub">Scegli liberamente quali giochi disputare in questo torneo.</div>
+      <div class="game-selection-list">
+  `;
+
+  GAME_LIST.forEach(game => {
+    const checked = selectedGames.includes(game) ? "checked" : "";
+    const turnSelector = isTurnSelectableGame(game)
+      ? `<select class="turn-selector" id="turnMode_${game}" onchange="setGameTurnMode('${game}', this.value)" ${checked ? "" : "disabled"}>
+          <option value="1" ${gameTurnModes[game] === 1 ? "selected" : ""}>1 turno</option>
+          <option value="2" ${gameTurnModes[game] === 2 ? "selected" : ""}>2 turni</option>
+        </select>`
+      : "";
+
+    html += `
+      <div class="game-selection-row">
+        <input type="checkbox" id="gameChoice_${game}" ${checked} onchange="toggleTournamentGame('${game}', this.checked)">
+        <label class="game-selection-name" for="gameChoice_${game}">${GAME_ICONS[game] || "🎮"} ${game}</label>
+        ${turnSelector}
+      </div>
+    `;
+  });
+
+  return html + "</div></div>";
+}
+
+function toggleTournamentGame(game, checked) {
+  if (checked && !selectedGames.includes(game)) {
+    selectedGames.push(game);
+    selectedGames.sort((a, b) => GAME_LIST.indexOf(a) - GAME_LIST.indexOf(b));
+  } else if (!checked) {
+    selectedGames = selectedGames.filter(g => g !== game);
+  }
+
+  const selector = document.getElementById("turnMode_" + game);
+  if (selector) selector.disabled = !checked;
+}
+
+function setGameTurnMode(game, value) {
+  gameTurnModes[game] = parseInt(value) === 1 ? 1 : 2;
+}
+
 function toggleRosterPlayerFromCard(card) {
   toggleRosterPlayer({
     id: card.dataset.id,
@@ -3161,6 +3273,7 @@ function escapeJs(str) {
 
 function startGames() {
   if (selected.length < 2) { alert("Seleziona almeno 2 giocatori"); return; }
+  if (!selectedGames.length) { alert("Seleziona almeno un gioco"); return; }
 
   liveTournamentStarted = true;
   document.getElementById("restartTournamentBtn").style.display = "inline-block";
@@ -3171,11 +3284,11 @@ function startGames() {
 
   let html = "";
 
-  GAME_LIST.forEach(g => {
+  selectedGames.forEach(g => {
     html += `<div class="score-game-title">${g}</div>`;
 
-    if (g === "Dubito" || g === "Fr0c10") {
-      html += createTwoTurnGame(g);
+    if (isTurnSelectableGame(g)) {
+      html += createTurnGame(g);
       return;
     }
 
@@ -3216,7 +3329,7 @@ function startGames() {
       <div id="finishConfirm" class="finish-confirm" style="display:none;">
         <div class="finish-confirm-title">Concludere torneo?</div>
         <div class="finish-confirm-text">
-          Verrà mostrata la classifica finale. I dati verranno salvati solo quando premi Nuovo Torneo.
+          Verrà mostrata la classifica finale. I dati verranno salvati solo quando premi Salva Partita.
         </div>
         <div class="restart-confirm-actions">
           <button class="btn-success" onclick="confirmFinishTournament()">Sì, concludi</button>
@@ -3227,10 +3340,10 @@ function startGames() {
 
   document.getElementById("gamesArea").innerHTML = html;
 
-  createUnoExtra();
-  updateAutoGameScores("UNO");
-  updateAutoGameScores("31");
-  updateAutoGameScores("Saltacavallo");
+  if (selectedGames.includes("UNO")) createUnoExtra();
+  ["UNO", "31", "Saltacavallo"].forEach(game => {
+    if (selectedGames.includes(game)) updateAutoGameScores(game);
+  });
   updateLiveRanking();
   publishLiveTournament("active");
 }
@@ -3376,15 +3489,16 @@ function markEliminatedBatch(game, playerIds) {
   });
 } 
 
-function createTwoTurnGame(game) {
+function createTurnGame(game) {
+  const turns = gameTurnModes[game] === 1 ? 1 : 2;
   let html = `<div class="twoturn-panel">
-    <div class="twoturn-title">${game} · due turni</div>`;
+    <div class="twoturn-title">${game} · ${turns === 1 ? "un turno" : "due turni"}</div>`;
 
   selected.forEach(p => {
-    html += `<div class="twoturn-row">
+    html += `<div class="twoturn-row" style="grid-template-columns:${turns === 1 ? "1fr 90px 70px" : "1fr 70px 70px 70px"};">
       <span>${p.name}</span>
-      <input type="number" id="${game}_turn1_${p.id}" placeholder="T1" oninput="updateTwoTurnGame('${game}')">
-      <input type="number" id="${game}_turn2_${p.id}" placeholder="T2" oninput="updateTwoTurnGame('${game}')">
+      <input type="number" id="${game}_turn1_${p.id}" placeholder="T1" oninput="updateTurnGame('${game}')">
+      ${turns === 2 ? `<input type="number" id="${game}_turn2_${p.id}" placeholder="T2" oninput="updateTurnGame('${game}')">` : ""}
       <div class="twoturn-final" id="${game}_final_${p.id}">0</div>
     </div>`;
   });
@@ -3393,8 +3507,8 @@ function createTwoTurnGame(game) {
   return html;
 }
 
-function updateTwoTurnGame(game) {
-  const finalPoints = calcTwoTurnFinalPoints(game);
+function updateTurnGame(game) {
+  const finalPoints = calcTurnFinalPoints(game);
 
   selected.forEach(p => {
     const el = document.getElementById(`${game}_final_${p.id}`);
@@ -3404,22 +3518,21 @@ function updateTwoTurnGame(game) {
   updateLiveRanking();
 }
 
-function calcTwoTurnFinalPoints(game) {
-  if (!isTwoTurnGameComplete(game)) {
+function calcTurnFinalPoints(game) {
+  if (!isTurnGameComplete(game)) {
     const emptyPoints = {};
     selected.forEach(p => emptyPoints[p.id] = 0);
     return emptyPoints;
   }
 
+  const turns = gameTurnModes[game] === 1 ? 1 : 2;
   const rows = selected.map(p => {
     const t1 = parseInt(document.getElementById(`${game}_turn1_${p.id}`)?.value) || 0;
-    const t2 = parseInt(document.getElementById(`${game}_turn2_${p.id}`)?.value) || 0;
+    const t2 = turns === 2
+      ? parseInt(document.getElementById(`${game}_turn2_${p.id}`)?.value) || 0
+      : 0;
 
-    return {
-      id: p.id,
-      name: p.name,
-      total: t1 + t2
-    };
+    return { id: p.id, name: p.name, total: t1 + t2 };
   });
 
   rows.sort((a, b) => a.total - b.total);
@@ -3433,18 +3546,20 @@ function calcTwoTurnFinalPoints(game) {
       currentPoints = index + 1;
       lastTotal = row.total;
     }
-
     points[row.id] = currentPoints;
   });
 
   return points;
 }
-function isTwoTurnGameComplete(game) {
+
+function isTurnGameComplete(game) {
+  const turns = gameTurnModes[game] === 1 ? 1 : 2;
   return selected.every(p => {
     const t1 = document.getElementById(`${game}_turn1_${p.id}`)?.value;
-    const t2 = document.getElementById(`${game}_turn2_${p.id}`)?.value;
-
-    return t1 !== "" && t2 !== "";
+    const t2 = turns === 2
+      ? document.getElementById(`${game}_turn2_${p.id}`)?.value
+      : "completo";
+    return t1 !== "" && t1 !== undefined && t2 !== "" && t2 !== undefined;
   });
 }
 
@@ -3454,8 +3569,8 @@ function isEliminationGameComplete(game) {
 }
 
 function isGameFinal(game) {
-  if (game === "Dubito" || game === "Fr0c10") {
-    return isTwoTurnGameComplete(game);
+  if (isTurnSelectableGame(game)) {
+    return isTurnGameComplete(game);
   }
 
   if (game === "UNO" || game === "31" || game === "Saltacavallo") {
@@ -3470,8 +3585,8 @@ function getGamePoints(game, playerId) {
     return 0;
   }
 
-  if (game === "Dubito" || game === "Fr0c10") {
-    return calcTwoTurnFinalPoints(game)[playerId] || 0;
+  if (isTurnSelectableGame(game)) {
+    return calcTurnFinalPoints(game)[playerId] || 0;
   }
 
   return parseInt(document.getElementById(game + "_" + playerId)?.value) || 0;
@@ -3481,7 +3596,7 @@ function updateLiveRanking() {
   const totals = {};
   selected.forEach(p => totals[p.name] = 0);
 
-  GAME_LIST.forEach(g => {
+  selectedGames.forEach(g => {
     selected.forEach(p => {
       totals[p.name] += getGamePoints(g, p.id);
     });
@@ -3515,7 +3630,7 @@ function getLiveTotals() {
   const totals = {};
   selected.forEach(p => totals[p.name] = 0);
 
-  GAME_LIST.forEach(g => {
+  selectedGames.forEach(g => {
     selected.forEach(p => {
       totals[p.name] += getGamePoints(g, p.id);
     });
@@ -3531,7 +3646,7 @@ function getLiveTotals() {
 }
 
 function getLiveGames() {
-  return GAME_LIST.map(g => {
+  return selectedGames.map(g => {
     const scores = selected.map(p => ({
       name: p.name,
       points: getGamePoints(g, p.id)
@@ -3857,7 +3972,7 @@ function finish() {
 
   const gameBreakdown = [];
 
-  for (const g of GAME_LIST) {
+  for (const g of selectedGames) {
     const gameRow = { game: g, icon: GAME_ICONS[g] || "🎮", scores: [] };
 
     for (const p of selected) {
@@ -3903,7 +4018,7 @@ function renderFinalAnimation(sorted, winner) {
     <div id="animatedRanking"></div>
 
     <div id="afterAnimationActions" style="display:none;margin:24px 0;text-align:center;">
-      <button class="btn-ghost" onclick="savePendingTournamentAndRestart()">Nuovo Torneo</button>
+      <button class="btn-ghost" onclick="savePendingTournamentAndRestart()">Salva Partita</button>
     </div>
   `;
 
@@ -4247,7 +4362,7 @@ async function loadGames() {
     data[g][p] = (data[g][p]||0) + pts;
   });
 
-  const allGames = [...GAME_LIST, "Merda"];
+  const allGames = [...GAME_LIST];
   let tabsHtml = `<div class="game-tabs-wrap"><div class="game-tabs">`;
   allGames.forEach((g, i) => {
     const icon = GAME_ICONS[g] || "🎮";
